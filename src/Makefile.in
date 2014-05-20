@@ -88,12 +88,21 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_aeolis_OBJECTS = constants_module.$(OBJEXT) utils_module.$(OBJEXT) \
-	input_module.$(OBJEXT) bed_module.$(OBJEXT) \
-	wind_module.$(OBJEXT) supply_module.$(OBJEXT) \
-	run_module.$(OBJEXT) AeoLiS.$(OBJEXT)
+am__dirstamp = $(am__leading_dot)dirstamp
+am_aeolis_OBJECTS = aeolis-constants_module.$(OBJEXT) \
+	sand_mud_bed/modules/aeolis-message_module.$(OBJEXT) \
+	sand_mud_bed/modules/aeolis-string_module.$(OBJEXT) \
+	sand_mud_bed/modules/aeolis-precision_basics.$(OBJEXT) \
+	sand_mud_bed/modules/aeolis-precision.$(OBJEXT) \
+	sand_mud_bed/modules/aeolis-bedcomposition_module.$(OBJEXT) \
+	aeolis-utils_module.$(OBJEXT) aeolis-input_module.$(OBJEXT) \
+	aeolis-bed_module.$(OBJEXT) aeolis-wind_module.$(OBJEXT) \
+	aeolis-supply_module.$(OBJEXT) aeolis-run_module.$(OBJEXT) \
+	aeolis-AeoLiS.$(OBJEXT)
 aeolis_OBJECTS = $(am_aeolis_OBJECTS)
 aeolis_LDADD = $(LDADD)
+aeolis_LINK = $(FCLD) $(aeolis_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -107,6 +116,10 @@ am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
 DEFAULT_INCLUDES = -I.@am__isrc@
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 PPFCCOMPILE = $(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_FCFLAGS) $(FCFLAGS)
 AM_V_PPFC = $(am__v_PPFC_@AM_V@)
@@ -226,9 +239,13 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-CFLAGS = -O2
-AM_LDFLAGS = 
+AUTOMAKE_OPTIONS = subdir-objects
 aeolis_SOURCES = constants_module.F90 \
+                 sand_mud_bed/modules/message_module.F90 \
+                 sand_mud_bed/modules/string_module.F90 \
+                 sand_mud_bed/modules/precision_basics.F90 \
+                 sand_mud_bed/modules/precision.F90 \
+                 sand_mud_bed/modules/bedcomposition_module.F90 \
 		 utils_module.F90 \
 		 input_module.F90 \
 		 bed_module.F90 \
@@ -237,6 +254,7 @@ aeolis_SOURCES = constants_module.F90 \
 		 run_module.F90 \
 		 AeoLiS.F90
 
+aeolis_FCFLAGS = -I$(top_srcdir) -I$(srcdir)/src/sand_mud_bed/include
 all: all-am
 
 .SUFFIXES:
@@ -313,13 +331,35 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+sand_mud_bed/modules/$(am__dirstamp):
+	@$(MKDIR_P) sand_mud_bed/modules
+	@: > sand_mud_bed/modules/$(am__dirstamp)
+sand_mud_bed/modules/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) sand_mud_bed/modules/$(DEPDIR)
+	@: > sand_mud_bed/modules/$(DEPDIR)/$(am__dirstamp)
+sand_mud_bed/modules/aeolis-message_module.$(OBJEXT):  \
+	sand_mud_bed/modules/$(am__dirstamp) \
+	sand_mud_bed/modules/$(DEPDIR)/$(am__dirstamp)
+sand_mud_bed/modules/aeolis-string_module.$(OBJEXT):  \
+	sand_mud_bed/modules/$(am__dirstamp) \
+	sand_mud_bed/modules/$(DEPDIR)/$(am__dirstamp)
+sand_mud_bed/modules/aeolis-precision_basics.$(OBJEXT):  \
+	sand_mud_bed/modules/$(am__dirstamp) \
+	sand_mud_bed/modules/$(DEPDIR)/$(am__dirstamp)
+sand_mud_bed/modules/aeolis-precision.$(OBJEXT):  \
+	sand_mud_bed/modules/$(am__dirstamp) \
+	sand_mud_bed/modules/$(DEPDIR)/$(am__dirstamp)
+sand_mud_bed/modules/aeolis-bedcomposition_module.$(OBJEXT):  \
+	sand_mud_bed/modules/$(am__dirstamp) \
+	sand_mud_bed/modules/$(DEPDIR)/$(am__dirstamp)
 
 aeolis$(EXEEXT): $(aeolis_OBJECTS) $(aeolis_DEPENDENCIES) $(EXTRA_aeolis_DEPENDENCIES) 
 	@rm -f aeolis$(EXEEXT)
-	$(AM_V_FCLD)$(FCLINK) $(aeolis_OBJECTS) $(aeolis_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(aeolis_LINK) $(aeolis_OBJECTS) $(aeolis_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f sand_mud_bed/modules/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -329,6 +369,84 @@ distclean-compile:
 
 .F90.obj:
 	$(AM_V_PPFC)$(PPFCCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+aeolis-constants_module.o: constants_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-constants_module.o `test -f 'constants_module.F90' || echo '$(srcdir)/'`constants_module.F90
+
+aeolis-constants_module.obj: constants_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-constants_module.obj `if test -f 'constants_module.F90'; then $(CYGPATH_W) 'constants_module.F90'; else $(CYGPATH_W) '$(srcdir)/constants_module.F90'; fi`
+
+sand_mud_bed/modules/aeolis-message_module.o: sand_mud_bed/modules/message_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o sand_mud_bed/modules/aeolis-message_module.o `test -f 'sand_mud_bed/modules/message_module.F90' || echo '$(srcdir)/'`sand_mud_bed/modules/message_module.F90
+
+sand_mud_bed/modules/aeolis-message_module.obj: sand_mud_bed/modules/message_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o sand_mud_bed/modules/aeolis-message_module.obj `if test -f 'sand_mud_bed/modules/message_module.F90'; then $(CYGPATH_W) 'sand_mud_bed/modules/message_module.F90'; else $(CYGPATH_W) '$(srcdir)/sand_mud_bed/modules/message_module.F90'; fi`
+
+sand_mud_bed/modules/aeolis-string_module.o: sand_mud_bed/modules/string_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o sand_mud_bed/modules/aeolis-string_module.o `test -f 'sand_mud_bed/modules/string_module.F90' || echo '$(srcdir)/'`sand_mud_bed/modules/string_module.F90
+
+sand_mud_bed/modules/aeolis-string_module.obj: sand_mud_bed/modules/string_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o sand_mud_bed/modules/aeolis-string_module.obj `if test -f 'sand_mud_bed/modules/string_module.F90'; then $(CYGPATH_W) 'sand_mud_bed/modules/string_module.F90'; else $(CYGPATH_W) '$(srcdir)/sand_mud_bed/modules/string_module.F90'; fi`
+
+sand_mud_bed/modules/aeolis-precision_basics.o: sand_mud_bed/modules/precision_basics.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o sand_mud_bed/modules/aeolis-precision_basics.o `test -f 'sand_mud_bed/modules/precision_basics.F90' || echo '$(srcdir)/'`sand_mud_bed/modules/precision_basics.F90
+
+sand_mud_bed/modules/aeolis-precision_basics.obj: sand_mud_bed/modules/precision_basics.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o sand_mud_bed/modules/aeolis-precision_basics.obj `if test -f 'sand_mud_bed/modules/precision_basics.F90'; then $(CYGPATH_W) 'sand_mud_bed/modules/precision_basics.F90'; else $(CYGPATH_W) '$(srcdir)/sand_mud_bed/modules/precision_basics.F90'; fi`
+
+sand_mud_bed/modules/aeolis-precision.o: sand_mud_bed/modules/precision.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o sand_mud_bed/modules/aeolis-precision.o `test -f 'sand_mud_bed/modules/precision.F90' || echo '$(srcdir)/'`sand_mud_bed/modules/precision.F90
+
+sand_mud_bed/modules/aeolis-precision.obj: sand_mud_bed/modules/precision.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o sand_mud_bed/modules/aeolis-precision.obj `if test -f 'sand_mud_bed/modules/precision.F90'; then $(CYGPATH_W) 'sand_mud_bed/modules/precision.F90'; else $(CYGPATH_W) '$(srcdir)/sand_mud_bed/modules/precision.F90'; fi`
+
+sand_mud_bed/modules/aeolis-bedcomposition_module.o: sand_mud_bed/modules/bedcomposition_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o sand_mud_bed/modules/aeolis-bedcomposition_module.o `test -f 'sand_mud_bed/modules/bedcomposition_module.F90' || echo '$(srcdir)/'`sand_mud_bed/modules/bedcomposition_module.F90
+
+sand_mud_bed/modules/aeolis-bedcomposition_module.obj: sand_mud_bed/modules/bedcomposition_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o sand_mud_bed/modules/aeolis-bedcomposition_module.obj `if test -f 'sand_mud_bed/modules/bedcomposition_module.F90'; then $(CYGPATH_W) 'sand_mud_bed/modules/bedcomposition_module.F90'; else $(CYGPATH_W) '$(srcdir)/sand_mud_bed/modules/bedcomposition_module.F90'; fi`
+
+aeolis-utils_module.o: utils_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-utils_module.o `test -f 'utils_module.F90' || echo '$(srcdir)/'`utils_module.F90
+
+aeolis-utils_module.obj: utils_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-utils_module.obj `if test -f 'utils_module.F90'; then $(CYGPATH_W) 'utils_module.F90'; else $(CYGPATH_W) '$(srcdir)/utils_module.F90'; fi`
+
+aeolis-input_module.o: input_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-input_module.o `test -f 'input_module.F90' || echo '$(srcdir)/'`input_module.F90
+
+aeolis-input_module.obj: input_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-input_module.obj `if test -f 'input_module.F90'; then $(CYGPATH_W) 'input_module.F90'; else $(CYGPATH_W) '$(srcdir)/input_module.F90'; fi`
+
+aeolis-bed_module.o: bed_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-bed_module.o `test -f 'bed_module.F90' || echo '$(srcdir)/'`bed_module.F90
+
+aeolis-bed_module.obj: bed_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-bed_module.obj `if test -f 'bed_module.F90'; then $(CYGPATH_W) 'bed_module.F90'; else $(CYGPATH_W) '$(srcdir)/bed_module.F90'; fi`
+
+aeolis-wind_module.o: wind_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-wind_module.o `test -f 'wind_module.F90' || echo '$(srcdir)/'`wind_module.F90
+
+aeolis-wind_module.obj: wind_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-wind_module.obj `if test -f 'wind_module.F90'; then $(CYGPATH_W) 'wind_module.F90'; else $(CYGPATH_W) '$(srcdir)/wind_module.F90'; fi`
+
+aeolis-supply_module.o: supply_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-supply_module.o `test -f 'supply_module.F90' || echo '$(srcdir)/'`supply_module.F90
+
+aeolis-supply_module.obj: supply_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-supply_module.obj `if test -f 'supply_module.F90'; then $(CYGPATH_W) 'supply_module.F90'; else $(CYGPATH_W) '$(srcdir)/supply_module.F90'; fi`
+
+aeolis-run_module.o: run_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-run_module.o `test -f 'run_module.F90' || echo '$(srcdir)/'`run_module.F90
+
+aeolis-run_module.obj: run_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-run_module.obj `if test -f 'run_module.F90'; then $(CYGPATH_W) 'run_module.F90'; else $(CYGPATH_W) '$(srcdir)/run_module.F90'; fi`
+
+aeolis-AeoLiS.o: AeoLiS.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-AeoLiS.o `test -f 'AeoLiS.F90' || echo '$(srcdir)/'`AeoLiS.F90
+
+aeolis-AeoLiS.obj: AeoLiS.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-AeoLiS.obj `if test -f 'AeoLiS.F90'; then $(CYGPATH_W) 'AeoLiS.F90'; else $(CYGPATH_W) '$(srcdir)/AeoLiS.F90'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -445,6 +563,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f sand_mud_bed/modules/$(DEPDIR)/$(am__dirstamp)
+	-rm -f sand_mud_bed/modules/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
