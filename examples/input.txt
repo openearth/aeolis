@@ -5,11 +5,22 @@ Tp = 0.5
 u_th = 4
 z = 0.1
 S = 0.0
-dt = 0.05
 dx = 1
-tstop  2592000
-tstop = 86400
-tout = 100
+
+# time
+dt = 0.05
+tstop = 2592000
+tstop  86400
+tout = 1000
+
+# files
 wind_file = wind.txt
 bed_file = bed.txt
 supply_file = supply.txt
+
+# bed composition
+nfractions = 7
+nlayers = 3
+grain_size = 1.18e-3 0.6e-3 0.425e-3 0.3e-3 0.212e-3 0.15e-3 0.063e-3
+grain_size_distribution = 0.63 0.94 6.80 51.35 30.73 8.07 1.43
+layer_thickness = 5e-4

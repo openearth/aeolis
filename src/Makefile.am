@@ -14,4 +14,4 @@ aeolis_SOURCES = constants_module.F90 \
 		 supply_module.F90 \
 		 run_module.F90 \
 		 AeoLiS.F90
-aeolis_FCFLAGS=-I$(top_srcdir) -I$(srcdir)/src/sand_mud_bed/include
+aeolis_FCFLAGS=-I$(top_srcdir) -I$(srcdir)/sand_mud_bed/include
