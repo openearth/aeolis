@@ -2,6 +2,10 @@ module input_module
 
   use constants_module
 
+  implicit none
+
+  include 'sedparams.inc'
+
   type parameters
      real*8    :: VS    = 0.d0
      real*8    :: Tp    = 0.d0
@@ -27,7 +31,7 @@ contains
     character(len=100) :: arg
     character(len=500) :: version
     character(slen)    :: fname
-    integer            :: narguments
+    integer            :: iarg, narguments
     logical            :: done
     
     fname = 'examples/input.txt'
@@ -136,7 +140,7 @@ contains
        value_dbl = default
     end if
 
-    write(0, '(a12,a,f10.4)') key, ' = ', value_dbl
+    write(0, '(a12,a,f15.4)') key, ' = ', value_dbl
     
   end function read_key_dbl
   
@@ -155,7 +159,7 @@ contains
        value_int = default
     end if
 
-    write(0, '(a12,a,i10)') key, ' = ', value_int
+    write(0, '(a12,a,i15)') key, ' = ', value_int
     
   end function read_key_int
   

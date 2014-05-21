@@ -3,6 +3,8 @@ module supply_module
   use constants_module
   use input_module
 
+  implicit none
+
 contains
 
   subroutine generate_supply(par, time, supply)

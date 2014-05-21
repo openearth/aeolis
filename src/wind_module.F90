@@ -4,12 +4,14 @@ module wind_module
   use utils_module
   use input_module
 
+  implicit none
+
 contains
 
   subroutine generate_wind(par, u)
 
     type(parameters), intent(inout) :: par
-    integer*4 :: fid, ierr, n, i, nt
+    integer*4 :: fid, ierr, n, i, it, nt, l
     real*8, dimension(:), allocatable, intent(out) :: u
     real*8, dimension(:), allocatable :: duration, u_m, u_std, g_m, g_std
 

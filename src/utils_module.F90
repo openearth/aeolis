@@ -1,5 +1,7 @@
 module utils_module
 
+  implicit none
+
 contains
 
   function linear_interp(x, y, xx) result (yy)
@@ -71,7 +73,7 @@ contains
 
   function rand_normal(mean, stdev) result(c)
     
-    real*8 :: mean, stdev, c, x(2), pi
+    real*8 :: mean, stdev, r, theta, c, x(2), pi
     
     if(stdev <= 0.0d0) then
        write(*,*) "WARNING: standard deviation must be positive"
