@@ -12,39 +12,35 @@ contains
   subroutine run_model(par)
     
     type(parameters), intent(inout) :: par
-    integer*4 :: i, ti, si, n, l
+    integer*4 :: i, ti, si, nx, nt
     real*8 :: t, dt, dx, Ta
     real*8 :: tstart
     real*8, dimension(:), allocatable :: x, z, u_th
-    real*8, dimension(:), allocatable :: u, t_supply
+    real*8, dimension(:), allocatable :: u, t_supply, current_supply
     real*8, dimension(:,:), allocatable :: supply
-    real*8, dimension(:), allocatable :: Ct, Cu, Ca
+    real*8, dimension(:), allocatable :: Ct, Ct1, Ct2, Cu, Ca
+    logical, dimension(:), allocatable :: supply_limited, transport_limited
     integer*4, parameter :: fid=20
 
     write(*,*) 'Initialization started...'
 
-    ! parameters
-    dt = par%dt
-    dx = par%dx
-    Ta = par%Tp / par%dt
-
     ! bed
     call generate_bed(par, x, z)
     call generate_bedcomposition(par, x, z)
-    open(unit=fid, file="bed", action="write", status="replace", form="unformatted")
+    open(unit=fid, file="bed.out", action="write", status="replace", form="unformatted")
     write(fid) x
     write(fid) z
     close(fid)
 
     ! wind
     call generate_wind(par, u)
-    open(unit=fid, file="wind", action="write", status="replace", form="unformatted")
+    open(unit=fid, file="wind.out", action="write", status="replace", form="unformatted")
     write(fid) u
     close(fid)
 
     ! supply
     call generate_supply(par, t_supply, supply)
-    open(unit=fid, file="supply", action="write", status="replace", form="unformatted")
+    open(unit=fid, file="supply.out", action="write", status="replace", form="unformatted")
     write(fid) supply
     close(fid)
 
@@ -55,10 +51,16 @@ contains
     ! space
     allocate(u_th(par%nx+1))
     allocate(Ct(par%nx+1))
+    allocate(Ct1(par%nx+1))
+    allocate(Ct2(par%nx+1))
     allocate(Cu(par%nx+1))
     allocate(Ca(par%nx+1))
-    u_th = 0.d0
+    allocate(supply_limited(par%nx+1))
+    allocate(current_supply(par%nx+1))
+    u_th = 0.0
     Ct = 0.0
+    Ct1 = 0.0
+    Ct2 = 0.0
     Cu = 0.0
     Ca = par%S
 
@@ -75,17 +77,26 @@ contains
     call compute_threshold_bedslope(par, x, z, u_th)
 
     ! model
-    open(unit=fid+1, file="Ct", action="write", status="replace", form="unformatted")
-    open(unit=fid+2, file="Cu", action="write", status="replace", form="unformatted")
-    open(unit=fid+3, file="Ca", action="write", status="replace", form="unformatted")
+    open(unit=fid+1, file="Ct.out", action="write", status="replace", form="unformatted")
+    open(unit=fid+2, file="Cu.out", action="write", status="replace", form="unformatted")
+    open(unit=fid+3, file="Ca.out", action="write", status="replace", form="unformatted")
+
+    ! parameters
+    nx = par%nx
+    nt = par%nt
+    dt = par%dt
+    dx = par%dx
+    Ta = par%Tp / par%dt
 
     si = 1
+    current_supply = supply(si,:)
     tstart = get_time()
     do ti=1,par%nt
 
        ! update supply
        if (t .gt. t_supply(si+1)) then
           si = si + 1
+          current_supply = supply(si,:)
        end if
 
        ! log progress
@@ -93,26 +104,24 @@ contains
           call write_progress(ti, par%nt, tstart)
        end if
 
-       do i=2,par%nx+1
+       Cu = max(0.d0, 1.5e-4 * ((u(ti) - u_th)**3) / (u(ti) * par%VS))
 
-          Cu(i) = max(0.d0, 1.5e-4 * ((u(ti) - u_th(i))**3) / (u(ti) * par%VS))
-          
-          Ct(i) = ((-par%VS * u(ti) * (Ct(i) - Ct(i-1)) / dx) * dt + \
-                     Ct(i) + Cu(i) / Ta) / (1+1/Ta)
+       Ct1(2:nx+1) = ((-par%VS * u(ti) * (Ct(2:nx+1) - Ct(1:nx)) / dx) * dt + \
+                        Ct(2:nx+1) + Cu(2:nx+1) / Ta) / (1+1/Ta)
 
-          if ( (Cu(i) - Ct(i)) / Ta .gt. Ca(i) ) then
-             Ct(i) = ((-par%VS * u(ti) * (Ct(i) - Ct(i-1)) / dx) * dt + \
-                        Ct(i) + Ca(i) / Ta) / (1+1/Ta)
+       Ct2(2:nx+1) = ((-par%VS * u(ti) * (Ct(2:nx+1) - Ct(1:nx)) / dx) * dt + \
+                        Ct(2:nx+1) + Ca(2:nx+1) / Ta) / (1+1/Ta)
 
-             Ca(i) = Ca(i) - Ca(i) / Ta
-          else
-             Ca(i) = Ca(i) - (Cu(i) - Ct(i)) / Ta
-          end if
+       supply_limited = (Cu - Ct) / Ta .gt. Ca
 
-          Ca(i) = Ca(i) + supply(si,i) / dx
+       where (supply_limited)
+          Ct = Ct2
+          Ca = Ca + current_supply / dx - Ca / Ta
+       elsewhere
+          Ct = Ct1
+          Ca = Ca + current_supply / dx - (Cu - Ct) / Ta
+       end where
  
-       end do
-
        if ( mod(ti, nint(par%tout / dt)) == 0 ) then
           write(fid+1) Ct
           write(fid+2) Cu

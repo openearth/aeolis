@@ -9,14 +9,14 @@ dx = 1
 
 # time
 dt = 0.05
-tstop = 2592000
-tstop  86400
-tout = 1000
+tstop  2592000
+tstop = 86400
+tout = 100
 
 # files
-wind_file = wind.txt
-bed_file = bed.txt
-supply_file = supply.txt
+wind_file = examples/wind.txt
+bed_file = examples/bed.txt
+supply_file = examples/supply.txt
 
 # bed composition
 nfractions = 7
