@@ -10,7 +10,7 @@ character(slen) :: fname
 type(parameters) :: par
 
 fname = read_params()
-par = read_input(fname)
+par   = read_input(fname)
 
 call run_model(par)
 

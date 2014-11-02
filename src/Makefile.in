@@ -96,8 +96,8 @@ am_aeolis_OBJECTS = aeolis-constants_module.$(OBJEXT) \
 	sand_mud_bed/modules/aeolis-precision.$(OBJEXT) \
 	sand_mud_bed/modules/aeolis-bedcomposition_module.$(OBJEXT) \
 	aeolis-utils_module.$(OBJEXT) aeolis-input_module.$(OBJEXT) \
-	aeolis-bed_module.$(OBJEXT) aeolis-wind_module.$(OBJEXT) \
-	aeolis-supply_module.$(OBJEXT) aeolis-run_module.$(OBJEXT) \
+	aeolis-bed_module.$(OBJEXT) aeolis-moist_module.$(OBJEXT) \
+	aeolis-wind_module.$(OBJEXT) aeolis-run_module.$(OBJEXT) \
 	aeolis-AeoLiS.$(OBJEXT)
 aeolis_OBJECTS = $(am_aeolis_OBJECTS)
 aeolis_LDADD = $(LDADD)
@@ -249,8 +249,8 @@ aeolis_SOURCES = constants_module.F90 \
 		 utils_module.F90 \
 		 input_module.F90 \
 		 bed_module.F90 \
+                 moist_module.F90 \
 		 wind_module.F90 \
-		 supply_module.F90 \
 		 run_module.F90 \
 		 AeoLiS.F90
 
@@ -424,17 +424,17 @@ aeolis-bed_module.o: bed_module.F90
 aeolis-bed_module.obj: bed_module.F90
 	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-bed_module.obj `if test -f 'bed_module.F90'; then $(CYGPATH_W) 'bed_module.F90'; else $(CYGPATH_W) '$(srcdir)/bed_module.F90'; fi`
 
+aeolis-moist_module.o: moist_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-moist_module.o `test -f 'moist_module.F90' || echo '$(srcdir)/'`moist_module.F90
+
+aeolis-moist_module.obj: moist_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-moist_module.obj `if test -f 'moist_module.F90'; then $(CYGPATH_W) 'moist_module.F90'; else $(CYGPATH_W) '$(srcdir)/moist_module.F90'; fi`
+
 aeolis-wind_module.o: wind_module.F90
 	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-wind_module.o `test -f 'wind_module.F90' || echo '$(srcdir)/'`wind_module.F90
 
 aeolis-wind_module.obj: wind_module.F90
 	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-wind_module.obj `if test -f 'wind_module.F90'; then $(CYGPATH_W) 'wind_module.F90'; else $(CYGPATH_W) '$(srcdir)/wind_module.F90'; fi`
-
-aeolis-supply_module.o: supply_module.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-supply_module.o `test -f 'supply_module.F90' || echo '$(srcdir)/'`supply_module.F90
-
-aeolis-supply_module.obj: supply_module.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-supply_module.obj `if test -f 'supply_module.F90'; then $(CYGPATH_W) 'supply_module.F90'; else $(CYGPATH_W) '$(srcdir)/supply_module.F90'; fi`
 
 aeolis-run_module.o: run_module.F90
 	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-run_module.o `test -f 'run_module.F90' || echo '$(srcdir)/'`run_module.F90

@@ -10,6 +10,10 @@ module bed_module
 
   implicit none
 
+  type(bedcomp_data), pointer :: morlyr
+  type(message_stack), pointer :: messages
+  character(message_len) :: message
+
 contains
 
   subroutine generate_bed(par, x, z)
@@ -63,8 +67,6 @@ contains
     real*8, dimension(:), intent(in) :: x, z
 
     integer :: iostat
-    type(bedcomp_data), pointer :: morlyr
-    type(message_stack), pointer :: messages
     logical, pointer :: exchlyr
     integer, pointer :: nmlb
     integer, pointer :: nmub
@@ -92,7 +94,6 @@ contains
     real(fp) , dimension(:,:,:) , pointer :: msed
     real(prec) , dimension(:,:) , pointer :: bodsed
 
-    character(message_len) :: message
     integer :: i
     integer :: l
     integer :: nm
@@ -160,23 +161,23 @@ contains
     nmlb    = 1                
     nmub    = size(x)                
     tstart  = 0.0              
-    tend    = par%tstop           
-    dt      = par%dt            
-    morfac  = 1.0              
+    tend    = par%tstop
+    dt      = par%dt
+    morfac  = par%morfac
     nstep  = (tend-tstart)/dt; 
 
-    nfrac       = 2
+    nfrac       = par%nfractions
     iunderlyr   = 2            
-    neulyr      = 3            
-    nlalyr      = 0            
-    theulyr     = 0.1_fp       
-    thlalyr     = 0.2_fp       
+    neulyr      = par%nlayers
+    nlalyr      = 0
+    theulyr     = par%layer_thickness
+    thlalyr     = par%layer_thickness
     updbaselyr  = 1            
                                
     maxwarn     = 100          
     minmass     = 0.0_fp       
     idiffusion  = 0            
-    ndiff       = 5            
+    ndiff       = 5
     flufflyr    = 0            
     iporosity   = 0            
                                
@@ -221,40 +222,176 @@ contains
 
     sedtyp(1)   = SEDTYP_NONCOHESIVE_SUSPENDED 
     sedtyp(2)   = SEDTYP_COHESIVE              
-    cdryb       = 1650.0_fp                    
-    rhosol      = 2650.0_fp                    
+    cdryb       = par%rhom
+    rhosol      = par%rhop
     sedd50      = 0.0001_fp                    
     sedd90      = 0.0002_fp                    
     logsedsig   = log(1.34_fp)                 
 
-    thtrlyr = 0.1_fp       
-    thlyr   = 0.1_fp       
+    nlyr = par%nlayers
+    thlyr = par%layer_thickness
+    thtrlyr = par%layer_thickness
     svfrac  = 1.0_fp       
     msed = 0.0_fp          
-    do l = 1, nfrac
-       msed(l,:,:) = thlyr*cdryb(l)/nfrac 
+    do i = 1,par%nfractions
+       msed(i,:,:) = thlyr * cdryb(i) * par%grain_dist(i) / sum(par%grain_dist)
     enddo
 
     call setbedfracprop(morlyr, sedtyp, sedd50, logsedsig, cdryb)
 
   end subroutine generate_bedcomposition
 
+  function update_bed(z, mass, rho, dt, morfac) result (z_new)
+
+    real*8, dimension(:), intent(in) :: z
+    real*8, dimension(:,:), intent(in) :: mass
+    real*8, dimension(:), intent(in) :: rho
+    real*8, dimension(:), allocatable :: z_new, dz
+    real*8 :: dt, morfac
+    
+    allocate(z_new(size(z)))
+    allocate(dz(size(z)))
+
+    if ( updmorlyr(morlyr, transpose(mass), 0.d0 * mass, rho, dt, morfac, dz, messages) /= 0 ) then
+       call adderror(messages, message)
+    end if
+
+    z_new = z + dz
+
+  end function update_bed
+
+  function get_layer_mass() result (mass)
+
+    integer :: istat
+    real*8 , dimension(:,:,:), pointer :: mass
+
+    istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', mass)
+    if (istat/=0) call adderror(messages, message)
+
+  end function get_layer_mass
+
+  function get_layer_percentile(par, p) result (perc)
+
+    type(parameters), intent(in) :: par
+    integer :: istat, i, j, k
+    real*8 :: sedtot
+    real*8, intent(in) :: p
+    real*8, dimension(:), allocatable :: frac
+    real*8, dimension(:,:), allocatable :: perc
+    real*8, dimension(:,:,:), allocatable :: msed_cs
+    real*8, dimension(:,:,:), pointer :: msed
+
+    allocate(frac(par%nfractions))
+    allocate(perc(par%nlayers+2, par%nx+1))
+    allocate(msed_cs(par%nfractions, par%nlayers+2, par%nx+1))
+
+    istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
+    if (istat/=0) call adderror(messages, message)
+
+    do i = 1,par%nx+1
+       do j = 1,par%nlayers+2
+          sedtot = 0.0_fp
+          do k = 1,par%nfractions
+             sedtot = sedtot + msed(k,j,i)
+             msed_cs(k,j,i) = sedtot
+          enddo
+          perc(j,i) = 10**linear_interp(msed_cs(:,j,i)/sedtot, log10(par%grain_size), p)
+       enddo
+    enddo
+
+  end function get_layer_percentile
+
+  function get_layer_massfraction(par) result (fractions)
+
+    type(parameters), intent(in) :: par
+    integer :: istat, i, j, k
+    real*8 :: sedtot
+    real*8, dimension(:,:,:), allocatable :: fractions
+    real*8, dimension(:,:,:), pointer :: msed
+
+    allocate(fractions(par%nfractions, par%nlayers+2, par%nx+1))
+
+    istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
+    if (istat/=0) call adderror(messages, message)
+
+    do i = 1,par%nx+1
+       do j = 1,par%nlayers+2
+          sedtot = 0.0_fp
+          do k = 1,par%nfractions
+             sedtot = sedtot + msed(k,j,i)
+          enddo
+          do k = 1,par%nfractions
+             fractions(k,j,i) = msed(k,j,i)/sedtot
+          enddo
+       enddo
+    enddo
+
+  end function get_layer_massfraction
+
+  function get_layer_volumefraction(par) result (fractions)
+
+    type(parameters), intent(in) :: par
+    integer :: istat, i, j, k
+    real*8, dimension(:,:,:), allocatable :: fractions
+    real*8, dimension(:,:,:), pointer :: msed
+    real*8, dimension(:,:), pointer :: svfrac
+    real*8, dimension(:,:), pointer :: thlyr
+    real*8, dimension(:), pointer :: dens
+
+    allocate(fractions(par%nfractions, par%nlayers+2, par%nx+1))
+
+    istat = bedcomp_getpointer_realfp(morlyr, 'layer_thickness', thlyr)
+    istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
+    istat = bedcomp_getpointer_realfp(morlyr, 'sediment_density', dens)
+    istat = bedcomp_getpointer_realfp(morlyr, 'solid_volume_fraction', svfrac)
+    if (istat/=0) call adderror(messages, message)
+
+    do i = 1,par%nx+1
+       do j = 1,par%nlayers
+          do k = 1,par%nfractions+2
+             fractions(k,j,i) = msed(k,j,i)/(dens(k)*svfrac(j,i)*thlyr(j,i))
+          enddo
+       enddo
+    enddo
+
+  end function get_layer_volumefraction
+
+  subroutine compute_threshold_grainsize(par, u_th)
+
+    type(parameters), intent(in) :: par
+    real*8, dimension(:,:), intent(inout) :: u_th
+    integer :: i
+
+    ! Bagnold
+
+    do i=1,par%nfractions
+       u_th(:,i) = par%A * sqrt(((par%rhop - par%rhoa) * &
+                   par%g * par%grain_size(i)) / par%rhop)
+    end do
+
+  end subroutine compute_threshold_grainsize
+
   subroutine compute_threshold_bedslope(par, x, z, u_th)
 
     type(parameters), intent(in) :: par
     real*8, dimension(:), intent(in) :: x, z
-    real*8, dimension(:), intent(inout) :: u_th
+    real*8, dimension(:,:), intent(inout) :: u_th
     integer :: i
     real*8 :: phi, theta
+
+    ! Dyer, 1986
 
     phi = par%phi / 180.d0 * pi
 
     do i=1,par%nx
        theta = -atan((z(i+1) - z(i)) / (x(i+1) - x(i)))
-       u_th(i) = sqrt((tan(phi) - tan(theta) / tan(phi) + cos(theta)) / \
-                 (tan(phi)+1)) * u_th(i)
+       u_th(i,:) = sqrt((tan(phi) - tan(theta) / tan(phi) + cos(theta)) / \
+                   (tan(phi)+1)) * u_th(i,:)
     end do
+
+    u_th(par%nx+1,:) = u_th(par%nx,:)
 
   end subroutine compute_threshold_bedslope
 
 end module bed_module
+ 
