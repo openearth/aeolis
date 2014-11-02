@@ -1,8 +1,61 @@
 module utils_module
 
+  use constants_module
+
   implicit none
 
 contains
+
+  subroutine sort(x, x2)
+    
+    integer :: n, i, idx
+    real*8 :: tmp
+    real*8, dimension(:), intent(inout) :: x
+    real*8, dimension(:), intent(inout), optional :: x2
+
+    n = size(x)
+
+    do i=1,n
+       idx = i + find_minimum(x(i:n)) - 1
+
+       call swap(x(i), x(idx))
+
+       if (present(x2)) then
+          call swap(x2(i), x2(idx))
+       end if
+    end do
+
+  end subroutine sort
+
+  subroutine swap(x, y)
+    
+    real*8, intent(inout) :: x, y
+    real*8 :: tmp
+
+    tmp = x
+    x = y
+    y = tmp
+
+  end subroutine swap
+
+  function find_minimum(x) result (loc)
+
+    integer :: n, i, loc
+    real*8 :: mn
+    real*8, dimension(:), intent(in) :: x
+
+    n = size(x)
+
+    loc = 1
+    mn = x(loc)
+    do i=2,n
+       if (x(i) < mn) then
+          loc = i
+          mn = x(loc)
+       end if
+    end do
+
+  end function find_minimum
 
   function linear_interp(x, y, xx) result (yy)
 
@@ -73,9 +126,9 @@ contains
 
   function rand_normal(mean, stdev) result(c)
     
-    real*8 :: mean, stdev, r, theta, c, x(2), pi
+    real*8 :: mean, stdev, r, theta, c, x(2)
     
-    if(stdev <= 0.0d0) then
+    if(stdev < 0.0d0) then
        write(*,*) "WARNING: standard deviation must be positive"
     else
        call random_number(x)

@@ -43,20 +43,43 @@ contains
     end do
     close(fid)
         
-    ! allocate arrays
-    nt = nint(sum(duration) / par%dt)
-    allocate(u(nt))
+    ! checks
+    if (sum(duration) < par%tstop) then
+       write(*,*) "ERROR: wind definition file too short"
+       stop 1
+    end if
 
-    ! compute random time series
-    i = 1
-    it = 1
-    do while (it < nt)
-       l = nint(rand_normal(g_m(i), g_std(i)) / par%dt)
-       u(it:min(nt,it+l)) = max(0.d0, rand_normal(u_m(i), u_std(i)))
-       it = it + l
-       if (it > sum(duration(1:i)) / par%dt) then
-          i = i + 1
+    ! maximize optimization tries
+    do n=1,20
+
+       ! allocate arrays
+       nt = nint(par%tstop / par%dt)
+       if (allocated(u)) deallocate(u)
+       allocate(u(nt))
+   
+       ! compute random time series
+       i = 1
+       it = 1
+       do while (it < nt)
+          l = nint(max(par%dt, rand_normal(g_m(i), g_std(i))) / par%dt)
+          u(it:min(nt,it+l)) = max(0.d0, rand_normal(u_m(i), u_std(i)))
+          it = it + l
+          if (it > sum(duration(1:i)) / par%dt) then
+             i = i + 1
+          end if
+       end do
+   
+       ! courant check
+       if (par%CFL > 0.d0) then
+          if (i > 1 .and. abs(maxval(u) / par%dx * par%dt - par%CFL) < .005) then
+             write(0, '(a, f6.4)') " Adapted timestep based on CFL condition: ", par%dt
+             exit
+          end if
+          par%dt = par%CFL * par%dx / maxval(u)
+       else
+          exit
        end if
+
     end do
 
   end subroutine generate_wind

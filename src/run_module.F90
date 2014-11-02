@@ -3,7 +3,7 @@ module run_module
   use input_module
   use wind_module
   use bed_module
-  use supply_module
+  use moist_module
 
   implicit none
 
@@ -12,14 +12,14 @@ contains
   subroutine run_model(par)
     
     type(parameters), intent(inout) :: par
-    integer*4 :: i, ti, si, nx, nt
+    integer*4 :: i, ti, nx, nt
     real*8 :: t, dt, dx, Ta
     real*8 :: tstart
-    real*8, dimension(:), allocatable :: x, z, u_th
-    real*8, dimension(:), allocatable :: u, t_supply, current_supply
-    real*8, dimension(:,:), allocatable :: supply
-    real*8, dimension(:), allocatable :: Ct, Ct1, Ct2, Cu, Ca
-    logical, dimension(:), allocatable :: supply_limited, transport_limited
+    real*8, dimension(:), allocatable :: x, z, zm, u
+    real*8, dimension(:,:), allocatable :: u_th, m
+    real*8, dimension(:), allocatable :: rho, dist
+    real*8, dimension(:,:), allocatable :: Cu, Ct
+    real*8, dimension(:,:,:), allocatable :: mass
     integer*4, parameter :: fid=20
 
     write(*,*) 'Initialization started...'
@@ -38,10 +38,22 @@ contains
     write(fid) u
     close(fid)
 
-    ! supply
-    call generate_supply(par, t_supply, supply)
-    open(unit=fid, file="supply.out", action="write", status="replace", form="unformatted")
-    write(fid) supply
+    ! courant check
+    write(0, '(a, f4.2)') " Courant condition: ", maxval(u) / par%dx * par%dt   
+    if (par%dx / par%dt < maxval(u)) then
+       write(0, '(a)') " Courant condition violated. Please adapt numerical parameters."
+       stop 1
+    end if
+
+    ! moist
+    call generate_moist(par, zm, m)
+    write(*,*) m(:,5)
+    open(unit=fid, file="moist.out", action="write", status="replace", form="unformatted")
+    write(fid) m
+    close(fid)
+
+    open(unit=fid, file="moist_z.out", action="write", status="replace", form="unformatted")
+    write(fid) zm
     close(fid)
 
     ! time
@@ -49,83 +61,99 @@ contains
     par%nt = nint(par%tstop / par%dt)
 
     ! space
-    allocate(u_th(par%nx+1))
-    allocate(Ct(par%nx+1))
-    allocate(Ct1(par%nx+1))
-    allocate(Ct2(par%nx+1))
-    allocate(Cu(par%nx+1))
-    allocate(Ca(par%nx+1))
-    allocate(supply_limited(par%nx+1))
-    allocate(current_supply(par%nx+1))
+    allocate(u_th(par%nx+1, par%nfractions))
+    allocate(Cu(par%nx+1, par%nfractions))
+    allocate(Ct(par%nx+1, par%nfractions))
+    allocate(mass(par%nx+1, par%nlayers, par%nfractions))
     u_th = 0.0
-    Ct = 0.0
-    Ct1 = 0.0
-    Ct2 = 0.0
     Cu = 0.0
-    Ca = par%S
+    Ct = 0.0
+    mass = 0.0
 
-    ! checks
-    if (size(u) < par%nt) then
-       write(*,*) "ERROR: wind definition file too short"
-       stop 1
-    end if
+    ! fractions
+    allocate(rho(par%nfractions))
+    allocate(dist(par%nfractions))
+
+    rho = par%grain_size
+    dist = par%grain_dist
+
+    open(unit=fid, file="dims.out", action="write", status="replace", form="unformatted")
+    write(fid) par%nx
+    write(fid) par%dx
+    write(fid) par%nt
+    write(fid) par%dt
+    write(fid) par%nfractions
+    write(fid) par%nlayers+2
+    close(fid)
 
     write(*,*) 'Model run started...'
-
-    ! update threshold
-    u_th = par%u_th
-    call compute_threshold_bedslope(par, x, z, u_th)
 
     ! model
     open(unit=fid+1, file="Ct.out", action="write", status="replace", form="unformatted")
     open(unit=fid+2, file="Cu.out", action="write", status="replace", form="unformatted")
-    open(unit=fid+3, file="Ca.out", action="write", status="replace", form="unformatted")
+    open(unit=fid+3, file="z.out", action="write", status="replace", form="unformatted")
+    open(unit=fid+4, file="u_th.out", action="write", status="replace", form="unformatted")
+    open(unit=fid+5, file="mass.out", action="write", status="replace", form="unformatted")
+!    open(unit=fid+6, file="mfrac.out", action="write", status="replace", form="unformatted")
+!    open(unit=fid+7, file="vfrac.out", action="write", status="replace", form="unformatted")
+    open(unit=fid+8, file="d10.out", action="write", status="replace", form="unformatted")
+    open(unit=fid+9, file="d50.out", action="write", status="replace", form="unformatted")
+    open(unit=fid+10, file="d90.out", action="write", status="replace", form="unformatted")
 
-    ! parameters
+    ! dimensions
     nx = par%nx
     nt = par%nt
     dt = par%dt
     dx = par%dx
     Ta = par%Tp / par%dt
 
-    si = 1
-    current_supply = supply(si,:)
     tstart = get_time()
     do ti=1,par%nt
 
-       ! update supply
-       if (t .gt. t_supply(si+1)) then
-          si = si + 1
-          current_supply = supply(si,:)
-       end if
-
        ! log progress
-       if ( mod(dble(ti), par%nt/10.d0) == 0 ) then
+       if ( mod(dble(ti), par%nt/10.d0) < 1.d0 ) then
           call write_progress(ti, par%nt, tstart)
        end if
 
-       Cu = max(0.d0, 1.5e-4 * ((u(ti) - u_th)**3) / (u(ti) * par%VS))
+       ! update threshold
+       u_th = par%u_th
+       call compute_threshold_grainsize(par, u_th)
+       call compute_threshold_bedslope(par, x, z, u_th)
+       call compute_threshold_moisture(par, zm, m(ti,:), z, u_th)
 
-       Ct1(2:nx+1) = ((-par%VS * u(ti) * (Ct(2:nx+1) - Ct(1:nx)) / dx) * dt + \
-                        Ct(2:nx+1) + Cu(2:nx+1) / Ta) / (1+1/Ta)
+       ! get available mass
+       mass = get_layer_mass()
 
-       Ct2(2:nx+1) = ((-par%VS * u(ti) * (Ct(2:nx+1) - Ct(1:nx)) / dx) * dt + \
-                        Ct(2:nx+1) + Ca(2:nx+1) / Ta) / (1+1/Ta)
+       do i=1,par%nfractions
 
-       supply_limited = (Cu - Ct) / Ta .gt. Ca
+          ! compute transport capacity by wind, including thresholds
+          Cu(:,i) = max(0.d0, 1.5e-4 * ((u(ti) - u_th(:,i))**3) / (u(ti) * par%VS))
 
-       where (supply_limited)
-          Ct = Ct2
-          Ca = Ca + current_supply / dx - Ca / Ta
-       elsewhere
-          Ct = Ct1
-          Ca = Ca + current_supply / dx - (Cu - Ct) / Ta
-       end where
- 
-       if ( mod(ti, nint(par%tout / dt)) == 0 ) then
+          ! compute sediment advection by wind
+          Ct(2:nx+1,i) = -par%VS * u(ti) * (Ct(2:nx+1,i) - Ct(1:nx,i)) / dx * dt + &
+                          Cu(2:nx+1,i) / Ta + &
+                          Ct(2:nx+1,i) * (1-1/Ta)
+
+          ! limit advection by available mass
+          Ct(2:nx+1,i) = min(mass(2:nx+1,1,i), Ct(2:nx+1,i))
+
+       end do
+
+       ! update bed elevation
+       z = update_bed(z, -(Cu - Ct) / Ta, rho, par%dt, par%morfac)
+
+       ! write output
+       if ( mod(ti, nint(par%tout / dt)) < 1.d0 ) then
           write(fid+1) Ct
           write(fid+2) Cu
-          write(fid+3) Ca
+          write(fid+3) z
+          write(fid+4) u_th
+          write(fid+5) get_layer_mass()
+ !         write(fid+6) get_layer_massfraction(par)
+ !         write(fid+7) get_layer_volumefraction(par)
+          write(fid+8) get_layer_percentile(par, 0.1d0)
+          write(fid+9) get_layer_percentile(par, 0.5d0)
+          write(fid+10) get_layer_percentile(par, 0.9d0)
        end if
        
        t = t + par%dt
@@ -134,6 +162,13 @@ contains
     close(fid+1)
     close(fid+2)
     close(fid+3)
+    close(fid+4)
+    close(fid+5)
+ !   close(fid+6)
+ !   close(fid+7)
+    close(fid+8)
+    close(fid+9)
+    close(fid+10)
 
     write(*,*) 'Done.'
 
