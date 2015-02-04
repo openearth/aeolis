@@ -9,8 +9,8 @@ implicit none
 character(slen) :: fname
 type(parameters) :: par
 
-fname = read_params()
-par   = read_input(fname)
+fname = read_cmd()
+par   = read_params(fname)
 
 call run_model(par)
 

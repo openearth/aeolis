@@ -23,6 +23,7 @@ module input_module
      real*8    :: tout  = 0.d0
      real*8    :: CFL   = 0.d0
      real*8    :: morfac = 1.d0
+
      character(slen) :: wind_file = ''
      character(slen) :: bed_file = ''
      character(slen) :: moist_file = ''
@@ -44,16 +45,14 @@ module input_module
 
 contains
 
-  function read_params() result (fname)
+  function read_cmd() result (fname)
     
     character(len=100) :: arg
     character(len=500) :: version
-    character(slen)    :: fname
+    character(slen)    :: fpath, fname
     integer            :: iarg, narguments
     logical            :: done
-    
-    fname = 'examples/input.txt'
-    
+
     narguments = command_argument_count()
     if (narguments > 0) then
        do iarg=1,narguments
@@ -71,8 +70,8 @@ contains
              write(*,*)'                   Welcome to AeoLiS                      '
              write(*,*)' '
              write(*,*)'Usage:'
-             write(*,*)'    aeolis.exe'
-             write(*,*)'    aeolis.exe [options]'
+             write(*,*)'    aeolis.exe <input>'
+             write(*,*)'    aeolis.exe <input> [options]'
              write(*,*)' '
              write(*,*)'Options:'
              write(*,*)'    -v Shows the version of this AeoLiS executable'
@@ -80,7 +79,8 @@ contains
              write(*,*)' '
              stop
           else
-             fname = arg
+             call split_path(arg, fpath, fname)
+             call chdir(fpath)
           end if
 
        end do
@@ -96,10 +96,15 @@ contains
     write(*,*) '   d8888888888 Y8b.     Y88..88P 888      888 Y88b  d88P  ' 
     write(*,*) '  d88P     888  "Y8888   "Y88P"  88888888 888  "Y8888P"   '
     write(*,*) ' '
-    
-  end function read_params
+
+    if (len(trim(fpath)) .gt. 0) then
+       write(0, '(a, a)') '  Changed working directory to: ', trim(fpath)
+       write(*,*) ' '
+    end if
+
+  end function read_cmd
   
-  function read_input(fname) result (par)
+  function read_params(fname) result (par)
     
     character(len=*) :: fname
     type(parameters) :: par
@@ -148,7 +153,7 @@ contains
     write(*,*) '**********************************************************'
     write(*,*) ' '
 
-  end function read_input
+  end function read_params
 
   function read_key_str(fname, key, default) result (value)
     

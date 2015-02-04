@@ -47,7 +47,6 @@ contains
 
     ! moist
     call generate_moist(par, zm, m)
-    write(*,*) m(:,5)
     open(unit=fid, file="moist.out", action="write", status="replace", form="unformatted")
     write(fid) m
     close(fid)
