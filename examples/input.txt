@@ -15,9 +15,9 @@ tstop  86400
 tout = 100
 
 # files
-wind_file = examples/wind.txt
-bed_file = examples/bed.txt
-moist_file = examples/moist.txt
+wind_file = wind.txt
+bed_file = bed.txt
+moist_file = moist.txt
 
 # bed composition
 nfractions = 11

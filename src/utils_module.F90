@@ -6,6 +6,7 @@ module utils_module
 
 contains
 
+  
   subroutine sort(x, x2)
     
     integer :: n, i, idx
@@ -27,6 +28,7 @@ contains
 
   end subroutine sort
 
+  
   subroutine swap(x, y)
     
     real*8, intent(inout) :: x, y
@@ -38,6 +40,29 @@ contains
 
   end subroutine swap
 
+  
+  subroutine split_path(str, fpath, fname)
+
+    character(*),    intent(in) :: str
+    character(slen), intent(out) :: fpath, fname
+    integer :: pos, pos0
+
+    pos0 = 1
+    
+    do
+       pos = index(str(pos0:), '/')
+       if (pos == 0) then
+          fpath = str(:(pos0-1))
+          fname = str(pos0:)
+          exit
+       else
+          pos0 = pos0 + pos
+       end if
+    end do
+    
+  end subroutine split_path
+
+  
   function find_minimum(x) result (loc)
 
     integer :: n, i, loc
@@ -57,6 +82,7 @@ contains
 
   end function find_minimum
 
+  
   function linear_interp(x, y, xx) result (yy)
 
     integer :: n
@@ -94,6 +120,7 @@ contains
 
   end function linear_interp
 
+  
   function binary_search(xx, x) result (j)
 
     integer :: n
@@ -124,6 +151,7 @@ contains
 
   end function binary_search
 
+  
   function rand_normal(mean, stdev) result(c)
     
     real*8 :: mean, stdev, r, theta, c, x(2)
@@ -138,4 +166,5 @@ contains
     end if
   end function rand_normal
 
+  
 end module utils_module
