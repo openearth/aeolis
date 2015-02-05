@@ -96,9 +96,9 @@ am_aeolis_OBJECTS = aeolis-constants_module.$(OBJEXT) \
 	sand_mud_bed/modules/aeolis-precision.$(OBJEXT) \
 	sand_mud_bed/modules/aeolis-bedcomposition_module.$(OBJEXT) \
 	aeolis-utils_module.$(OBJEXT) aeolis-input_module.$(OBJEXT) \
-	aeolis-bed_module.$(OBJEXT) aeolis-moist_module.$(OBJEXT) \
-	aeolis-wind_module.$(OBJEXT) aeolis-run_module.$(OBJEXT) \
-	aeolis-AeoLiS.$(OBJEXT)
+	aeolis-output_module.$(OBJEXT) aeolis-bed_module.$(OBJEXT) \
+	aeolis-moist_module.$(OBJEXT) aeolis-wind_module.$(OBJEXT) \
+	aeolis-run_module.$(OBJEXT) aeolis-AeoLiS.$(OBJEXT)
 aeolis_OBJECTS = $(am_aeolis_OBJECTS)
 aeolis_LDADD = $(LDADD)
 aeolis_LINK = $(FCLD) $(aeolis_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) \
@@ -248,6 +248,7 @@ aeolis_SOURCES = constants_module.F90 \
                  sand_mud_bed/modules/bedcomposition_module.F90 \
 		 utils_module.F90 \
 		 input_module.F90 \
+                 output_module.F90 \
 		 bed_module.F90 \
                  moist_module.F90 \
 		 wind_module.F90 \
@@ -417,6 +418,12 @@ aeolis-input_module.o: input_module.F90
 
 aeolis-input_module.obj: input_module.F90
 	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-input_module.obj `if test -f 'input_module.F90'; then $(CYGPATH_W) 'input_module.F90'; else $(CYGPATH_W) '$(srcdir)/input_module.F90'; fi`
+
+aeolis-output_module.o: output_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-output_module.o `test -f 'output_module.F90' || echo '$(srcdir)/'`output_module.F90
+
+aeolis-output_module.obj: output_module.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-output_module.obj `if test -f 'output_module.F90'; then $(CYGPATH_W) 'output_module.F90'; else $(CYGPATH_W) '$(srcdir)/output_module.F90'; fi`
 
 aeolis-bed_module.o: bed_module.F90
 	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(aeolis_FCFLAGS) $(FCFLAGS) -c -o aeolis-bed_module.o `test -f 'bed_module.F90' || echo '$(srcdir)/'`bed_module.F90

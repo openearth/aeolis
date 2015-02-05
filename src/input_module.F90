@@ -41,6 +41,8 @@ module input_module
      real*8, dimension(:), allocatable :: grain_size
      real*8, dimension(:), allocatable :: grain_dist
 
+     character(10), dimension(:), allocatable  :: outputvars
+
   end type parameters
 
 contains
@@ -148,6 +150,8 @@ contains
     par%grain_size = read_key_dblvec(fname, 'grain_size', par%nfractions, 0.d0003)
     par%grain_dist = read_key_dblvec(fname, 'grain_dist', par%nfractions, 1.d0)
 
+    par%outputvars = read_key_strvec(fname, 'outputvars', 'z')
+
     call sort(par%grain_size, par%grain_dist)
 
     write(*,*) '**********************************************************'
@@ -168,8 +172,33 @@ contains
     end if
 
     write(0, '(a12,a,a)') key, ' = ', trim(value)
-    
+
   end function read_key_str
+
+  function read_key_strvec(fname, key, default) result (value_arr)
+    
+    integer*4 :: ierr
+    character(len=*) :: fname, key
+    character(slen) :: value
+    integer*4 :: n, i
+    character(*), optional :: default
+    character(10), dimension(:), allocatable :: value_arr
+
+    value = read_key(fname, key)
+
+    if (value == ' ') then
+       value = default
+    end if
+
+    value_arr = split(value)
+
+    write(0, '(a12,a,a)') key, ' = ', trim(value_arr(1))
+    
+    do i = 2,size(value_arr)
+       write(0, '(a15,a)') ' ', trim(value_arr(i))
+    end do
+        
+  end function read_key_strvec
   
   function read_key_dbl(fname, key, default) result (value_dbl)
 

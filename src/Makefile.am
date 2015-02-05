@@ -9,6 +9,7 @@ aeolis_SOURCES = constants_module.F90 \
                  sand_mud_bed/modules/bedcomposition_module.F90 \
 		 utils_module.F90 \
 		 input_module.F90 \
+                 output_module.F90 \
 		 bed_module.F90 \
                  moist_module.F90 \
 		 wind_module.F90 \
