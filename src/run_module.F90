@@ -1,5 +1,6 @@
 module run_module
   
+  use output_module
   use input_module
   use wind_module
   use bed_module
@@ -12,6 +13,7 @@ contains
   subroutine run_model(par)
     
     type(parameters), intent(inout) :: par
+    type(output_files), dimension(:), allocatable :: out
     integer*4 :: i, ti, nx, nt
     real*8 :: t, dt, dx, Ta
     real*8 :: tstart
@@ -23,18 +25,18 @@ contains
     integer*4, parameter :: fid=20
 
     write(*,*) 'Initialization started...'
-
+    
     ! bed
     call generate_bed(par, x, z)
     call generate_bedcomposition(par, x, z)
-    open(unit=fid, file="bed.out", action="write", status="replace", form="unformatted")
+    open(unit=fid, file="bed.in", action="write", status="replace", form="unformatted")
     write(fid) x
     write(fid) z
     close(fid)
 
     ! wind
     call generate_wind(par, u)
-    open(unit=fid, file="wind.out", action="write", status="replace", form="unformatted")
+    open(unit=fid, file="wind.in", action="write", status="replace", form="unformatted")
     write(fid) u
     close(fid)
 
@@ -45,19 +47,19 @@ contains
        stop 1
     end if
 
-    ! moist
-    call generate_moist(par, zm, m)
-    open(unit=fid, file="moist.out", action="write", status="replace", form="unformatted")
-    write(fid) m
-    close(fid)
-
-    open(unit=fid, file="moist_z.out", action="write", status="replace", form="unformatted")
-    write(fid) zm
-    close(fid)
-
     ! time
     t = 0
     par%nt = nint(par%tstop / par%dt)
+
+    ! moist
+    call generate_moist(par, zm, m)
+    open(unit=fid, file="moist.in", &
+         action="write", status="replace", form="unformatted")
+    write(fid) zm
+    do i = 1,par%nt
+       write(fid) m(i,:)
+    end do
+    close(fid)
 
     ! space
     allocate(u_th(par%nx+1, par%nfractions))
@@ -76,29 +78,13 @@ contains
     rho = par%grain_size
     dist = par%grain_dist
 
-    open(unit=fid, file="dims.out", action="write", status="replace", form="unformatted")
-    write(fid) par%nx
-    write(fid) par%dx
-    write(fid) par%nt
-    write(fid) par%dt
-    write(fid) par%nfractions
-    write(fid) par%nlayers+2
-    close(fid)
+    call write_dimensions(par)
 
     write(*,*) 'Model run started...'
 
     ! model
-    open(unit=fid+1, file="Ct.out", action="write", status="replace", form="unformatted")
-    open(unit=fid+2, file="Cu.out", action="write", status="replace", form="unformatted")
-    open(unit=fid+3, file="z.out", action="write", status="replace", form="unformatted")
-    open(unit=fid+4, file="u_th.out", action="write", status="replace", form="unformatted")
-    open(unit=fid+5, file="mass.out", action="write", status="replace", form="unformatted")
-!    open(unit=fid+6, file="mfrac.out", action="write", status="replace", form="unformatted")
-!    open(unit=fid+7, file="vfrac.out", action="write", status="replace", form="unformatted")
-    open(unit=fid+8, file="d10.out", action="write", status="replace", form="unformatted")
-    open(unit=fid+9, file="d50.out", action="write", status="replace", form="unformatted")
-    open(unit=fid+10, file="d90.out", action="write", status="replace", form="unformatted")
-
+    out = output_init(par%outputvars)
+    
     ! dimensions
     nx = par%nx
     nt = par%nt
@@ -143,32 +129,23 @@ contains
 
        ! write output
        if ( mod(ti, nint(par%tout / dt)) < 1.d0 ) then
-          write(fid+1) Ct
-          write(fid+2) Cu
-          write(fid+3) z
-          write(fid+4) u_th
-          write(fid+5) get_layer_mass()
- !         write(fid+6) get_layer_massfraction(par)
- !         write(fid+7) get_layer_volumefraction(par)
-          write(fid+8) get_layer_percentile(par, 0.1d0)
-          write(fid+9) get_layer_percentile(par, 0.5d0)
-          write(fid+10) get_layer_percentile(par, 0.9d0)
+          call output_write(out, 'Ct', Ct)
+          call output_write(out, 'Cu', Cu)
+          call output_write(out, 'z', z)
+          call output_write(out, 'u_th', u_th)
+          call output_write(out, 'wind', u(ti))
+          call output_write(out, 'mass', get_layer_mass())
+          call output_write(out, 'moist', map_moisture(par, zm, m(ti,:), z))
+          call output_write(out, 'd10', get_layer_percentile(par, 0.1d0))
+          call output_write(out, 'd50', get_layer_percentile(par, 0.5d0))
+          call output_write(out, 'd90', get_layer_percentile(par, 0.9d0))
        end if
        
        t = t + par%dt
     end do
 
-    close(fid+1)
-    close(fid+2)
-    close(fid+3)
-    close(fid+4)
-    close(fid+5)
- !   close(fid+6)
- !   close(fid+7)
-    close(fid+8)
-    close(fid+9)
-    close(fid+10)
-
+    call output_close(out)
+    
     write(*,*) 'Done.'
 
   end subroutine run_model
@@ -207,7 +184,7 @@ contains
     
     h = int(tm / 3600)
     m = int((tm - h * 3600) / 60)
-    s = nint(tm - h * 3600 - m * 60)
+    s = int(tm - h * 3600 - m * 60)
 
     if (h < 10) then
        write(h_s, '("0",i0)') h

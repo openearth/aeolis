@@ -6,7 +6,6 @@ module utils_module
 
 contains
 
-  
   subroutine sort(x, x2)
     
     integer :: n, i, idx
@@ -27,7 +26,6 @@ contains
     end do
 
   end subroutine sort
-
   
   subroutine swap(x, y)
     
@@ -40,7 +38,49 @@ contains
 
   end subroutine swap
 
-  
+  function split(str, sep) result (arr)
+
+    character(*) :: str
+    character(*), optional :: sep
+    character(1) :: sep0
+    character(10), dimension(:), allocatable :: arr
+    integer*4 :: i, n, pos, pos0
+
+    if (present(sep)) then
+       sep0 = sep
+    else
+       sep0 = ' '
+    end if
+    
+    n = 0
+    i = 1
+
+    pos0 = 1
+    do
+       pos = index(trim(str(pos0:)), sep0)
+       if (pos == 0) then
+          exit
+       else if (pos .gt. 1) then
+          n = n + 1
+       end if
+       pos0 = pos0 + pos
+    end do
+
+    allocate(arr(n+1))
+
+    pos0 = 1
+    do i = 1, n+1
+       pos = index(str(pos0:), sep0)
+       if (pos == 0) then
+          arr(i) = trim(str(pos0:))
+          exit
+       end if
+       arr(i) = trim(str(pos0:(pos0+pos-1)))
+       pos0 = pos0 + pos
+    end do
+
+  end function split
+
   subroutine split_path(str, fpath, fname)
 
     character(*),    intent(in) :: str
@@ -61,7 +101,6 @@ contains
     end do
     
   end subroutine split_path
-
   
   function find_minimum(x) result (loc)
 
@@ -81,7 +120,6 @@ contains
     end do
 
   end function find_minimum
-
   
   function linear_interp(x, y, xx) result (yy)
 
@@ -120,7 +158,6 @@ contains
 
   end function linear_interp
 
-  
   function binary_search(xx, x) result (j)
 
     integer :: n
@@ -151,7 +188,6 @@ contains
 
   end function binary_search
 
-  
   function rand_normal(mean, stdev) result(c)
     
     real*8 :: mean, stdev, r, theta, c, x(2)
@@ -165,6 +201,5 @@ contains
        c = mean + stdev*r*sin(theta)
     end if
   end function rand_normal
-
   
 end module utils_module

@@ -86,24 +86,15 @@ contains
 
     type(parameters), intent(in) :: par
     real*8, dimension(:), intent(in) :: zm, m, z
-    real*8, dimension(par%nx) :: mg
+    real*8, dimension(par%nx+1) :: mg
     real*8, dimension(:,:), intent(inout) :: u_th
-    real*8, dimension(par%nx, par%nfractions) :: u_th_m
+    real*8, dimension(par%nx+1, par%nfractions) :: u_th_m
     integer :: i, n
+
+    mg = map_moisture(par, zm, m, z)
 
     ! convert from volumetric content (percentage of volume) to
     ! geotechnical mass content (percentage of dry mass)
-    n = size(m)
-    do i = 1,par%nx
-       if (z(i) < minval(zm)) then
-          mg(i) = m(1)
-       elseif (z(i) > maxval(zm)) then
-          mg(i) = m(n)
-       else
-          mg(i) = linear_interp(zm(2:n-1), m(2:n-1), z(i+1))
-       end if
-    end do
-
     mg = mg * par%rhow / (par%rhop * (1 - par%porosity))
 
     u_th_m = 0.d0
@@ -129,5 +120,25 @@ contains
     end do
 
   end subroutine compute_threshold_moisture
+
+  function map_moisture(par, zm, m, z) result (mg)
+    
+    type(parameters) :: par
+    real*8, dimension(:) :: zm, m, z
+    real*8, dimension(par%nx+1) :: mg
+    integer :: i, n
+
+    n = size(m)
+    do i = 1,par%nx+1
+       if (z(i) < minval(zm)) then
+          mg(i) = m(1)
+       elseif (z(i) > maxval(zm)) then
+          mg(i) = m(n)
+       else
+          mg(i) = linear_interp(zm(2:n-1), m(2:n-1), z(i))
+       end if
+    end do
+
+  end function map_moisture
 
 end module moist_module
