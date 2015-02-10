@@ -8,11 +8,12 @@ module wind_module
 
 contains
 
-  subroutine generate_wind(par, u)
+  subroutine generate_wind(par, uout)
 
     type(parameters), intent(inout) :: par
     integer*4 :: fid, ierr, n, i, it, nt, l
-    real*8, dimension(:), allocatable, intent(out) :: u
+    real*8, dimension(:), pointer, intent(out) :: uout
+    real*8, dimension(:), allocatable :: u
     real*8, dimension(:), allocatable :: duration, u_m, u_std, g_m, g_std
 
     fid = 88
@@ -71,7 +72,7 @@ contains
    
        ! courant check
        if (par%CFL > 0.d0) then
-          if (i > 1 .and. abs(maxval(u) / par%dx * par%dt - par%CFL) < .005) then
+          if (abs(maxval(u) / par%dx * par%dt - par%CFL) < .005) then
              write(0, '(a, f6.4)') " Adapted timestep based on CFL condition: ", par%dt
              exit
           end if
@@ -81,6 +82,12 @@ contains
        end if
 
     end do
+
+    ! make time step fit with output time step
+    par%dt = par%tout / ceiling(par%tout / par%dt)
+
+    allocate(uout(size(u)))
+    uout = u
 
   end subroutine generate_wind
 

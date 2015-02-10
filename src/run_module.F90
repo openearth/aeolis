@@ -13,21 +13,34 @@ contains
   subroutine run_model(par)
     
     type(parameters), intent(inout) :: par
-    type(output_files), dimension(:), allocatable :: out
-    integer*4 :: i, ti, nx, nt
-    real*8 :: t, dt, dx, Ta
+    type(variables), dimension(:), allocatable :: var
+    type(variables), dimension(:), allocatable :: var_sum
+    integer*4 :: i, j, ti, nx, nt
+    real*8 :: t, dt, dx, Ta, n
     real*8 :: tstart
-    real*8, dimension(:), allocatable :: x, z, zm, u
-    real*8, dimension(:,:), allocatable :: u_th, m
-    real*8, dimension(:), allocatable :: rho, dist
-    real*8, dimension(:,:), allocatable :: Cu, Ct
-    real*8, dimension(:,:,:), allocatable :: mass
+    real*8, pointer :: wind
+    real*8, dimension(:), pointer :: x, z, u, moist_map
+    real*8, dimension(:,:), pointer :: uth
+    real*8, dimension(:), pointer :: rho, dist
+    real*8, dimension(:,:), pointer :: Cu, Ct, supply
+    real*8, dimension(:,:), pointer :: d10, d50, d90
+    real*8, dimension(:,:,:), pointer :: mass
+    real*8, dimension(:), allocatable :: x_tmp, z_tmp, zmoist
+    real*8, dimension(:,:), allocatable :: Ct2, moist
     integer*4, parameter :: fid=20
 
     write(*,*) 'Initialization started...'
     
     ! bed
-    call generate_bed(par, x, z)
+    call generate_bed(par, x_tmp, z_tmp)
+    call alloc_variable(var, 'x', (/par%nx+1/))
+    call alloc_variable(var, 'z', (/par%nx+1/))
+    call get_pointer(var, 'x', x)
+    call get_pointer(var, 'z', z)
+    
+    x = x_tmp
+    z = z_tmp
+    
     call generate_bedcomposition(par, x, z)
     open(unit=fid, file="bed.in", action="write", status="replace", form="unformatted")
     write(fid) x
@@ -35,6 +48,8 @@ contains
     close(fid)
 
     ! wind
+    call alloc_variable(var, 'u', (/par%nx+1/))
+    call get_pointer(var, 'u', u)
     call generate_wind(par, u)
     open(unit=fid, file="wind.in", action="write", status="replace", form="unformatted")
     write(fid) u
@@ -49,41 +64,62 @@ contains
 
     ! time
     t = 0
-    par%nt = nint(par%tstop / par%dt)
+    par%nt = int(par%tstop / par%dt)
+    par%ntout = int(par%tstop / par%tout) + 1
 
     ! moist
-    call generate_moist(par, zm, m)
+    call generate_moist(par, zmoist, moist)
     open(unit=fid, file="moist.in", &
          action="write", status="replace", form="unformatted")
-    write(fid) zm
     do i = 1,par%nt
-       write(fid) m(i,:)
+       write(fid) moist(i,:)
     end do
     close(fid)
 
-    ! space
-    allocate(u_th(par%nx+1, par%nfractions))
-    allocate(Cu(par%nx+1, par%nfractions))
-    allocate(Ct(par%nx+1, par%nfractions))
-    allocate(mass(par%nx+1, par%nlayers, par%nfractions))
-    u_th = 0.0
-    Cu = 0.0
-    Ct = 0.0
-    mass = 0.0
-
     ! fractions
-    allocate(rho(par%nfractions))
-    allocate(dist(par%nfractions))
-
-    rho = par%grain_size
+    call alloc_variable(var, 'rho',    (/par%nfractions/))
+    call alloc_variable(var, 'dist',   (/par%nfractions/))
+    call get_pointer(var, 'rho', rho)
+    call get_pointer(var, 'dist', dist)
+    rho = par%rhop
     dist = par%grain_dist
+
+    ! variables
+    call alloc_variable(var, 'Cu',     (/par%nfractions, par%nx+1/))
+    call alloc_variable(var, 'Ct',     (/par%nfractions, par%nx+1/))
+    call alloc_variable(var, 'uth',    (/par%nfractions, par%nx+1/))
+    call alloc_variable(var, 'mass',   (/par%nfractions, par%nlayers+2, par%nx+1/))
+    call alloc_variable(var, 'supply', (/par%nfractions, par%nx+1/))
+
+    call get_pointer(var, 'Cu', Cu)
+    call get_pointer(var, 'Ct', Ct)
+    call get_pointer(var, 'uth', uth)
+    call get_pointer(var, 'mass', mass)
+    call get_pointer(var, 'supply', supply)
+
+    ! extra output
+    call alloc_variable(var, 'wind')
+    call alloc_variable(var, 'moist_map', (/par%nx+1/))
+    call alloc_variable(var, 'd10', (/par%nlayers+2, par%nx+1/))
+    call alloc_variable(var, 'd50', (/par%nlayers+2, par%nx+1/))
+    call alloc_variable(var, 'd90', (/par%nlayers+2, par%nx+1/))
+
+    call get_pointer(var, 'wind', wind)
+    call get_pointer(var, 'moist_map', moist_map)
+    call get_pointer(var, 'd10', d10)
+    call get_pointer(var, 'd50', d50)
+    call get_pointer(var, 'd90', d90)
+
+    allocate(Ct2(par%nfractions, par%nx+1))
+    Ct2 = 0.d0
 
     call write_dimensions(par)
 
     write(*,*) 'Model run started...'
 
-    ! model
-    out = output_init(par%outputvars)
+    ! output
+    call output_init(var, par%outputvars)
+    call output_init_sum(var, var_sum)
     
     ! dimensions
     nx = par%nx
@@ -101,50 +137,89 @@ contains
        end if
 
        ! update threshold
-       u_th = par%u_th
-       call compute_threshold_grainsize(par, u_th)
-       call compute_threshold_bedslope(par, x, z, u_th)
-       call compute_threshold_moisture(par, zm, m(ti,:), z, u_th)
+       uth = par%u_th
+       call compute_threshold_grainsize(par, uth)
+       call compute_threshold_bedslope(par, x, z, uth)
+       call compute_threshold_moisture(par, zmoist, moist(ti,:), z, uth)
+
+       ! mix top layer of wet cells
+       call mix_toplayer(par, uth)
 
        ! get available mass
        mass = get_layer_mass()
 
-       do i=1,par%nfractions
+       do j=1,par%nx+1
 
-          ! compute transport capacity by wind, including thresholds
-          Cu(:,i) = max(0.d0, 1.5e-4 * ((u(ti) - u_th(:,i))**3) / (u(ti) * par%VS))
+          do i=1,par%nfractions
 
-          ! compute sediment advection by wind
-          Ct(2:nx+1,i) = -par%VS * u(ti) * (Ct(2:nx+1,i) - Ct(1:nx,i)) / dx * dt + &
-                          Cu(2:nx+1,i) / Ta + &
-                          Ct(2:nx+1,i) * (1-1/Ta)
+             ! compute transport capacity by wind, including thresholds
+             Cu(i,j) = max(0.d0, 1.5e-4 * (u(ti) - uth(i,j))**3 / (u(ti) * par%VS))
 
-          ! limit advection by available mass
-          Ct(2:nx+1,i) = min(mass(2:nx+1,1,i), Ct(2:nx+1,i))
+             ! limit advection by available mass
+             supply(i,j) = min(mass(i,1,j), par%accfac * Cu(i,j) - Ct(i,j)) / Ta
+
+          end do
+
+          ! scale supply to availability of fractions
+          where (supply(:,j) > 0.d0)
+             dist = mass(:,1,j)
+          elsewhere
+             dist = 0.d0
+          end where
+          dist = dist / max(1e-10, sum(dist))
+          where (supply(:,j) > 0.d0)
+             supply(:,j) = supply(:,j) * dist
+          end where
+             
+       end do
+
+       ! set supply in first cell to zero, since it cannot be picked up
+       supply(:,1) = 0.d0
+
+       do j=1,par%nx
+
+          do i=1,par%nfractions
+
+             ! compute sediment advection by wind
+             Ct2(i,j+1) = max(0.d0, -par%VS * u(ti) * (Ct(i,j+1) - Ct(i,j)) / dx * dt + &
+                  Ct(i,j+1) + supply(i,j+1))
+
+          end do
 
        end do
 
-       ! update bed elevation
-       z = update_bed(z, -(Cu - Ct) / Ta, rho, par%dt, par%morfac)
+       Ct = Ct2
 
+       ! update bed elevation
+       z = update_bed(z, -supply, rho, par%dt)
+
+       ! incremental output
+       call output_update(var, var_sum)
+ 
        ! write output
-       if ( mod(ti, nint(par%tout / dt)) < 1.d0 ) then
-          call output_write(out, 'Ct', Ct)
-          call output_write(out, 'Cu', Cu)
-          call output_write(out, 'z', z)
-          call output_write(out, 'u_th', u_th)
-          call output_write(out, 'wind', u(ti))
-          call output_write(out, 'mass', get_layer_mass())
-          call output_write(out, 'moist', map_moisture(par, zm, m(ti,:), z))
-          call output_write(out, 'd10', get_layer_percentile(par, 0.1d0))
-          call output_write(out, 'd50', get_layer_percentile(par, 0.5d0))
-          call output_write(out, 'd90', get_layer_percentile(par, 0.9d0))
+       if ( ti == 1 .or. par%tout < dt .or. mod(ti, nint(par%tout / dt)) < 1.d0 ) then
+
+          ! update derived variables
+          if (is_output(var, 'mass')) mass = get_layer_mass()
+          if (is_output(var, 'wind')) wind = u(ti)
+          if (is_output(var, 'moist_map')) &
+               moist_map = map_moisture(par, zmoist, moist(ti,:), z)
+          if (is_output(var, 'd10')) d10 = get_layer_percentile(par, 0.1d0)
+          if (is_output(var, 'd50')) d50 = get_layer_percentile(par, 0.5d0)
+          if (is_output(var, 'd90')) d90 = get_layer_percentile(par, 0.9d0)
+
+          call output_write(var)
+          call output_write(var_sum)
+
+          call output_clear(var_sum)
+          
        end if
        
        t = t + par%dt
     end do
 
-    call output_close(out)
+    call output_close(var)
+    call output_close(var_sum)
     
     write(*,*) 'Done.'
 

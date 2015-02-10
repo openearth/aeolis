@@ -21,8 +21,9 @@ module input_module
      real*8    :: dx    = 0.d0
      real*8    :: tstop = 0.d0
      real*8    :: tout  = 0.d0
+     integer*4 :: ntout = 0
      real*8    :: CFL   = 0.d0
-     real*8    :: morfac = 1.d0
+     real*8    :: accfac = 1.d0
 
      character(slen) :: wind_file = ''
      character(slen) :: bed_file = ''
@@ -31,6 +32,7 @@ module input_module
 
      integer*4 :: nfractions = 1
      integer*4 :: nlayers = 3
+     integer*4 :: nmix = 3
      real*8    :: layer_thickness = 5e-4
      real*8    :: rhop = 2650.d0
      real*8    :: rhom = 1650.d0
@@ -127,7 +129,7 @@ contains
     par%tstop = read_key_dbl(fname, 'tstop', 3600.d0)
     par%tout  = read_key_dbl(fname, 'tout',  1.d0)
     par%CFL   = read_key_dbl(fname, 'CFL',   -1.d0)
-    par%morfac = read_key_dbl(fname, 'morfac',  1.d0)
+    par%accfac = read_key_dbl(fname, 'accfac',  1.d0)
     par%wind_file   = read_key_str(fname, 'wind_file',  '')
     par%bed_file    = read_key_str(fname, 'bed_file',   '')
     par%moist_file  = read_key_str(fname, 'moist_file', '')
@@ -136,6 +138,7 @@ contains
     ! bed composition
     par%nfractions      = read_key_int(fname, 'nfractions',      1)
     par%nlayers         = read_key_int(fname, 'nlayers',         3)
+    par%nmix            = read_key_int(fname, 'nmix',            2)
     par%layer_thickness = read_key_dbl(fname, 'layer_thickness', 0.d0005)
     par%rhoa            = read_key_dbl(fname, 'rhoa',            1.25d0)
     par%rhow            = read_key_dbl(fname, 'rhow',            1025.d0)
@@ -152,7 +155,11 @@ contains
 
     par%outputvars = read_key_strvec(fname, 'outputvars', 'z')
 
+    ! sort grain size distribution
     call sort(par%grain_size, par%grain_dist)
+
+    ! number of mix layers cannot exceed available number of layers
+    par%nmix = min(par%nmix, par%nlayers+2)
 
     write(*,*) '**********************************************************'
     write(*,*) ' '

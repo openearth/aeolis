@@ -163,20 +163,20 @@ contains
     tstart  = 0.0              
     tend    = par%tstop
     dt      = par%dt
-    morfac  = par%morfac
-    nstep  = (tend-tstart)/dt; 
+    morfac  = 1.d0
+    nstep   = (tend-tstart)/dt; 
 
     nfrac       = par%nfractions
-    iunderlyr   = 2            
+    iunderlyr   = 2
     neulyr      = par%nlayers
     nlalyr      = 0
     theulyr     = par%layer_thickness
     thlalyr     = par%layer_thickness
     updbaselyr  = 1            
                                
-    maxwarn     = 100          
-    minmass     = 0.0_fp       
-    idiffusion  = 0            
+    maxwarn     = 100
+    minmass     = 0.5_fp       
+    idiffusion  = 0
     ndiff       = 5
     flufflyr    = 0            
     iporosity   = 0            
@@ -241,18 +241,18 @@ contains
 
   end subroutine generate_bedcomposition
 
-  function update_bed(z, mass, rho, dt, morfac) result (z_new)
+  function update_bed(z, mass, rho, dt) result (z_new)
 
     real*8, dimension(:), intent(in) :: z
     real*8, dimension(:,:), intent(in) :: mass
     real*8, dimension(:), intent(in) :: rho
     real*8, dimension(:), allocatable :: z_new, dz
-    real*8 :: dt, morfac
+    real*8 :: dt
     
     allocate(z_new(size(z)))
     allocate(dz(size(z)))
 
-    if ( updmorlyr(morlyr, transpose(mass), 0.d0 * mass, rho, dt, morfac, dz, messages) /= 0 ) then
+    if ( updmorlyr(morlyr, mass, 0.d0 * mass, rho, dt, 1.d0, dz, messages) /= 0 ) then
        call adderror(messages, message)
     end if
 
@@ -365,7 +365,7 @@ contains
     ! Bagnold
 
     do i=1,par%nfractions
-       u_th(:,i) = par%A * sqrt(((par%rhop - par%rhoa) * &
+       u_th(i,:) = par%A * sqrt(((par%rhop - par%rhoa) * &
                    par%g * par%grain_size(i)) / par%rhop)
     end do
 
@@ -385,12 +385,50 @@ contains
 
     do i=1,par%nx
        theta = -atan((z(i+1) - z(i)) / (x(i+1) - x(i)))
-       u_th(i,:) = sqrt((tan(phi) - tan(theta) / tan(phi) + cos(theta)) / \
-                   (tan(phi)+1)) * u_th(i,:)
+       u_th(:,i) = sqrt((tan(phi) - tan(theta) / tan(phi) + cos(theta)) / \
+                   (tan(phi)+1)) * u_th(:,i)
     end do
 
-    u_th(par%nx+1,:) = u_th(par%nx,:)
+    u_th(:,par%nx+1) = u_th(:,par%nx)
 
   end subroutine compute_threshold_bedslope
+
+  subroutine mix_toplayer(par, u_th)
+
+    type(parameters), intent(in) :: par
+    real*8, dimension(:,:), intent(in) :: u_th
+    integer :: i, j
+
+    integer :: istat
+    real(fp), dimension(:,:,:), pointer :: msed
+    real(fp), dimension(:,:), pointer :: thlyr
+    real(fp), dimension(:), allocatable :: cdryb
+
+    real*8, dimension(:,:), allocatable :: dist
+
+    istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass' , msed)
+    istat = bedcomp_getpointer_realfp(morlyr, 'layer_thickness' , thlyr)
+    if (istat/=0) call adderror(messages, message)
+
+    allocate(dist(par%nfractions, par%nx+1))
+
+    dist = 0.d0
+
+    do j = 1,par%nx+1
+       do i = 1,par%nfractions
+          dist(i,j) = sum(msed(i,1:par%nmix,j))
+       end do
+       dist(:,j) = dist(:,j) / max(1e-10, sum(dist(:,j)))
+    end do
+    
+    do j = 1,par%nmix
+       do i = 1,par%nfractions
+          where (u_th(i,:) == 999.d0)
+             msed(i,j,:) = thlyr(j,:) * par%rhom * dist(i,:)
+          end where
+       end do
+    end do
+    
+  end subroutine mix_toplayer
 
 end module bed_module

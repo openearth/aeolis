@@ -13,8 +13,8 @@ contains
     type(parameters), intent(inout) :: par
     integer*4 :: fid, ierr, n, nz, i, j, nt, file_pos
     real*8, dimension(:,:), allocatable, intent(out) :: m
-    real*8, dimension(:,:), allocatable :: m0
     real*8, dimension(:), allocatable, intent(out) :: z
+    real*8, dimension(:,:), allocatable :: m0
     real*8, dimension(:), allocatable :: t
     character(2) :: fmt
 
@@ -88,7 +88,7 @@ contains
     real*8, dimension(:), intent(in) :: zm, m, z
     real*8, dimension(par%nx+1) :: mg
     real*8, dimension(:,:), intent(inout) :: u_th
-    real*8, dimension(par%nx+1, par%nfractions) :: u_th_m
+    real*8, dimension(par%nfractions, par%nx+1) :: u_th_m
     integer :: i, n
 
     mg = map_moisture(par, zm, m, z)
@@ -100,22 +100,22 @@ contains
     u_th_m = 0.d0
     do i = 1,par%nfractions
        if (par%method_moist .eq. 'belly_johnson') then
-          u_th_m(:,i) = u_th(:,i) * max(1.d0, 1.8+0.6*log10(mg))
+          u_th_m(i,:) = u_th(i,:) * max(1.d0, 1.8+0.6*log10(mg))
        else if (par%method_moist .eq. 'hotta') then
-          u_th_m(:,i) = u_th(:,i) + 7.5 * mg
+          u_th_m(i,:) = u_th(i,:) + 7.5 * mg
        else
           write(*, '(a,a)') "ERROR: Unknown moisture formulation: ", par%method_moist
           stop 1
        end if
 
        where (mg > 0.005)
-          u_th(:,i) = u_th_m(:,i)
+          u_th(i,:) = u_th_m(i,:)
        end where
 
        where (mg > 0.064)
           ! should be .04 according to Pye and Tsoar
           ! should be .64 according to Delgado-Fernandez (10% vol.)
-          u_th(:,i) = 999.d0
+          u_th(i,:) = 999.d0
        end where
     end do
 
