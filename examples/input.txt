@@ -2,7 +2,7 @@
 
 VS = 1.0
 Tp = 1.0
-u_th = 4
+u_th = 0
 z = 0.1
 S = 0.0
 dx = 3
@@ -11,21 +11,23 @@ dx = 3
 dt = 0.05
 CFL = .9
 tstop  2592000
-tstop =  86400
-tout = 1800
+tstop = 86400
+tout = 360
+accfac = 1
 
 # files
-wind_file = wind.txt
+wind_file = wind_constant.txt
 bed_file = bed.txt
 moist_file = moist.txt
 
 # bed composition
 nfractions = 11
 nlayers = 3
+nmix = 3
 layer_thickness = 5e-3
 grain_size  1.18e-3 0.6e-3 0.425e-3 0.3e-3 0.212e-3 0.15e-3 0.063e-3
 grain_dist  0.63 0.94 6.80 51.35 30.73 8.07 1.43
 grain_size = 1e-3 0.8e-3 0.6e-3 0.4e-3 0.3e-3 0.25e-3 0.2e-3 0.15e-3 0.1e-3 0.05e-3 0.025e-3
 grain_dist = 1 2 5 10 20 25 20 15 10 5 2
 
-outputvars = Ct Cu z u_th mass moist d10 d50 d90 wind
+outputvars = Ct Cu z u_th mass moist d50 wind supply supply_sum
