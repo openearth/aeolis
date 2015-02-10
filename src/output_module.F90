@@ -240,6 +240,7 @@ contains
 
     do i = 1,size(var)
        if (var(i)%fid > 0) then
+          var(i)%n = var(i)%n + 1
           select case (var(i)%rank)
           case (0)
              var_sum(i)%rank0 = var_sum(i)%rank0 + var(i)%rank0
