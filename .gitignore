@@ -6,4 +6,7 @@
 *.var
 *.min
 *.max
+*.pyc
+*.egg
+*.egg-info
 .dirstamp

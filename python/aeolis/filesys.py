@@ -1,5 +1,6 @@
 import os
 import struct
+import numpy as np
 import pandas as pd
 
 def load_dimensions(fpath):
@@ -16,8 +17,11 @@ def load_dimensions(fpath):
         Model dimensions, space and time axes
     '''
 
+    if not os.path.isdir(fpath):
+        fpath = os.path.split(fpath)[0]
+        
     nx, dx, nt, dt, nf, nl, nt_out, dt_out = \
-        read_fortran(os.path.join(os.path.split(fpath)[0], 'dims.out'))
+        read_fortran(os.path.join(fpath, 'dims.out'))
 
     # integers
     nx = int(nx)+1
@@ -44,6 +48,38 @@ def load_dimensions(fpath):
             'ax_x':ax_x}
 
 
+def get_dims(fname):
+    '''Determine file dimensions
+
+    Parameters
+    ----------
+    fname : string
+        Path to output file
+
+    Returns
+    -------
+    tuple
+        Tuple with file dimensions
+    '''
+
+    fpath, fname = os.path.split(fname)
+    fname, fext = os.path.splitext(fname)
+    d = load_dimensions(fpath)
+
+    if fname in ['mass']:
+        return (-1, d['nx'], d['nl'], d['nf'])
+    elif fname in ['d10', 'd50', 'd90']:
+        return (-1, d['nx'], d['nl'])
+    elif fname in ['Cu', 'Ct', 'uth', 'supply']:
+        return (-1, d['nx'], d['nf'])
+    elif fname in ['x', 'z', 'moist_map']:
+        return (-1, d['nx'])
+    elif fname in ['rho', 'dist']:
+        return (-1, d['nf'])
+    else:
+        return [-1]
+
+    
 def guess_dims(dims, data, start=0, stop=np.inf, step=1):
     '''Guess dimensions of data read from output file
 
@@ -53,11 +89,11 @@ def guess_dims(dims, data, start=0, stop=np.inf, step=1):
         Dimensions read from dims.out file
     data : np.ndarray
         Data read from output file
-    start : int
+    start : int, optional
         Start position used for data read
-    stop : int
+    stop : int, optional
         Stop position used for data read
-    step : int
+    step : int, optional
         Step or stride used for data read
 
     Returns
@@ -114,14 +150,13 @@ def load_dataframe(fname, shape=None, start=0, stop=np.inf, step=1, verbose=Fals
     >>> load_dataframe('supply.out', step=10) # read every 10th block
     >>> load_dataframe('supply.out', start=100, step=2, stop=200) # read every even block from 100th to 200th
     '''
-    
+
+    if shape is None:
+        shape = get_dims(fname)
+
     dims = load_dimensions(fname)
     data = read_fortran(fname, shape=shape,
                         start=start, stop=stop, step=step, verbose=verbose)
-
-    if shape is None:
-        shape = guess_dims(dims, data, start=start, stop=stop, step=step)
-        data = data.reshape(shape)
         
     #ix = pd.TimedeltaIndex(start=0, periods=z.shape[0]-1, freq='H')
     ix = pd.DatetimeIndex(start=0, periods=data.shape[0], freq='%dS' % round(dims['dt_out'] * step))

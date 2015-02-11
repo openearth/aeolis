@@ -9,7 +9,8 @@ setup(
     description='AeoLiS toolbox',
     long_description=open('README.txt').read(),
     install_requires=[
+        'matplotlib',
         'pandas',
-        'struct'
+        'numpy'
     ],
 )
