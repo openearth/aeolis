@@ -8,12 +8,11 @@ module wind_module
 
 contains
 
-  subroutine generate_wind(par, uout)
+  subroutine generate_wind(par, u)
 
     type(parameters), intent(inout) :: par
     integer*4 :: fid, ierr, n, i, it, nt, l
-    real*8, dimension(:), pointer, intent(out) :: uout
-    real*8, dimension(:), allocatable :: u
+    real*8, dimension(:), allocatable, intent(out) :: u
     real*8, dimension(:), allocatable :: duration, u_m, u_std, g_m, g_std
 
     fid = 88
@@ -77,17 +76,14 @@ contains
              exit
           end if
           par%dt = par%CFL * par%dx / maxval(u)
+
+          ! make time step fit with output time step
+          par%dt = par%tout / ceiling(par%tout / par%dt)
        else
           exit
        end if
 
     end do
-
-    ! make time step fit with output time step
-    par%dt = par%tout / ceiling(par%tout / par%dt)
-
-    allocate(uout(size(u)))
-    uout = u
 
   end subroutine generate_wind
 

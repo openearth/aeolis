@@ -18,13 +18,13 @@ contains
     real*8 :: t, dt, dx, Ta, n
     real*8 :: tstart, tlog
     real*8, pointer :: wind
-    real*8, dimension(:), pointer :: x, z, u, moist_map
+    real*8, dimension(:), pointer :: x, z, moist_map
     real*8, dimension(:,:), pointer :: uth
     real*8, dimension(:), pointer :: rho, dist
     real*8, dimension(:,:), pointer :: Cu, Ct, supply
     real*8, dimension(:,:), pointer :: d10, d50, d90
     real*8, dimension(:,:,:), pointer :: mass
-    real*8, dimension(:), allocatable :: x_tmp, z_tmp, zmoist
+    real*8, dimension(:), allocatable :: x_tmp, z_tmp, u, zmoist
     real*8, dimension(:,:), allocatable :: Ct2, moist
     integer*4, parameter :: fid=20
 
@@ -38,6 +38,8 @@ contains
     
     x = x_tmp
     z = z_tmp
+    deallocate(x_tmp)
+    deallocate(z_tmp)
     
     call generate_bedcomposition(par, x, z)
     open(unit=fid, file="bed.in", action="write", status="replace", form="unformatted")
@@ -47,7 +49,6 @@ contains
 
     ! wind
     write(*,*) 'Generating bed wind time series...'
-    call get_pointer(var, 'u', (/par%nx+1/), u)
     call generate_wind(par, u)
     open(unit=fid, file="wind.in", action="write", status="replace", form="unformatted")
     write(fid) u
@@ -89,7 +90,7 @@ contains
     call get_pointer(var, 'supply', (/par%nfractions, par%nx+1/), supply)
 
     ! extra output
-    call get_pointer(var, 'wind', (/0/), wind)
+    call get_pointer(var, 'u', (/0/), wind)
     call get_pointer(var, 'moist_map', (/par%nx+1/), moist_map)
     call get_pointer(var, 'd10', (/par%nlayers+2, par%nx+1/), d10)
     call get_pointer(var, 'd50', (/par%nlayers+2, par%nx+1/), d50)
@@ -187,7 +188,7 @@ contains
 
           ! update derived variables
           if (is_output(var, 'mass')) mass = get_layer_mass()
-          if (is_output(var, 'wind')) wind = u(ti)
+          if (is_output(var, 'u')) wind = u(ti)
           if (is_output(var, 'moist_map')) &
                moist_map = map_moisture(par, zmoist, moist(ti,:), z)
           if (is_output(var, 'd10')) d10 = get_layer_percentile(par, 0.1d0)
