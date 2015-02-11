@@ -298,6 +298,8 @@ contains
 
     type(variables), dimension(:), intent(inout) :: var
     integer*4 :: i
+
+    var(i)%n = 0
     
     do i = 1,size(var)
        call output_clear_data(var(i)%sum, var(i)%rank)

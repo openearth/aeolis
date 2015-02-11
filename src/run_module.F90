@@ -31,6 +31,7 @@ contains
     write(*,*) 'Initialization started...'
     
     ! bed
+    write(*,*) 'Generating bed profile and composition...'
     call generate_bed(par, x_tmp, z_tmp)
     call get_pointer(var, 'x', (/par%nx+1/), x)
     call get_pointer(var, 'z', (/par%nx+1/), z)
@@ -45,6 +46,7 @@ contains
     close(fid)
 
     ! wind
+    write(*,*) 'Generating bed wind time series...'
     call get_pointer(var, 'u', (/par%nx+1/), u)
     call generate_wind(par, u)
     open(unit=fid, file="wind.in", action="write", status="replace", form="unformatted")
@@ -64,6 +66,7 @@ contains
     par%ntout = int(par%tstop / par%tout) + 1
 
     ! moist
+    write(*,*) 'Generating moisture time series...'
     call generate_moist(par, zmoist, moist)
     open(unit=fid, file="moist.in", &
          action="write", status="replace", form="unformatted")
