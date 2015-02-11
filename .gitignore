@@ -1,5 +1,6 @@
 *.mod
 *.o
+*.in
 *.out
 *.sum
 *.avg
