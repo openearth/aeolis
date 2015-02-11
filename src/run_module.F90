@@ -14,7 +14,6 @@ contains
     
     type(parameters), intent(inout) :: par
     type(variables), dimension(:), allocatable :: var
-    type(variables), dimension(:), allocatable :: var_sum
     integer*4 :: i, j, ti, nx, nt
     real*8 :: t, dt, dx, Ta, n
     real*8 :: tstart
@@ -33,10 +32,8 @@ contains
     
     ! bed
     call generate_bed(par, x_tmp, z_tmp)
-    call alloc_variable(var, 'x', (/par%nx+1/))
-    call alloc_variable(var, 'z', (/par%nx+1/))
-    call get_pointer(var, 'x', x)
-    call get_pointer(var, 'z', z)
+    call get_pointer(var, 'x', (/par%nx+1/), x)
+    call get_pointer(var, 'z', (/par%nx+1/), z)
     
     x = x_tmp
     z = z_tmp
@@ -48,8 +45,7 @@ contains
     close(fid)
 
     ! wind
-    call alloc_variable(var, 'u', (/par%nx+1/))
-    call get_pointer(var, 'u', u)
+    call get_pointer(var, 'u', (/par%nx+1/), u)
     call generate_wind(par, u)
     open(unit=fid, file="wind.in", action="write", status="replace", form="unformatted")
     write(fid) u
@@ -77,38 +73,24 @@ contains
     close(fid)
 
     ! fractions
-    call alloc_variable(var, 'rho',    (/par%nfractions/))
-    call alloc_variable(var, 'dist',   (/par%nfractions/))
-    call get_pointer(var, 'rho', rho)
-    call get_pointer(var, 'dist', dist)
+    call get_pointer(var, 'rho',    (/par%nfractions/), rho)
+    call get_pointer(var, 'dist',   (/par%nfractions/), dist)
     rho = par%rhop
     dist = par%grain_dist
 
     ! variables
-    call alloc_variable(var, 'Cu',     (/par%nfractions, par%nx+1/))
-    call alloc_variable(var, 'Ct',     (/par%nfractions, par%nx+1/))
-    call alloc_variable(var, 'uth',    (/par%nfractions, par%nx+1/))
-    call alloc_variable(var, 'mass',   (/par%nfractions, par%nlayers+2, par%nx+1/))
-    call alloc_variable(var, 'supply', (/par%nfractions, par%nx+1/))
-
-    call get_pointer(var, 'Cu', Cu)
-    call get_pointer(var, 'Ct', Ct)
-    call get_pointer(var, 'uth', uth)
-    call get_pointer(var, 'mass', mass)
-    call get_pointer(var, 'supply', supply)
+    call get_pointer(var, 'Cu',     (/par%nfractions, par%nx+1/), Cu)
+    call get_pointer(var, 'Ct',     (/par%nfractions, par%nx+1/), Ct)
+    call get_pointer(var, 'uth',    (/par%nfractions, par%nx+1/), uth)
+    call get_pointer(var, 'mass',   (/par%nfractions, par%nlayers+2, par%nx+1/), mass)
+    call get_pointer(var, 'supply', (/par%nfractions, par%nx+1/), supply)
 
     ! extra output
-    call alloc_variable(var, 'wind')
-    call alloc_variable(var, 'moist_map', (/par%nx+1/))
-    call alloc_variable(var, 'd10', (/par%nlayers+2, par%nx+1/))
-    call alloc_variable(var, 'd50', (/par%nlayers+2, par%nx+1/))
-    call alloc_variable(var, 'd90', (/par%nlayers+2, par%nx+1/))
-
-    call get_pointer(var, 'wind', wind)
-    call get_pointer(var, 'moist_map', moist_map)
-    call get_pointer(var, 'd10', d10)
-    call get_pointer(var, 'd50', d50)
-    call get_pointer(var, 'd90', d90)
+    call get_pointer(var, 'wind', (/0/), wind)
+    call get_pointer(var, 'moist_map', (/par%nx+1/), moist_map)
+    call get_pointer(var, 'd10', (/par%nlayers+2, par%nx+1/), d10)
+    call get_pointer(var, 'd50', (/par%nlayers+2, par%nx+1/), d50)
+    call get_pointer(var, 'd90', (/par%nlayers+2, par%nx+1/), d90)
 
     allocate(Ct2(par%nfractions, par%nx+1))
     Ct2 = 0.d0
@@ -119,7 +101,6 @@ contains
 
     ! output
     call output_init(var, par%outputvars)
-    call output_init_sum(var, var_sum)
     
     ! dimensions
     nx = par%nx
@@ -194,8 +175,8 @@ contains
        z = update_bed(z, -supply, rho, par%dt)
 
        ! incremental output
-       call output_update(var, var_sum)
- 
+       call output_update(var)
+
        ! write output
        if ( ti == 1 .or. par%tout < dt .or. mod(ti, nint(par%tout / dt)) < 1.d0 ) then
 
@@ -209,17 +190,14 @@ contains
           if (is_output(var, 'd90')) d90 = get_layer_percentile(par, 0.9d0)
 
           call output_write(var)
-          call output_write(var_sum)
+          call output_clear(var)
 
-          call output_clear(var_sum)
-          
        end if
        
        t = t + par%dt
     end do
 
     call output_close(var)
-    call output_close(var_sum)
     
     write(*,*) 'Done.'
 

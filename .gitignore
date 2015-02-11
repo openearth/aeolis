@@ -1,4 +1,9 @@
 *.mod
 *.o
 *.out
+*.sum
+*.avg
+*.var
+*.min
+*.max
 .dirstamp
