@@ -79,6 +79,7 @@ contains
     ! fractions
     call get_pointer(var, 'rho',    (/par%nfractions/), rho)
     call get_pointer(var, 'dist',   (/par%nfractions/), dist)
+
     rho = par%rhop
     dist = par%grain_dist
 
