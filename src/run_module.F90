@@ -16,7 +16,7 @@ contains
     type(variables), dimension(:), allocatable :: var
     integer*4 :: i, j, ti, nx, nt
     real*8 :: t, dt, dx, Ta, n
-    real*8 :: tstart
+    real*8 :: tstart, tlog
     real*8, pointer :: wind
     real*8, dimension(:), pointer :: x, z, u, moist_map
     real*8, dimension(:,:), pointer :: uth
@@ -113,11 +113,13 @@ contains
     Ta = par%Tp / par%dt
 
     tstart = get_time()
+    tlog = tstart
     do ti=1,par%nt
 
        ! log progress
-       if ( mod(dble(ti), par%nt/10.d0) < 1.d0 ) then
+       if ( mod(dble(ti), par%nt/10.d0) < 1.d0 .or. get_time()-tlog > 60) then
           call write_progress(ti, par%nt, tstart)
+          tlog = get_time()
        end if
 
        ! update threshold
@@ -217,7 +219,11 @@ contains
     dt2 = dt1 / p
     dt3 = dt2 * (1 - p)
 
-    write(*,'(f5.1,a2,a8,a3,a8,a3,a8)') 100.d0*p, '% ', format_time(dt1), ' / ', format_time(dt2), ' / ', format_time(dt3)
+    write(*,'(f5.1,a2,a8,a3,a8,a3,a8)') &
+         100.d0*p, '% ', &
+         format_time(dt1), ' / ', &
+         format_time(dt2), ' / ', &
+         format_time(dt3)
 
   end subroutine write_progress
 
