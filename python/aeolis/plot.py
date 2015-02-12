@@ -166,10 +166,9 @@ def plot_sediment_balance(fpath, rhom=1650., figsize=(10,5)):
     # read data files
     z = filesys.load_dataframe(os.path.join(fpath, 'z.out'))
     mass = filesys.load_dataframe(os.path.join(fpath, 'mass.out'))
-    supply = filesys.load_dataframe(os.path.join(fpath, 'supply.sum'))
-    Ct = filesys.load_dataframe(os.path.join(fpath, 'Ct.out')) # FIXME: avg
-    u = filesys.load_dataframe(os.path.join(fpath, 'u.out')) # FIXME: avg
-    u = [5] # FIXME
+    supply = filesys.load_dataframe(os.path.join(fpath, 'supply.sum.out'))
+    Ct = filesys.load_dataframe(os.path.join(fpath, 'Ct.avg.out'))
+    u = filesys.load_dataframe(os.path.join(fpath, 'u.avg.out'))
     
     # compute erosion/deposition
     v1 = np.sum(np.maximum(0., z.iloc[-1,:] - z.iloc[0,:]) * dx) # deposition

@@ -63,7 +63,7 @@ def get_dims(fname):
     '''
 
     fpath, fname = os.path.split(fname)
-    fname, fext = os.path.splitext(fname)
+    fname = fname.split('.')[0]
     d = load_dimensions(fpath)
 
     if fname in ['mass']:

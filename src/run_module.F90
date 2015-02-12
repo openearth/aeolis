@@ -137,7 +137,6 @@ contains
        mass = get_layer_mass()
 
        do j=1,par%nx+1
-
           do i=1,par%nfractions
 
              ! compute transport capacity by wind, including thresholds
@@ -165,7 +164,6 @@ contains
        supply(:,1) = 0.d0
 
        do j=1,par%nx
-
           do i=1,par%nfractions
 
              ! compute sediment advection by wind
@@ -173,7 +171,6 @@ contains
                   Ct(i,j+1) + supply(i,j+1))
 
           end do
-
        end do
 
        Ct = Ct2
@@ -185,7 +182,7 @@ contains
        call output_update(var)
 
        ! write output
-       if ( ti == 1 .or. par%tout < dt .or. mod(ti, nint(par%tout / dt)) < 1.d0 ) then
+       if (ti == 1 .or. par%tout < dt .or. mod(ti, nint(par%tout / dt)) < 1.d0) then
 
           ! update derived variables
           if (is_output(var, 'mass')) mass = get_layer_mass()

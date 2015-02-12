@@ -22,6 +22,7 @@ module output_module
      real*8, dimension(:), pointer :: rank1 => null()
      real*8, dimension(:,:), pointer :: rank2 => null()
      real*8, dimension(:,:,:), pointer :: rank3 => null()
+     real*8 :: init
      integer*4 :: fid = -1
   end type variables_data
   
@@ -60,18 +61,19 @@ contains
     call alloc_variable_data(var(i)%val, dims, var(i)%rank)
     call alloc_variable_data(var(i)%sum, dims, var(i)%rank)
     call alloc_variable_data(var(i)%var, dims, var(i)%rank)
-    call alloc_variable_data(var(i)%min, dims, var(i)%rank)
-    call alloc_variable_data(var(i)%max, dims, var(i)%rank)
+    call alloc_variable_data(var(i)%min, dims, var(i)%rank,  1d10)
+    call alloc_variable_data(var(i)%max, dims, var(i)%rank, -1d10)
 
     allocate(var(i)%avg)
 
   end subroutine alloc_variable
 
-  subroutine alloc_variable_data(var, dims, rank)
+  subroutine alloc_variable_data(var, dims, rank, val)
 
     type(variables_data), pointer, intent(inout) :: var
     integer*4, dimension(:), intent(in) :: dims
     integer*4, intent(out) :: rank
+    real*8, optional, intent(in) :: val
 
     allocate(var)
 
@@ -81,19 +83,25 @@ contains
        rank = size(dims)
     end if
 
+    if (present(val)) then
+       var%init = val
+    else
+       var%init = 0.d0
+    end if
+
     select case (rank)
     case (0)
        allocate(var%rank0)
-       var%rank0 = 0.d0
+       var%rank0 = var%init
     case (1)
        allocate(var%rank1(dims(1)))
-       var%rank1 = 0.d0
+       var%rank1 = var%init
     case (2)
        allocate(var%rank2(dims(1), dims(2)))
-       var%rank2 = 0.d0
+       var%rank2 = var%init
     case (3)
        allocate(var%rank3(dims(1), dims(2), dims(3)))
-       var%rank3 = 0.d0
+       var%rank3 = var%init
     end select
 
   end subroutine alloc_variable_data
@@ -168,11 +176,11 @@ contains
        do j = 1,size(var)
           if (trim(var(j)%name) == trim(vars(i))) then
              call output_init_data(var(j)%val, trim(vars(i))//".out", 100+i)
-             call output_init_data(var(j)%sum, trim(vars(i))//".sum", 200+i)
-             call output_init_data(var(j)%avg, trim(vars(i))//".avg", 300+i)
-             call output_init_data(var(j)%var, trim(vars(i))//".var", 400+i)
-             call output_init_data(var(j)%min, trim(vars(i))//".min", 500+i)
-             call output_init_data(var(j)%max, trim(vars(i))//".max", 600+i)
+             call output_init_data(var(j)%sum, trim(vars(i))//".sum.out", 200+i)
+             call output_init_data(var(j)%avg, trim(vars(i))//".avg.out", 300+i)
+             call output_init_data(var(j)%var, trim(vars(i))//".var.out", 400+i)
+             call output_init_data(var(j)%min, trim(vars(i))//".min.out", 500+i)
+             call output_init_data(var(j)%max, trim(vars(i))//".max.out", 600+i)
           end if
        end do
     end do
@@ -299,9 +307,8 @@ contains
     type(variables), dimension(:), intent(inout) :: var
     integer*4 :: i
 
-    var(i)%n = 0
-    
     do i = 1,size(var)
+       var(i)%n = 0
        call output_clear_data(var(i)%sum, var(i)%rank)
        call output_clear_data(var(i)%var, var(i)%rank)
        call output_clear_data(var(i)%min, var(i)%rank)
@@ -318,13 +325,13 @@ contains
     if (var%fid > 0) then
        select case (rank)
        case (0)
-          var%rank0 = 0.d0
+          var%rank0 = var%init
        case (1)
-          var%rank1 = 0.d0
+          var%rank1 = var%init
        case (2)
-          var%rank2 = 0.d0
+          var%rank2 = var%init
        case (3)
-          var%rank3 = 0.d0
+          var%rank3 = var%init
        end select
     end if
 
