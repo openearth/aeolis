@@ -176,7 +176,7 @@ contains
        end do
 
        if (trim(par%scheme) .eq. 'explicit') then
-          Ct2 = Ct
+          Ct = Ct2
        end if
        
        ! update bed elevation
