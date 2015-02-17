@@ -165,7 +165,8 @@ contains
              
              ! compute sediment advection by wind
              if (trim(par%scheme) .eq. 'explicit') then
-                ! insert explicit scheme here
+                Ct2(i,j+1) = max(0.d0, -par%VS * u(ti) * (Ct(i,j+1) - Ct(i,j)) / dx * dt + &
+                     Ct(i,j+1) + supply(i,j+1))
              else
                 Ct(i,j+1) = max(0.d0, (par%VS * u(ti) * Ct(i,j) * dt / dx + &
                      Ct(i,j+1) + supply(i,j+1)) / (1 + 1/Ta + u(ti) * dt / dx))
@@ -174,6 +175,10 @@ contains
           end do
        end do
 
+       if (trim(par%scheme) .eq. 'explicit') then
+          Ct2 = Ct
+       end if
+       
        ! update bed elevation
        z = update_bed(z, -supply, rho, par%dt)
 

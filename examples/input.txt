@@ -8,12 +8,13 @@ S = 0.0
 dx = 3
 
 # time
-dt = 0.05
+dt = 360
 CFL = .9
 tstop  2592000
 tstop = 86400
-tout = 360
+tout = 3600
 accfac = 1
+scheme = explicit
 
 # files
 wind_file = wind_constant.txt
