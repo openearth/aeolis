@@ -50,7 +50,7 @@ def plot_distribution(mass, locs=None, max_locs=5,
             if i == axs.shape[0]-1:
                 axs[i,j].set_xlabel('grain fraction')
 
-    return axs, fig
+    return fig, axs
 
 
 def plot_profiles(fpath, start=0, stop=np.inf, step=1, height_markers=[-1, 1],

@@ -8,8 +8,8 @@ dx = 1
 # time
 dt = 0.05
 CFL = .9
-tstop = 2592000
-tout = 360
+tstop = 2419200
+tout = 600
 
 # files
 wind_file = wind_constant.txt
@@ -18,9 +18,9 @@ moist_file = moist_constant.txt
 
 # bed composition
 nfractions = 1
-nlayers = 3
+nlayers = 10
 nmix = 3
-layer_thickness = 5e-3
+layer_thickness = 1e-2
 grain_size = 0.2e-3
 grain_dist = 1
 
