@@ -54,7 +54,7 @@ def plot_distribution(mass, locs=None, max_locs=5,
 
 
 def plot_profiles(fpath, start=0, stop=np.inf, step=1, height_markers=[-1, 1],
-                  clim=.3e-3, colormap='coolwarm', figsize=(20,30)):
+                  max_subplots=10, clim=.3e-3, colormap='coolwarm', figsize=(20,30)):
     '''Plot profile evolution including sediment sorting and armoring
 
     Parameters
@@ -71,6 +71,9 @@ def plot_profiles(fpath, start=0, stop=np.inf, step=1, height_markers=[-1, 1],
         Mark heights in list, for example tidal range
     clim : float
         Maximum grain size in color scale
+    max_subplots : int
+        Maximum number of subplots to be rendered. Above this value
+        will result in an error.
     colormap : string or matplotlib colormap, optional
         Colormap for coloring grain size distribution
     figsize : 2-tuple, optional
@@ -84,13 +87,18 @@ def plot_profiles(fpath, start=0, stop=np.inf, step=1, height_markers=[-1, 1],
     x = d['ax_x']
 
     # read data files
-    z = filesys.load_dataframe(os.path.join(fpath, 'z.out'), step=step).as_matrix()
-    d50 = filesys.load_dataframe(os.path.join(fpath, 'd50.out'), step=step).as_matrix()
+    z = filesys.load_dataframe(os.path.join(fpath, 'z.out'),
+                               start=start, stop=stop, step=step).as_matrix()
+    d50 = filesys.load_dataframe(os.path.join(fpath, 'd50.out'),
+                                 start=start, stop=stop, step=step).as_matrix()
 
     # determine starting distribution
     n = d50.shape[0]
     d50_0 = np.mean(d50[0,:,:])
     d50[d50 == 1e-3] = d50_0 # FIXME ?
+
+    if n > max_subplots:
+        raise ValueError('Maximum number of %d subplots exceeded with %d, limit the data' % (max_subplots, n-max_subplots))
 
     fig, axs = plt.subplots(n, 2, figsize=figsize)
     for i in range(n):
@@ -192,21 +200,23 @@ def plot_sediment_balance(fpath, rhom=1650., figsize=(10,5)):
     print 'net supply to wind:           %f' % v5
 
     # compute time series
-    s1 = supply.sum(axis=2).sum(axis=0).cumsum() * dx / rhom
+    #s1 = supply.sum(axis=2).sum(axis=0).cumsum() * dx / rhom
     s2 = Ct.sum(axis=2).iloc[-1,:].multiply(u[0]).cumsum() * dt / rhom + \
          Ct.sum(axis=2).sum(axis=0) * dx / rhom
+    s3 = -z.iloc[:,:].subtract(z.iloc[0,:]).sum(axis=1) * dx
 
     # plot time series
     fig, axs = plt.subplots(1, 2, figsize=figsize)
     
-    s1.plot(legend=False, label='supply to wind', ax=axs[0])
+    s3.plot(legend=False, label='loss from bed', ax=axs[0])
+    #s1.plot(legend=False, label='supply to wind', ax=axs[0])
     s2.plot(legend=False, label='loss over domain border +\nsaltation', ax=axs[0])
     axs[0].set_xlabel('time')
     axs[0].set_ylabel('supply / loss [$m^3$]')
     axs[0].set_title('supply vs. loss')
     axs[0].legend(loc='lower right')
     
-    (s2-s1).plot(legend=False, ax=axs[1])
+    (s3-s2).plot(legend=False, ax=axs[1])
     axs[1].set_xlabel('time')
     axs[0].set_ylabel('loss [$m^3$]')
     axs[1].set_title('difference')

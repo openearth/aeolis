@@ -70,15 +70,19 @@ contains
        end do
    
        ! courant check
-       if (par%CFL > 0.d0) then
-          if (abs(maxval(u) / par%dx * par%dt - par%CFL) < .005) then
-             write(0, '(a, f6.4)') " Adapted timestep based on CFL condition: ", par%dt
+       if (trim(par%scheme) .eq. 'explicit') then
+          if (par%CFL > 0.d0) then
+             if (abs(maxval(u) / par%dx * par%dt - par%CFL) < .005) then
+                write(0, '(a, f6.4)') " Adapted timestep based on CFL condition: ", par%dt
+                exit
+             end if
+             par%dt = par%CFL * par%dx / maxval(u)
+
+             ! make time step fit with output time step
+             par%dt = par%tout / ceiling(par%tout / par%dt)
+          else
              exit
           end if
-          par%dt = par%CFL * par%dx / maxval(u)
-
-          ! make time step fit with output time step
-          par%dt = par%tout / ceiling(par%tout / par%dt)
        else
           exit
        end if
