@@ -55,11 +55,11 @@ contains
     close(fid)
 
     ! courant check
-    write(0, '(a, f4.2)') " Courant condition: ", maxval(u) / par%dx * par%dt   
-    if (par%dx / par%dt < maxval(u)) then
-       write(0, '(a)') " Courant condition violated. Please adapt numerical parameters."
-       stop 1
-    end if
+!    write(0, '(a, f4.2)') " Courant condition: ", maxval(u) / par%dx * par%dt   
+!    if (par%dx / par%dt < maxval(u)) then
+!       write(0, '(a)') " Courant condition violated. Please adapt numerical parameters."
+!       stop 1
+!    end if
 
     ! time
     t = 0
@@ -136,44 +136,37 @@ contains
        ! get available mass
        mass = get_layer_mass()
 
-       do j=1,par%nx+1
+       do j=1,par%nx
+
           do i=1,par%nfractions
 
              ! compute transport capacity by wind, including thresholds
-             Cu(i,j) = max(0.d0, 1.5e-4 * (u(ti) - uth(i,j))**3 / (u(ti) * par%VS))
+             Cu(i,j+1) = max(0.d0, 1.5e-4 * (u(ti) - uth(i,j+1))**3 / (u(ti) * par%VS))
 
              ! limit advection by available mass
-             supply(i,j) = min(mass(i,1,j), par%accfac * Cu(i,j) - Ct(i,j)) / Ta
+             supply(i,j+1) = min(mass(i,1,j+1), (par%accfac * Cu(i,j+1) - Ct(i,j+1)) / Ta)
 
           end do
 
           ! scale supply to availability of fractions
-          where (supply(:,j) > 0.d0)
-             dist = mass(:,1,j)
+          where (supply(:,j+1) > 0.d0)
+             dist = mass(:,1,j+1)
           elsewhere
              dist = 0.d0
           end where
           dist = dist / max(1e-10, sum(dist))
-          where (supply(:,j) > 0.d0)
-             supply(:,j) = supply(:,j) * dist
+          where (supply(:,j+1) > 0.d0)
+             supply(:,j+1) = supply(:,j+1) * dist
           end where
-             
-       end do
 
-       ! set supply in first cell to zero, since it cannot be picked up
-       supply(:,1) = 0.d0
-
-       do j=1,par%nx
           do i=1,par%nfractions
 
              ! compute sediment advection by wind
-             Ct2(i,j+1) = max(0.d0, -par%VS * u(ti) * (Ct(i,j+1) - Ct(i,j)) / dx * dt + &
-                  Ct(i,j+1) + supply(i,j+1))
+             Ct(i,j+1) = max(0.d0, (par%VS * u(ti) * Ct(i,j) * dt / dx + &
+                  Ct(i,j+1) + supply(i,j+1)) / (1 + 1/Ta + u(ti) * dt / dx))
 
           end do
        end do
-
-       Ct = Ct2
 
        ! update bed elevation
        z = update_bed(z, -supply, rho, par%dt)
