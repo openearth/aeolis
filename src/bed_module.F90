@@ -385,8 +385,7 @@ contains
 
     do i=1,par%nx
        theta = -atan((z(i+1) - z(i)) / (x(i+1) - x(i)))
-       u_th(:,i) = sqrt((tan(phi) - tan(theta) / tan(phi) + cos(theta)) / \
-                   (tan(phi)+1)) * u_th(:,i)
+       u_th(:,i) = sqrt((tan(phi) - tan(theta)) / tan(phi) * cos(theta)) * u_th(:,i)
     end do
 
     u_th(:,par%nx+1) = u_th(:,par%nx)
