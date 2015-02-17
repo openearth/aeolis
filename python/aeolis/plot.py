@@ -54,7 +54,7 @@ def plot_distribution(mass, locs=None, max_locs=5,
 
 
 def plot_profiles(fpath, start=0, stop=np.inf, step=1, height_markers=[-1, 1],
-                  clim=.3e-3, colormap='coolwarm', figsize=(20,30)):
+                  max_subplots=10, clim=.3e-3, colormap='coolwarm', figsize=(20,30)):
     '''Plot profile evolution including sediment sorting and armoring
 
     Parameters
@@ -71,6 +71,9 @@ def plot_profiles(fpath, start=0, stop=np.inf, step=1, height_markers=[-1, 1],
         Mark heights in list, for example tidal range
     clim : float
         Maximum grain size in color scale
+    max_subplots : int
+        Maximum number of subplots to be rendered. Above this value
+        will result in an error.
     colormap : string or matplotlib colormap, optional
         Colormap for coloring grain size distribution
     figsize : 2-tuple, optional
@@ -84,13 +87,18 @@ def plot_profiles(fpath, start=0, stop=np.inf, step=1, height_markers=[-1, 1],
     x = d['ax_x']
 
     # read data files
-    z = filesys.load_dataframe(os.path.join(fpath, 'z.out'), step=step).as_matrix()
-    d50 = filesys.load_dataframe(os.path.join(fpath, 'd50.out'), step=step).as_matrix()
+    z = filesys.load_dataframe(os.path.join(fpath, 'z.out'),
+                               start=start, stop=stop, step=step).as_matrix()
+    d50 = filesys.load_dataframe(os.path.join(fpath, 'd50.out'),
+                                 start=start, stop=stop, step=step).as_matrix()
 
     # determine starting distribution
     n = d50.shape[0]
     d50_0 = np.mean(d50[0,:,:])
     d50[d50 == 1e-3] = d50_0 # FIXME ?
+
+    if n > max_subplots:
+        raise ValueError('Maximum number of %d subplots exceeded with %d, limit the data' % (max_subplots, n-max_subplots))
 
     fig, axs = plt.subplots(n, 2, figsize=figsize)
     for i in range(n):
