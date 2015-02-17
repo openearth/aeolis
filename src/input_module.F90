@@ -43,6 +43,8 @@ module input_module
      real*8, dimension(:), allocatable :: grain_size
      real*8, dimension(:), allocatable :: grain_dist
 
+     character(10) :: scheme
+
      character(10), dimension(:), allocatable  :: outputvars
 
   end type parameters
@@ -134,6 +136,7 @@ contains
     par%bed_file    = read_key_str(fname, 'bed_file',   '')
     par%moist_file  = read_key_str(fname, 'moist_file', '')
     par%method_moist = read_key_str(fname, 'method_moist', 'belly_johnson')
+    par%scheme = read_key_str(fname, 'scheme', 'implicit')
 
     ! bed composition
     par%nfractions      = read_key_int(fname, 'nfractions',      1)
@@ -155,17 +158,37 @@ contains
 
     par%outputvars = read_key_strvec(fname, 'outputvars', 'z')
 
+    write(*,*) '**********************************************************'
+    write(*,*) ' '
+
+    call check_params(par)
+
+  end function read_params
+
+  subroutine check_params(par)
+
+    type(parameters), intent(inout) :: par
+
+    ! check if valid scheme is selected
+    select case (trim(par%scheme))
+    case ('implicit', 'explicit')
+       ! all ok
+    case default
+       write(0, '(a,a)') " Unsupported scheme: ",trim(par%scheme)
+       stop 1
+    end select
+
     ! sort grain size distribution
     call sort(par%grain_size, par%grain_dist)
 
     ! number of mix layers cannot exceed available number of layers
     par%nmix = min(par%nmix, par%nlayers+2)
 
-    write(*,*) '**********************************************************'
-    write(*,*) ' '
+    ! make time step fit with output time step
+    par%dt = par%tout / ceiling(par%tout / par%dt)
 
-  end function read_params
-
+  end subroutine check_params
+  
   function read_key_str(fname, key, default) result (value)
     
     integer*4 :: ierr

@@ -55,12 +55,14 @@ contains
     close(fid)
 
     ! courant check
-!    write(0, '(a, f4.2)') " Courant condition: ", maxval(u) / par%dx * par%dt   
-!    if (par%dx / par%dt < maxval(u)) then
-!       write(0, '(a)') " Courant condition violated. Please adapt numerical parameters."
-!       stop 1
-!    end if
-
+    if (trim(par%scheme) .eq. 'explicit') then
+       write(0, '(a, f4.2)') " Courant condition: ", maxval(u) / par%dx * par%dt   
+       if (par%dx / par%dt < maxval(u)) then
+          write(0, '(a)') " Courant condition violated. Please adapt numerical parameters."
+          stop 1
+       end if
+    end if
+    
     ! time
     t = 0
     par%nt = int(par%tstop / par%dt)
@@ -144,7 +146,7 @@ contains
              Cu(i,j+1) = max(0.d0, 1.5e-4 * (u(ti) - uth(i,j+1))**3 / (u(ti) * par%VS))
 
              ! limit advection by available mass
-             supply(i,j+1) = min(mass(i,1,j+1), (par%accfac * Cu(i,j+1) - Ct(i,j+1)) / Ta)
+             supply(i,j+1) = min(mass(i,1,j+1), Cu(i,j+1) / Ta)
 
           end do
 
@@ -160,10 +162,14 @@ contains
           end where
 
           do i=1,par%nfractions
-
+             
              ! compute sediment advection by wind
-             Ct(i,j+1) = max(0.d0, (par%VS * u(ti) * Ct(i,j) * dt / dx + &
-                  Ct(i,j+1) + supply(i,j+1)) / (1 + 1/Ta + u(ti) * dt / dx))
+             if (trim(par%scheme) .eq. 'explicit') then
+                ! insert explicit scheme here
+             else
+                Ct(i,j+1) = max(0.d0, (par%VS * u(ti) * Ct(i,j) * dt / dx + &
+                     Ct(i,j+1) + supply(i,j+1)) / (1 + 1/Ta + u(ti) * dt / dx))
+             end if
 
           end do
        end do

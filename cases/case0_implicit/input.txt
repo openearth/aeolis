@@ -6,10 +6,10 @@ u_th = 4
 dx = 1
 
 # time
-dt = 600
+dt = 3600
 CFL = -1
 tstop = 2592000
-tout = 600
+tout = 3600
 
 # files
 wind_file = wind_constant.txt
