@@ -1,0 +1,29 @@
+# AeoLiS parameters
+
+VS = 1.0
+Tp = 1.0
+u_th = 4
+dx = 1
+
+# time
+dt = 3600
+CFL = .9
+tstop = 24192000
+tout = 3600
+scheme = implicit
+
+# files
+wind_file = wind_constant.txt
+bed_file = bed.txt
+moist_file = moist_constant.txt
+output_dir = case1
+
+# bed composition
+nfractions = 16
+nlayers = 10
+nmix = 3
+layer_thickness = 1e-2
+grain_size = 1.0e-04 1.5e-04 2.0e-04 2.5e-04 3.0e-04 3.5e-04 4.0e-04 4.5e-04 5.0e-04 5.5e-04 6.0e-04 6.5e-04 7.0e-04 7.5e-04 8.0e-04 8.5e-04
+grain_dist = 0.368 0.57 0.779 0.939 1. 0.939 0.779 0.57 0.368 0.21 0.105 0.047 0.018 0.006 0.002 0.001
+
+outputvars = Ct Cu z u uth mass d50 supply
