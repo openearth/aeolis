@@ -29,6 +29,7 @@ module input_module
      character(slen) :: bed_file = ''
      character(slen) :: moist_file = ''
      character(slen) :: method_moist = ''
+     character(slen) :: output_dir = ''
 
      character(10) :: scheme
      integer*4 :: max_iter = 100
@@ -106,7 +107,7 @@ contains
     write(*,*) ' '
 
     if (len(trim(fpath)) .gt. 0) then
-       write(0, '(a, a)') '  Changed working directory to: ', trim(fpath)
+       write(0, '(a, a)') ' Changed working directory to: ', trim(fpath)
        write(*,*) ' '
     end if
 
@@ -137,6 +138,7 @@ contains
     par%bed_file    = read_key_str(fname, 'bed_file',   '')
     par%moist_file  = read_key_str(fname, 'moist_file', '')
     par%method_moist = read_key_str(fname, 'method_moist', 'belly_johnson')
+    par%output_dir = read_key_str(fname, 'output_dir', '')
     par%scheme = read_key_str(fname, 'scheme', 'implicit')
 
     if (trim(par%scheme) .eq. 'implicit') then
@@ -176,6 +178,7 @@ contains
   subroutine check_params(par)
 
     type(parameters), intent(inout) :: par
+    logical :: ex
 
     ! check if valid scheme is selected
     select case (trim(par%scheme))
@@ -194,6 +197,16 @@ contains
 
     ! make time step fit with output time step
     par%dt = par%tout / ceiling(par%tout / par%dt)
+
+    ! create output directory
+    if (trim(par%output_dir) .ne. '') then
+       par%output_dir = trim(par%output_dir) // "/"
+       inquire(file=par%output_dir, exist=ex)
+       if (.not. ex) then
+          write(0, '(a,a)') " Created output directory ", trim(par%output_dir)
+          call system("mkdir " // trim(par%output_dir))
+       end if
+    end if
 
   end subroutine check_params
   

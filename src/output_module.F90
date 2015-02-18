@@ -166,35 +166,43 @@ contains
     
   end subroutine get_pointer_rank3
   
-  subroutine output_init(var, vars)
+  subroutine output_init(var, vars, dir)
 
     type(variables), dimension(:), intent(inout) :: var
     character(*), dimension(:), intent(in) :: vars
+    character(*), optional, intent(in) :: dir
+    character(slen) :: dir0
     integer*4 :: i, j
 
+    if (present(dir)) then
+       dir0 = dir
+    else
+       dir0 = dir
+    end if
+    
     do i = 1,size(vars)
        do j = 1,size(var)
           if (trim(var(j)%name) == trim(vars(i))) then
-             call output_init_data(var(j)%val, trim(vars(i))//".out", 100+i)
-             call output_init_data(var(j)%sum, trim(vars(i))//".sum.out", 200+i)
-             call output_init_data(var(j)%avg, trim(vars(i))//".avg.out", 300+i)
-             call output_init_data(var(j)%var, trim(vars(i))//".var.out", 400+i)
-             call output_init_data(var(j)%min, trim(vars(i))//".min.out", 500+i)
-             call output_init_data(var(j)%max, trim(vars(i))//".max.out", 600+i)
+             call output_init_data(var(j)%val, dir0, trim(vars(i))//".out", 100+i)
+             call output_init_data(var(j)%sum, dir0, trim(vars(i))//".sum.out", 200+i)
+             call output_init_data(var(j)%avg, dir0, trim(vars(i))//".avg.out", 300+i)
+             call output_init_data(var(j)%var, dir0, trim(vars(i))//".var.out", 400+i)
+             call output_init_data(var(j)%min, dir0, trim(vars(i))//".min.out", 500+i)
+             call output_init_data(var(j)%max, dir0, trim(vars(i))//".max.out", 600+i)
           end if
        end do
     end do
 
   end subroutine output_init
 
-  subroutine output_init_data(var, name, fid)
+  subroutine output_init_data(var, dir, name, fid)
 
     type(variables_data), intent(inout) :: var
-    character(*), intent(in) :: name
+    character(*), intent(in) :: name, dir
     integer*4, intent(in) :: fid
 
     var%fid = fid
-    open(unit=var%fid, file=trim(name), &
+    open(unit=var%fid, file=trim(dir) // trim(name), &
          action="write", status="replace", form="unformatted")
 
   end subroutine output_init_data
@@ -357,7 +365,8 @@ contains
     integer*4, parameter :: fid=1
     type(parameters), intent(in) :: par
   
-    open(unit=fid, file="dims.out", action="write", status="replace", form="unformatted")
+    open(unit=fid, file=trim(par%output_dir) // "dims.out", &
+         action="write", status="replace", form="unformatted")
     write(fid) par%nx
     write(fid) par%dx
     write(fid) par%nt

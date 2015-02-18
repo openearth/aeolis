@@ -27,7 +27,7 @@ contains
     real*8, dimension(:), allocatable :: x_tmp, z_tmp, u, zmoist
     real*8, dimension(:,:), allocatable :: Ct2, Ct2_prev, moist
     integer*4, parameter :: fid=20
-
+    
     write(*,*) 'Initialization started...'
     
     ! bed
@@ -40,9 +40,10 @@ contains
     z = z_tmp
     deallocate(x_tmp)
     deallocate(z_tmp)
-    
+
     call generate_bedcomposition(par, x, z)
-    open(unit=fid, file="bed.in", action="write", status="replace", form="unformatted")
+    open(unit=fid, file=trim(par%output_dir) // "bed.in", &
+         action="write", status="replace", form="unformatted")
     write(fid) x
     write(fid) z
     close(fid)
@@ -50,7 +51,8 @@ contains
     ! wind
     write(*,*) 'Generating bed wind time series...'
     call generate_wind(par, u)
-    open(unit=fid, file="wind.in", action="write", status="replace", form="unformatted")
+    open(unit=fid, file=trim(par%output_dir) // "wind.in", &
+         action="write", status="replace", form="unformatted")
     write(fid) u
     close(fid)
 
@@ -71,7 +73,7 @@ contains
     ! moist
     write(*,*) 'Generating moisture time series...'
     call generate_moist(par, zmoist, moist)
-    open(unit=fid, file="moist.in", &
+    open(unit=fid, file=trim(par%output_dir) // "moist.in", &
          action="write", status="replace", form="unformatted")
     do i = 1,par%nt
        write(fid) moist(i,:)
@@ -109,7 +111,7 @@ contains
     write(*,*) 'Model run started...'
 
     ! output
-    call output_init(var, par%outputvars)
+    call output_init(var, par%outputvars, par%output_dir)
     
     ! dimensions
     nx = par%nx
@@ -200,7 +202,7 @@ contains
        end if
 
        Ct = Ct2
-       
+
        ! update bed elevation
        z = update_bed(z, -supply, rho, par%dt)
 
