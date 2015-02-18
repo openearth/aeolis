@@ -200,7 +200,7 @@ def plot_sediment_balance(fpath, rhom=1650., figsize=(10,5)):
     print 'net supply to wind:           %f' % v5
 
     # compute time series
-    #s1 = supply.sum(axis=2).sum(axis=0).cumsum() * dx / rhom
+    s1 = supply.sum(axis=2).sum(axis=0).cumsum() * dx / rhom
     s2 = Ct.sum(axis=2).iloc[-1,:].multiply(u[0]).cumsum() * dt / rhom + \
          Ct.sum(axis=2).sum(axis=0) * dx / rhom
     s3 = -z.iloc[:,:].subtract(z.iloc[0,:]).sum(axis=1) * dx
@@ -208,9 +208,9 @@ def plot_sediment_balance(fpath, rhom=1650., figsize=(10,5)):
     # plot time series
     fig, axs = plt.subplots(1, 2, figsize=figsize)
     
-    s3.plot(legend=False, label='loss from bed', ax=axs[0])
-    #s1.plot(legend=False, label='supply to wind', ax=axs[0])
+    s3.plot(legend=False, label='loss from profile (z)', ax=axs[0])
     s2.plot(legend=False, label='loss over domain border +\nsaltation', ax=axs[0])
+    s1.plot(legend=False, label='net supply to wind', ax=axs[0])
     axs[0].set_xlabel('time')
     axs[0].set_ylabel('supply / loss [$m^3$]')
     axs[0].set_title('supply vs. loss')

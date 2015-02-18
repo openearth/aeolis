@@ -22,13 +22,17 @@ module input_module
      real*8    :: tstop = 0.d0
      real*8    :: tout  = 0.d0
      integer*4 :: ntout = 0
-     real*8    :: CFL   = 0.d0
+     real*8    :: CFL   = -1.d0
      real*8    :: accfac = 1.d0
 
      character(slen) :: wind_file = ''
      character(slen) :: bed_file = ''
      character(slen) :: moist_file = ''
      character(slen) :: method_moist = ''
+
+     character(10) :: scheme
+     integer*4 :: max_iter = 100
+     real*8    :: max_error = 1d-6
 
      integer*4 :: nfractions = 1
      integer*4 :: nlayers = 3
@@ -42,8 +46,6 @@ module input_module
      real*8    :: A = 100.d0
      real*8, dimension(:), allocatable :: grain_size
      real*8, dimension(:), allocatable :: grain_dist
-
-     character(10) :: scheme
 
      character(10), dimension(:), allocatable  :: outputvars
 
@@ -130,13 +132,19 @@ contains
     par%dx    = read_key_dbl(fname, 'dx',    1.d0)
     par%tstop = read_key_dbl(fname, 'tstop', 3600.d0)
     par%tout  = read_key_dbl(fname, 'tout',  1.d0)
-    par%CFL   = read_key_dbl(fname, 'CFL',   -1.d0)
     par%accfac = read_key_dbl(fname, 'accfac',  1.d0)
     par%wind_file   = read_key_str(fname, 'wind_file',  '')
     par%bed_file    = read_key_str(fname, 'bed_file',   '')
     par%moist_file  = read_key_str(fname, 'moist_file', '')
     par%method_moist = read_key_str(fname, 'method_moist', 'belly_johnson')
     par%scheme = read_key_str(fname, 'scheme', 'implicit')
+
+    if (trim(par%scheme) .eq. 'implicit') then
+       par%max_iter  = read_key_int(fname, 'max_iter',  100)
+       par%max_error = read_key_dbl(fname, 'max_error', 1d-6)
+    else
+       par%CFL       = read_key_dbl(fname, 'CFL',      -1.d0)
+    end if
 
     ! bed composition
     par%nfractions      = read_key_int(fname, 'nfractions',      1)
