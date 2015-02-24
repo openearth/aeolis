@@ -81,6 +81,7 @@ contains
     integer , pointer :: nlalyr
     integer , pointer :: nlyr
     integer , pointer :: updbaselyr
+    integer , pointer :: keuler
     real(fp) , pointer :: minmass
     real(fp) , pointer :: theulyr
     real(fp) , pointer :: thlalyr
@@ -153,6 +154,7 @@ contains
     istat = bedcomp_getpointer_integer(morlyr, 'number_of_eulerian_layers' , neulyr)
     istat = bedcomp_getpointer_integer(morlyr, 'number_of_lagrangian_layers' , nlalyr)
     istat = bedcomp_getpointer_integer(morlyr, 'base_layer_updating_type' , updbaselyr)
+    istat = bedcomp_getpointer_integer(morlyr, 'keuler' , keuler)
     istat = bedcomp_getpointer_realfp (morlyr, 'MinMassShortWarning' , minmass)
     istat = bedcomp_getpointer_realfp (morlyr, 'thickness_of_eulerian_layers' , theulyr)
     istat = bedcomp_getpointer_realfp (morlyr, 'thickness_of_lagrangian_layers' , thlalyr)
@@ -167,19 +169,20 @@ contains
     nstep   = (tend-tstart)/dt; 
 
     nfrac       = par%nfractions
-    iunderlyr   = 2
-    neulyr      = par%nlayers
-    nlalyr      = 0
+    iunderlyr   = 2 ! graded sediments
+    neulyr      = par%nlayers ! all layers are fixed
+    nlalyr      = 1 ! except one
     theulyr     = par%layer_thickness
     thlalyr     = par%layer_thickness
-    updbaselyr  = 1            
+    keuler      = 2 ! first fixed layer is on top
+    updbaselyr  = 1 ! base layer is independent
                                
     maxwarn     = 100
     minmass     = 0.5_fp       
-    idiffusion  = 0
+    idiffusion  = 0 ! no diffusion between layers
     ndiff       = 5
-    flufflyr    = 0            
-    iporosity   = 0            
+    flufflyr    = 0 ! no fluff layers            
+    iporosity   = 0 ! porosity included in densities
                                
     message = 'allocating bed composition module'
     call addmessage(messages, message)
@@ -247,7 +250,7 @@ contains
     real*8, dimension(:,:), intent(in) :: mass
     real*8, dimension(:), intent(in) :: rho
     real*8, dimension(:), allocatable :: z_new, dz
-    real*8 :: dt
+    real*8, intent(in) :: dt
     
     allocate(z_new(size(z)))
     allocate(dz(size(z)))
@@ -396,7 +399,8 @@ contains
 
     type(parameters), intent(in) :: par
     real*8, dimension(:,:), intent(in) :: u_th
-    integer :: i, j
+    integer :: i, j, k, nmix
+    real*8 :: th
 
     integer :: istat
     real(fp), dimension(:,:,:), pointer :: msed
@@ -411,23 +415,36 @@ contains
 
     allocate(dist(par%nfractions, par%nx+1))
 
-    dist = 0.d0
+    do k = 1,par%nx+1
 
-    do j = 1,par%nx+1
-       do i = 1,par%nfractions
-          dist(i,j) = sum(msed(i,1:par%nmix,j))
-       end do
-       dist(:,j) = dist(:,j) / max(1e-10, sum(dist(:,j)))
+       ! fix only if flooded
+       if (u_th(1,k) == 999.d0) then
+
+          ! determine mixing depth in terms of number of layers
+          nmix = 0
+          th = 0.d0
+          do i = 1,size(thlyr(:,k))
+             nmix = nmix + 1
+             th = th + thlyr(i,k)
+             if (th >= par%Hs * par%facDOD) exit
+          end do
+
+          ! determine average sediment distribution over mixing depth
+          do i = 1,par%nfractions
+             dist(i,k) = sum(msed(i,1:nmix,k))
+          end do
+          dist(:,k) = dist(:,k) / max(1e-10, sum(dist(:,k)))
+
+          ! mix layer mass
+          do j = 1,nmix
+             do i = 1,par%nfractions
+                msed(i,j,k) = thlyr(j,k) * par%rhom * dist(i,k)
+             end do
+          end do
+       end if
+       
     end do
-    
-    do j = 1,par%nmix
-       do i = 1,par%nfractions
-          where (u_th(i,:) == 999.d0)
-             msed(i,j,:) = thlyr(j,:) * par%rhom * dist(i,:)
-          end where
-       end do
-    end do
-    
+        
   end subroutine mix_toplayer
 
 end module bed_module
