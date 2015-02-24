@@ -37,7 +37,6 @@ module input_module
 
      integer*4 :: nfractions = 1
      integer*4 :: nlayers = 3
-     integer*4 :: nmix = 3
      real*8    :: layer_thickness = 5e-4
      real*8    :: rhop = 2650.d0
      real*8    :: rhom = 1650.d0
@@ -45,6 +44,8 @@ module input_module
      real*8    :: rhoa = 1.25d0
      real*8    :: porosity = 0.4d0
      real*8    :: A = 100.d0
+     real*8    :: Hs = 1.d0
+     real*8    :: facDOD = 1d-1
      real*8, dimension(:), allocatable :: grain_size
      real*8, dimension(:), allocatable :: grain_dist
 
@@ -151,7 +152,6 @@ contains
     ! bed composition
     par%nfractions      = read_key_int(fname, 'nfractions',      1)
     par%nlayers         = read_key_int(fname, 'nlayers',         3)
-    par%nmix            = read_key_int(fname, 'nmix',            2)
     par%layer_thickness = read_key_dbl(fname, 'layer_thickness', 0.d0005)
     par%rhoa            = read_key_dbl(fname, 'rhoa',            1.25d0)
     par%rhow            = read_key_dbl(fname, 'rhow',            1025.d0)
@@ -159,6 +159,8 @@ contains
     par%rhop            = read_key_dbl(fname, 'rhop',            2650.d0)
     par%porosity        = read_key_dbl(fname, 'porosity',        0.4d0)
     par%A               = read_key_dbl(fname, 'A',               100.d0)
+    par%Hs              = read_key_dbl(fname, 'Hs',              1.d0)
+    par%facDOD          = read_key_dbl(fname, 'facDOD',          0.d1)
 
     allocate(par%grain_size(par%nfractions))
     allocate(par%grain_dist(par%nfractions))
@@ -191,9 +193,6 @@ contains
 
     ! sort grain size distribution
     call sort(par%grain_size, par%grain_dist)
-
-    ! number of mix layers cannot exceed available number of layers
-    par%nmix = min(par%nmix, par%nlayers+2)
 
     ! make time step fit with output time step
     par%dt = par%tout / ceiling(par%tout / par%dt)
