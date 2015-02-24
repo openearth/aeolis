@@ -15,7 +15,7 @@ contains
     type(parameters), intent(inout) :: par
     type(variables), dimension(:), allocatable :: var
     integer*4 :: i, j, n, ti, nx, nt
-    real*8 :: t, dt, dx, Ta, err
+    real*8 :: t, dt, dx, Ta, f, err
     real*8 :: tstart, tlog
     real*8, pointer :: wind
     real*8, dimension(:), pointer :: x, z, moist_map
@@ -24,7 +24,7 @@ contains
     real*8, dimension(:,:), pointer :: Cu, Ct, supply
     real*8, dimension(:,:), pointer :: d10, d50, d90
     real*8, dimension(:,:,:), pointer :: mass
-    real*8, dimension(:), allocatable :: x_tmp, z_tmp, u, zmoist
+    real*8, dimension(:), allocatable :: x_tmp, z_tmp, u, zmoist, frac
     real*8, dimension(:,:), allocatable :: Ct2, Ct2_prev, moist
     integer*4, parameter :: fid=20
     
@@ -84,7 +84,7 @@ contains
     call get_pointer(var, 'rho',    (/par%nfractions/), rho)
     call get_pointer(var, 'dist',   (/par%nfractions/), dist)
 
-    rho = par%rhop
+    rho = par%rhom
     dist = par%grain_dist
 
     ! variables
@@ -101,10 +101,12 @@ contains
     call get_pointer(var, 'd50', (/par%nlayers+2, par%nx+1/), d50)
     call get_pointer(var, 'd90', (/par%nlayers+2, par%nx+1/), d90)
 
+    allocate(frac(par%nfractions))
     allocate(Ct2(par%nfractions, par%nx+1))
     allocate(Ct2_prev(par%nfractions, par%nx+1))
     Ct2 = 0.d0
     Ct2_prev = 0.d0
+    frac = 0.d0
 
     call write_dimensions(par)
 
@@ -147,15 +149,9 @@ contains
 
        if (trim(par%scheme) .eq. 'explicit') then
           do j=2,par%nx+1
-             do i=1,par%nfractions
 
-                ! limit advection by available mass
-                supply(i,j) = min(mass(i,1,j), (Cu(i,j) - Ct(i,j)) / Ta)
-
-             end do
-
-             ! scale supply to availability of fractions
-             call scale_supply(supply(:,j), mass(:,1,j))
+             ! compute supply based on sediment availability
+             supply(:,j) = compute_supply(mass(:,1,j), Cu(:,j), Ct2(:,j), Ta)
 
              do i=1,par%nfractions
              
@@ -167,37 +163,33 @@ contains
           end do
        else
           do n=1,par%max_iter
-             
+
              Ct2_prev = Ct2
              
              do j=2,par%nx+1
-                do i=1,par%nfractions
 
-                   ! limit advection by available mass
-                   supply(i,j) = min(mass(i,1,j), (Cu(i,j) - Ct2(i,j)) / Ta)
-
-                end do
-
-                ! scale supply to availability of fractions
-                call scale_supply(supply(:,j), mass(:,1,j))
+                ! compute supply based on sediment availability
+                supply(:,j) = compute_supply(mass(:,1,j), Cu(:,j), Ct2(:,j), Ta)
 
                 do i=1,par%nfractions
                 
                    ! compute sediment advection by wind
-                   Ct2(i,j) = max(0.d0, (par%VS * u(ti) * Ct(i,j-1) * dt / dx + &
-                        (1 + 1/Ta) * Ct(i,j) + supply(i,j)) / (1 + 1/Ta + u(ti) * dt / dx))
+                   Ct2(i,j) = max(0.d0, (par%VS * u(ti) * Ct2(i,j-1) * dt / dx + &
+                        Ct(i,j) + supply(i,j)) / (1 + u(ti) * dt / dx))
 
                 end do
              end do
 
              ! exit iteration if change is negligible
-             err = sum(abs(Ct2 - Ct2_prev) / max(1e-10, Ct2_prev)) / (par%nx+1) / par%nfractions
+             err = sum(abs(Ct2 - Ct2_prev) / max(1e-10, Ct2_prev)) / &
+                  (par%nx+1) / par%nfractions
              if (err .le. par%max_error) exit
 
           end do
 
           if (err .gt. par%max_error) &
-               write(0, '(a,f0.4,a)') "WARNING: iteration not converged (error: ", err, ")"
+               write(0, '(a,i4,a,f0.4,a)') &
+               "WARNING: iteration not converged (i: ", ti, "; error: ", err, ")"
 
        end if
 
@@ -235,24 +227,23 @@ contains
 
   end subroutine run_model
 
-  subroutine scale_supply(supply, mass)
+  function compute_supply(mass, Cu, Ct, T) result(supply)
 
-    real*8, dimension(:), intent(inout) :: supply
-    real*8, dimension(:), intent(in) :: mass
-    real*8, dimension(size(supply)) :: dist
+    real*8, dimension(:), intent(in) :: mass, Cu, Ct
+    real*8, dimension(size(mass)) :: dist, supply
+    real*8, intent(in) :: T
 
-    where (supply > 0.d0)
-       dist = mass
-    elsewhere
-       dist = 0.d0
-    end where
-    dist = dist / max(1e-10, sum(dist))
-    where (supply > 0.d0)
-       supply = supply * dist
-    end where
+    ! compute sediment distribution in bed
+    dist = mass / max(1e-10, sum(mass))
+                
+    ! determine weighed supply
+    supply = (Cu * dist - Ct) / T
 
-  end subroutine scale_supply
-        
+    ! limit advection by available mass
+    supply = min(mass, supply)
+
+  end function compute_supply
+
   subroutine write_progress(ti, nt, tstart)
 
     integer*4, intent(in) :: ti, nt

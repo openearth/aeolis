@@ -109,6 +109,7 @@ def plot_profiles(fpath, start=0, stop=np.inf, step=1, height_markers=[-1, 1],
         Z2 = np.repeat(z[i,:] - z[0,:], nl).reshape((-1,nl))
         L = .25 / nl * np.repeat(np.arange(nl), nx).reshape((-1,nx)).T
         C = d50[i,:,:] - d50_0
+        C[:,1:] = 0.
 
         zlim = [np.max(np.abs(Z1)),
                 np.max(np.abs(Z2))]
@@ -146,7 +147,7 @@ def plot_profiles(fpath, start=0, stop=np.inf, step=1, height_markers=[-1, 1],
     return fig, axs
             
                                                                                 
-def plot_sediment_balance(fpath, rhom=1650., figsize=(10,5)):
+def plot_sediment_balance(fpath, rhom=1650., start=0, stop=np.inf, step=1, figsize=(10,5)):
     '''Compute and plot sediment balance of model
 
     Parameters
@@ -172,11 +173,16 @@ def plot_sediment_balance(fpath, rhom=1650., figsize=(10,5)):
     dt = d['dt_out']
 
     # read data files
-    z = filesys.load_dataframe(os.path.join(fpath, 'z.out'))
-    mass = filesys.load_dataframe(os.path.join(fpath, 'mass.out'))
-    supply = filesys.load_dataframe(os.path.join(fpath, 'supply.sum.out'))
-    Ct = filesys.load_dataframe(os.path.join(fpath, 'Ct.avg.out'))
-    u = filesys.load_dataframe(os.path.join(fpath, 'u.avg.out'))
+    z =      filesys.load_dataframe(os.path.join(fpath, 'z.out'),
+                                    start=start, stop=stop, step=step)
+    mass =   filesys.load_dataframe(os.path.join(fpath, 'mass.out'),
+                                    start=start, stop=stop, step=step)
+    supply = filesys.load_dataframe(os.path.join(fpath, 'supply.sum.out'),
+                                    start=start, stop=stop, step=step)
+    Ct =     filesys.load_dataframe(os.path.join(fpath, 'Ct.avg.out'),
+                                    start=start, stop=stop, step=step)
+    u =      filesys.load_dataframe(os.path.join(fpath, 'u.avg.out'),
+                                    start=start, stop=stop, step=step)
     
     # compute erosion/deposition
     v1 = np.sum(np.maximum(0., z.iloc[-1,:] - z.iloc[0,:]) * dx) # deposition
@@ -186,9 +192,9 @@ def plot_sediment_balance(fpath, rhom=1650., figsize=(10,5)):
     v4 = -sum(mass.sum(axis=3).sum(axis=2).iloc[:,-1] - \
               mass.sum(axis=3).sum(axis=2).iloc[:,0]) * dx / rhom
 
-    v5 = sum(supply.sum(axis=2).sum(axis=1)) * dx / rhom
+    v5 = sum(supply.iloc[:,:-1,:].sum(axis=2).sum(axis=1)) * dx * step / rhom
 
-    v6 = Ct.sum(axis=2).iloc[-1,:].multiply(u[0]).sum() * dt / rhom
+    v6 = Ct.sum(axis=2).iloc[-1,:].multiply(u[0]).sum() * dt * step / rhom
     v7 = Ct.sum(axis=2).iloc[:,-1].sum() * dx / rhom
 
     # print output statistics
@@ -200,8 +206,8 @@ def plot_sediment_balance(fpath, rhom=1650., figsize=(10,5)):
     print 'net supply to wind:           %f' % v5
 
     # compute time series
-    s1 = supply.sum(axis=2).sum(axis=0).cumsum() * dx / rhom
-    s2 = Ct.sum(axis=2).iloc[-1,:].multiply(u[0]).cumsum() * dt / rhom + \
+    s1 = supply.sum(axis=2).sum(axis=0).cumsum() * dx * step / rhom
+    s2 = Ct.sum(axis=2).iloc[-1,:].multiply(u[0]).cumsum() * dt * step / rhom + \
          Ct.sum(axis=2).sum(axis=0) * dx / rhom
     s3 = -z.iloc[:,:].subtract(z.iloc[0,:]).sum(axis=1) * dx
 

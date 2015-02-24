@@ -6,7 +6,7 @@ u_th = 4
 dx = 1
 
 # time
-dt = 3600
+dt = 600
 CFL = .9
 tstop = 2419200
 tout = 3600
@@ -15,15 +15,16 @@ scheme = implicit
 # files
 wind_file = wind_constant.txt
 bed_file = bed.txt
-moist_file = moist_constant.txt
-output_dir = case0
+moist_file = moist.txt
+output_dir = case2
 
 # bed composition
-nfractions = 1
-nlayers = 10
+nfractions = 12
+nlayers = 5
 nmix = 3
 layer_thickness = 1e-2
-grain_size = 0.2e-3
-grain_dist = 1
+
+grain_size = 5.0e-05 1.0e-04 1.5e-04 2.0e-04 2.5e-04 3.0e-04 3.5e-04 4.0e-04 4.5e-04 5.0e-04 5.5e-04
+grain_dist = 0.21 0.368 0.57 0.779 0.939 1. 0.939 0.779 0.57 0.368 0.21
 
 outputvars = Ct Cu z u uth mass d50 supply
