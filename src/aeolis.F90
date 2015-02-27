@@ -1,5 +1,14 @@
 program aeolis
-
+  ! AeoLiS main program.
+  ! Reads command line options, model parameters and start model run.
+  !
+  ! Usage:
+  !     | aeolis <input>
+  !     | aeolis <input> [options]
+  !
+  ! Options:
+  !     -v Shows the version of this AeoLiS executable
+  
 use constants_module
 use input_module
 use run_module

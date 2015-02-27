@@ -6,17 +6,32 @@
 Welcome to AeoLiS's documentation!
 ==================================
 
-Contents:
+AeoLiS is a process-based model for simulating aeolian sediment transport in situations where supply-limiting factors are important, like in coastal environments. Supply-limitations currently supported are moisture content, sediment sorting and armouring and bed slope effects.
+
+AeoLiS is developed and maintained by:
+
+| Bas Hoonhout <b.m.hoonhout@tudelft.nl>
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
 
+   processes_and_formulations
+   commandline_options
+   model_settings
+   examples
+   modules_and_functions
 
+Acknowledgements
+================
+
+AeoLiS is developed at `Delft University of Technology <http://www.tudelft.nl>`_ with support from the ERC-Advanced Grant 291206 Nearshore Monitoring and Modeling (`NEMO <http://nemo.citg.tudelft.nl>`_) and `Deltares <http://www.deltares.nl>`_.
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 

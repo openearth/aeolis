@@ -1,4 +1,5 @@
 module run_module
+! This is a docstring of run_module
   
   use output_module
   use input_module
@@ -246,24 +247,25 @@ contains
 
   function compute_supply(par, mass, Cu, Ct) result(supply)
 
-    type(parameters), intent(in) :: par
+    type(parameters), intent(in) :: par ! parameters structure
     real*8, dimension(:), intent(in) :: mass, Cu, Ct
     real*8, dimension(size(mass)) :: dist, dist2, supply
 
     dist = Ct / max(1e-10, Cu)
 
-    if (sum(dist) >= 1.d0) then ! deposition
-
-       ! compute distribution in air
-       dist = dist / max(1e-10, sum(dist))
-
-    else ! erosion
+    if (sum(dist) < 1.d0) then ! deposition
     
        ! compute sediment distribution in bed
        dist2 = mass / max(1e-10, sum(mass))
+
+       ! compute new sediment distributuion in the air
        dist = dist + dist2 * (1.d0 - sum(dist))
 
     end if
+
+    ! compute distribution in air
+    if (sum(dist) == 0.d0) dist = 1.d0
+    dist = dist / sum(dist)
 
     call assert(abs(sum(dist) - 1.d0) < 1e-10)
 

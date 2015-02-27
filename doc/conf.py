@@ -32,9 +32,14 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
+    'sphinx.ext.pngmath',
     'sphinx.ext.viewcode',
+    'sphinxfortran.fortran_domain',
+    'sphinxfortran.fortran_autodoc',
 ]
+
+fortran_src = '../src/'
+fortran_ext = ['F90', 'f90']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
