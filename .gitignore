@@ -11,3 +11,4 @@
 *.egg
 *.egg-info
 .dirstamp
+_build/
