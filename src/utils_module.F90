@@ -6,6 +6,17 @@ module utils_module
 
 contains
 
+  subroutine assert(condition)
+
+    logical :: condition
+    
+    if (.not. condition) then
+       write(0,*) 'Assertion failed.'
+       stop 1
+    end if
+    
+  end subroutine assert
+  
   subroutine sort(x, x2)
     
     integer :: n, i, idx

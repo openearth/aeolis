@@ -3,8 +3,9 @@ module run_module
   use output_module
   use input_module
   use wind_module
-  use bed_module
   use moist_module
+  use bed_module
+  use utils_module
 
   implicit none
 
@@ -14,18 +15,19 @@ contains
     
     type(parameters), intent(inout) :: par
     type(variables), dimension(:), allocatable :: var
+    type(meteorology), dimension(:), allocatable :: meteo
     integer*4 :: i, j, n, ti, nx, nt
-    real*8 :: t, dt, dx, Ta, f, err
+    real*8 :: t, dt, dx, f, err, alpha
     real*8 :: tstart, tlog
     real*8, pointer :: wind
-    real*8, dimension(:), pointer :: x, z, moist_map
+    real*8, dimension(:), pointer :: x, z
     real*8, dimension(:,:), pointer :: uth
     real*8, dimension(:), pointer :: rho, dist
-    real*8, dimension(:,:), pointer :: Cu, Ct, supply
+    real*8, dimension(:,:), pointer :: Cu, Ct, supply, moist
     real*8, dimension(:,:), pointer :: d10, d50, d90
     real*8, dimension(:,:,:), pointer :: mass
-    real*8, dimension(:), allocatable :: x_tmp, z_tmp, u, zmoist, frac
-    real*8, dimension(:,:), allocatable :: Ct2, Ct2_prev, moist
+    real*8, dimension(:), allocatable :: x_tmp, z_tmp, u, tide, frac
+    real*8, dimension(:,:), allocatable :: Ct2, Ct2_prev
     integer*4, parameter :: fid=20
     
     write(*,*) 'Initialization started...'
@@ -71,14 +73,19 @@ contains
     par%ntout = int(par%tstop / par%tout) + 1
 
     ! moist
-    write(*,*) 'Generating moisture time series...'
-    call generate_moist(par, zmoist, moist)
-    open(unit=fid, file=trim(par%output_dir) // "moist.in", &
-         action="write", status="replace", form="unformatted")
-    do i = 1,par%nt
-       write(fid) moist(i,:)
-    end do
-    close(fid)
+!    write(*,*) 'Generating moisture time series...'
+!    call generate_moist(par, zmoist, moist)
+!    open(unit=fid, file=trim(par%output_dir) // "moist.in", &
+!         action="write", status="replace", form="unformatted")
+!    do i = 1,par%nt
+!       write(fid) moist(i,:)
+!    end do
+    !    close(fid)
+
+    ! tide and meteo
+    write(*,*) 'Generating tide and meteo time series...'
+    call generate_tide(par, tide)
+    call generate_meteo(par, meteo)
 
     ! fractions
     call get_pointer(var, 'rho',    (/par%nfractions/), rho)
@@ -93,10 +100,10 @@ contains
     call get_pointer(var, 'uth',    (/par%nfractions, par%nx+1/), uth)
     call get_pointer(var, 'mass',   (/par%nfractions, par%nlayers+2, par%nx+1/), mass)
     call get_pointer(var, 'supply', (/par%nfractions, par%nx+1/), supply)
+    call get_pointer(var, 'moist',  (/par%nlayers+2, par%nx+1/), moist)
 
     ! extra output
     call get_pointer(var, 'u', (/0/), wind)
-    call get_pointer(var, 'moist_map', (/par%nx+1/), moist_map)
     call get_pointer(var, 'd10', (/par%nlayers+2, par%nx+1/), d10)
     call get_pointer(var, 'd50', (/par%nlayers+2, par%nx+1/), d50)
     call get_pointer(var, 'd90', (/par%nlayers+2, par%nx+1/), d90)
@@ -120,7 +127,6 @@ contains
     nt = par%nt
     dt = par%dt
     dx = par%dx
-    Ta = par%Tp / par%dt
 
     tstart = get_time()
     tlog = tstart
@@ -132,26 +138,28 @@ contains
           tlog = get_time()
        end if
 
+       ! update moisture contents
+       call update_moisture(par, z, tide(ti), meteo(1), u(ti), moist)
+       call mix_toplayer(par, z, tide(ti))
+       
        ! update threshold
        uth = par%u_th
        call compute_threshold_grainsize(par, uth)
-       call compute_threshold_bedslope(par, x, z, uth)
-       call compute_threshold_moisture(par, zmoist, moist(ti,:), z, uth)
-
-       ! mix top layer of wet cells
-       call mix_toplayer(par, uth)
+!       call compute_threshold_bedslope(par, x, z, uth)
+       call compute_threshold_moisture(par, moist(1,:), uth)
 
        ! get available mass
        mass = get_layer_mass()
 
        ! compute transport capacity by wind, including thresholds
-       Cu = max(0.d0, 1.5e-4 * (u(ti) - uth)**3 / (u(ti) * par%VS))
+       alpha = (0.174 / log10(par%z0/par%k))**3
+       Cu = max(0.d0, alpha * par%Cb * par%rhoa / par%g * (u(ti) - uth)**3 / (u(ti) * par%VS))
 
        if (trim(par%scheme) .eq. 'explicit') then
           do j=2,par%nx+1
 
              ! compute supply based on sediment availability
-             supply(:,j) = compute_supply(mass(:,1,j), Cu(:,j), Ct2(:,j), Ta)
+             supply(:,j) = compute_supply(par, mass(:,1,j), par%accfac * Cu(:,j), Ct(:,j))
 
              do i=1,par%nfractions
              
@@ -169,7 +177,7 @@ contains
              do j=2,par%nx+1
 
                 ! compute supply based on sediment availability
-                supply(:,j) = compute_supply(mass(:,1,j), Cu(:,j), Ct2(:,j), Ta)
+                supply(:,j) = compute_supply(par, mass(:,1,j), par%accfac * Cu(:,j), Ct2(:,j))
 
                 do i=1,par%nfractions
                 
@@ -195,8 +203,19 @@ contains
 
        Ct = Ct2
 
+       ! add sediment deposit
+       do i = 1,par%nfractions
+          where (z < tide(ti))
+             supply(i,:) = supply(i,:) - par%Cw * &
+                  min(par%w * par%dt, tide(ti) - z) * &
+                  par%grain_dist(i) / max(1e-10, sum(par%grain_dist))
+          end where
+       end do
+       supply(:,1) = 0.d0
+
        ! update bed elevation
        z = update_bed(z, -supply, rho, par%dt)
+       call sweep_toplayer(par)
 
        ! incremental output
        call output_update(var)
@@ -207,8 +226,6 @@ contains
           ! update derived variables
           if (is_output(var, 'mass')) mass = get_layer_mass()
           if (is_output(var, 'u')) wind = u(ti)
-          if (is_output(var, 'moist_map')) &
-               moist_map = map_moisture(par, zmoist, moist(ti,:), z)
           if (is_output(var, 'd10')) d10 = get_layer_percentile(par, 0.1d0)
           if (is_output(var, 'd50')) d50 = get_layer_percentile(par, 0.5d0)
           if (is_output(var, 'd90')) d90 = get_layer_percentile(par, 0.9d0)
@@ -227,17 +244,31 @@ contains
 
   end subroutine run_model
 
-  function compute_supply(mass, Cu, Ct, T) result(supply)
+  function compute_supply(par, mass, Cu, Ct) result(supply)
 
+    type(parameters), intent(in) :: par
     real*8, dimension(:), intent(in) :: mass, Cu, Ct
-    real*8, dimension(size(mass)) :: dist, supply
-    real*8, intent(in) :: T
+    real*8, dimension(size(mass)) :: dist, dist2, supply
 
-    ! compute sediment distribution in bed
-    dist = mass / max(1e-10, sum(mass))
-                
+    dist = Ct / max(1e-10, Cu)
+
+    if (sum(dist) >= 1.d0) then ! deposition
+
+       ! compute distribution in air
+       dist = dist / max(1e-10, sum(dist))
+
+    else ! erosion
+    
+       ! compute sediment distribution in bed
+       dist2 = mass / max(1e-10, sum(mass))
+       dist = dist + dist2 * (1.d0 - sum(dist))
+
+    end if
+
+    call assert(abs(sum(dist) - 1.d0) < 1e-10)
+
     ! determine weighed supply
-    supply = (Cu * dist - Ct) / T
+    supply = (Cu * dist - Ct) / par%Tp * par%dt
 
     ! limit advection by available mass
     supply = min(mass, supply)

@@ -3,6 +3,7 @@ module bed_module
   use constants_module
   use utils_module
   use input_module
+  use moist_module
 
   use precision
   use bedcomposition_module
@@ -171,10 +172,9 @@ contains
     nfrac       = par%nfractions
     iunderlyr   = 2 ! graded sediments
     neulyr      = par%nlayers ! all layers are fixed
-    nlalyr      = 1 ! except one
+    nlalyr      = 0 ! except one
     theulyr     = par%layer_thickness
     thlalyr     = par%layer_thickness
-    keuler      = 2 ! first fixed layer is on top
     updbaselyr  = 1 ! base layer is independent
                                
     maxwarn     = 100
@@ -237,7 +237,7 @@ contains
     svfrac  = 1.0_fp       
     msed = 0.0_fp          
     do i = 1,par%nfractions
-       msed(i,:,:) = thlyr * cdryb(i) * par%grain_dist(i) / sum(par%grain_dist)
+       msed(i,:,:) = thlyr * cdryb(i) * par%grain_dist(i) / max(1e-10, sum(par%grain_dist))
     enddo
 
     call setbedfracprop(morlyr, sedtyp, sedd50, logsedsig, cdryb)
@@ -395,17 +395,17 @@ contains
 
   end subroutine compute_threshold_bedslope
 
-  subroutine mix_toplayer(par, u_th)
+  subroutine mix_toplayer(par, z, tide)
 
     type(parameters), intent(in) :: par
-    real*8, dimension(:,:), intent(in) :: u_th
+    real*8, dimension(:), intent(in) :: z
+    real*8, intent(in) :: tide
     integer :: i, j, k, nmix
     real*8 :: th
 
     integer :: istat
     real(fp), dimension(:,:,:), pointer :: msed
     real(fp), dimension(:,:), pointer :: thlyr
-    real(fp), dimension(:), allocatable :: cdryb
 
     real*8, dimension(:,:), allocatable :: dist
 
@@ -418,7 +418,7 @@ contains
     do k = 1,par%nx+1
 
        ! fix only if flooded
-       if (u_th(1,k) == 999.d0) then
+       if (z(k) <= tide) then
 
           ! determine mixing depth in terms of number of layers
           nmix = 0
@@ -426,8 +426,10 @@ contains
           do i = 1,size(thlyr(:,k))
              nmix = nmix + 1
              th = th + thlyr(i,k)
-             if (th >= par%Hs * par%facDOD) exit
+             if (th >= min(par%Hs, (tide - z(k)) * par%gamma) * par%facDOD) exit
           end do
+
+          if (nmix == 0) continue
 
           ! determine average sediment distribution over mixing depth
           do i = 1,par%nfractions
@@ -447,4 +449,50 @@ contains
         
   end subroutine mix_toplayer
 
+  subroutine sweep_toplayer(par)
+
+    type(parameters), intent(in) :: par
+    integer :: i, k, n, m
+
+    integer :: istat
+    real(fp), dimension(:,:,:), pointer :: msed
+
+    real*8, dimension(:), allocatable :: dist, mass
+
+    istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass' , msed)
+    if (istat/=0) call adderror(messages, message)
+
+    n = par%nfractions
+    m = par%nlayers+2
+    
+    allocate(dist(n))
+    allocate(mass(n))
+
+    do k = 1,par%nx+1
+
+       ! determine sediment distribution in top layer
+       dist = msed(:,1,k) / max(1e-10, sum(msed(:,1,k)))
+       
+       do i = 1,n
+          if (dist(i) < par%minfrac) then ! if fraction is below threshold
+
+             ! compute exchange of sediment between top two layers
+             mass = 0.d0
+             mass(i) = -msed(i,1,k)
+             mass(i+1:n) = msed(i,1,k) * sum(msed(i+1:n,2:m,k), dim=2) / max(1e-10, sum(msed(i+1:n,2:m,k)))
+
+             if (abs(sum(mass)) < 1e-10) then
+
+                ! swap sediment
+                msed(:,1,k) = msed(:,1,k) + mass
+                msed(:,2,k) = msed(:,2,k) - mass
+
+             end if
+             
+          end if
+       end do
+    end do
+
+  end subroutine sweep_toplayer
+  
 end module bed_module

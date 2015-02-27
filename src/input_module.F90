@@ -8,48 +8,55 @@ module input_module
   include 'sedparams.inc'
 
   type parameters
-     real*8    :: VS    = 0.d0
-     real*8    :: Tp    = 0.d0
-     real*8    :: u_th  = 0.d0
-     real*8    :: z     = 0.d0
-     real*8    :: S     = 0.d0
-     real*8    :: phi   = 0.d0
-     real*8    :: g     = 9.81d0
-     integer*4 :: nx    = 0
-     integer*4 :: nt    = 0
-     real*8    :: dt    = 0.d0
-     real*8    :: dx    = 0.d0
-     real*8    :: tstop = 0.d0
-     real*8    :: tout  = 0.d0
-     integer*4 :: ntout = 0
-     real*8    :: CFL   = -1.d0
-     real*8    :: accfac = 1.d0
+     real*8    :: VS    = 0.d0            ! [-] ratio sediment transport velocity to wind velocity
+     real*8    :: Tp    = 0.d0            ! [s] adaptation time scale in transport formulation
+     real*8    :: u_th  = 0.d0            ! [m/s] constant velocity threshold in transport formulation
+     real*8    :: z0    = 0.d0            ! [m] height of wind measurement
+     real*8    :: k     = 0.d0            ! [m] bottom friction
+     real*8    :: Cb    = 0.d0            ! [-] empirical constant in transport formulation
+     real*8    :: phi   = 0.d0            ! [-] angle of repose of sediment
+     real*8    :: g     = 0.d0            ! [m/s^2] gravitational acceleration
+     integer*4 :: nx    = 0               ! [-] number of grid cells
+     integer*4 :: nt    = 0               ! [-] number of time steps
+     real*8    :: dt    = 0.d0            ! [s] duration of time step
+     real*8    :: dx    = 0.d0            ! [m] size of grid cell
+     real*8    :: tstop = 0.d0            ! [s] duration of simulation
+     real*8    :: tout  = 0.d0            ! [s] time interval for writing model output to disk
+     integer*4 :: ntout = 0               ! [-] number of time steps written to disk
+     real*8    :: CFL   = 0.d0            ! [-] Courant condition
+     real*8    :: accfac = 0.d0           ! [-] acceleration factor applied to transport capacity
 
-     character(slen) :: wind_file = ''
-     character(slen) :: bed_file = ''
-     character(slen) :: moist_file = ''
-     character(slen) :: method_moist = ''
-     character(slen) :: output_dir = ''
+     character(slen) :: wind_file = ''    ! wind velocity time series definition file
+     character(slen) :: bed_file = ''     ! bed profile definition file
+     character(slen) :: tide_file = ''    ! tidal time series definition file
+     character(slen) :: moist_file = ''   ! moisture time series definition file
+     character(slen) :: method_moist = '' ! method for conversion of moisture content to velocity threshold
+     character(slen) :: output_dir = ''   ! output directory relative to working directory
 
-     character(10) :: scheme
-     integer*4 :: max_iter = 100
-     real*8    :: max_error = 1d-6
+     character(10) :: scheme              ! numerical scheme (implicit/explicit)
+     integer*4 :: max_iter = 0            ! [-] maximum number of point iterations per time step in implicit scheme
+     real*8    :: max_error = 0d0         ! [-] maximum relative error allowed in time step in implicit scheme
 
-     integer*4 :: nfractions = 1
-     integer*4 :: nlayers = 3
-     real*8    :: layer_thickness = 5e-4
-     real*8    :: rhop = 2650.d0
-     real*8    :: rhom = 1650.d0
-     real*8    :: rhow = 1025.d0
-     real*8    :: rhoa = 1.25d0
-     real*8    :: porosity = 0.4d0
-     real*8    :: A = 100.d0
-     real*8    :: Hs = 1.d0
-     real*8    :: facDOD = 1d-1
-     real*8, dimension(:), allocatable :: grain_size
-     real*8, dimension(:), allocatable :: grain_dist
+     integer*4 :: nfractions = 0          ! [-] number of sediment fractions
+     integer*4 :: nlayers = 0             ! [-] number of bed layers additional to transport and base layer
+     real*8    :: layer_thickness = 0.d0  ! [m] thickness of bed layers
+     real*8    :: minfrac = 0.d0          ! [-] minimum fraction allowed in top layer of bed
+     real*8    :: rhop = 0.d0             ! [kg/m^3] sediment density (excluding pores)
+     real*8    :: rhom = 0.d0             ! [kg/m^3] sediment density (including pores)
+     real*8    :: rhow = 0.d0             ! [kg/m^3] water density
+     real*8    :: rhoa = 0.d0             ! [kg/m^3] air density
+     real*8    :: porosity = 0.d0         ! [-] porosity of bed
+     real*8    :: A = 0.d0                ! [-] empirical constant in grain size threshold formulation
+     real*8    :: Hs = 0.d0               ! [m] offshore wave height
+     real*8    :: gamma = 0.d0            ! [-] maximum wave height to depth ratio
+     real*8    :: facDOD = 0.d0           ! [-] wave height to depth of disturbance ratio
+     real*8    :: F = 0.d0                ! [m/s] hydraulic infiltration rate
+     real*8    :: Cw = 0.d0               ! [-] sediment concentration in water column
+     real*8    :: w = 0.d0                ! [m/s] fall velocity of sediment in water column
+     real*8, dimension(:), allocatable :: grain_size ! [m] median grain size for each fraction
+     real*8, dimension(:), allocatable :: grain_dist ! [-] occurence of each fraction in bed
 
-     character(10), dimension(:), allocatable  :: outputvars
+     character(10), dimension(:), allocatable  :: outputvars ! space separated list of output variables
 
   end type parameters
 
@@ -123,24 +130,26 @@ contains
     write(*,*) 'PARAMETER SETTINGS'
     write(*,*) '**********************************************************'
     
-    par%VS    = read_key_dbl(fname, 'VS',    1.d0)
-    par%Tp    = read_key_dbl(fname, 'Tp',    0.d5)
-    par%u_th  = read_key_dbl(fname, 'u_th',  0.d4)
-    par%z     = read_key_dbl(fname, 'z',     0.d1)
-    par%S     = read_key_dbl(fname, 'S',     0.d00015)
-    par%g     = read_key_dbl(fname, 'g',     9.81d0)
-    par%phi   = read_key_dbl(fname, 'phi',   40.d0)
-    par%dt    = read_key_dbl(fname, 'dt',    0.d05)
-    par%dx    = read_key_dbl(fname, 'dx',    1.d0)
-    par%tstop = read_key_dbl(fname, 'tstop', 3600.d0)
-    par%tout  = read_key_dbl(fname, 'tout',  1.d0)
+    par%VS     = read_key_dbl(fname, 'VS',    1.d0)
+    par%Tp     = read_key_dbl(fname, 'Tp',    1.0d0)
+    par%u_th   = read_key_dbl(fname, 'u_th',  0.4d0)
+    par%z0     = read_key_dbl(fname, 'z0',    1.d0)
+    par%k      = read_key_dbl(fname, 'k',     0.01d0)
+    par%Cb     = read_key_dbl(fname, 'Cb',    1.8d0)
+    par%g      = read_key_dbl(fname, 'g',     9.81d0)
+    par%phi    = read_key_dbl(fname, 'phi',   40.d0)
+    par%dt     = read_key_dbl(fname, 'dt',    0.05d0)
+    par%dx     = read_key_dbl(fname, 'dx',    1.d0)
+    par%tstop  = read_key_dbl(fname, 'tstop', 3600.d0)
+    par%tout   = read_key_dbl(fname, 'tout',  1.d0)
     par%accfac = read_key_dbl(fname, 'accfac',  1.d0)
-    par%wind_file   = read_key_str(fname, 'wind_file',  '')
-    par%bed_file    = read_key_str(fname, 'bed_file',   '')
-    par%moist_file  = read_key_str(fname, 'moist_file', '')
+    par%wind_file    = read_key_str(fname, 'wind_file',  '')
+    par%bed_file     = read_key_str(fname, 'bed_file',   '')
+    par%tide_file    = read_key_str(fname, 'tide_file', '')
+    par%moist_file   = read_key_str(fname, 'moist_file', '')
     par%method_moist = read_key_str(fname, 'method_moist', 'belly_johnson')
-    par%output_dir = read_key_str(fname, 'output_dir', '')
-    par%scheme = read_key_str(fname, 'scheme', 'implicit')
+    par%output_dir   = read_key_str(fname, 'output_dir', '')
+    par%scheme       = read_key_str(fname, 'scheme', 'implicit')
 
     if (trim(par%scheme) .eq. 'implicit') then
        par%max_iter  = read_key_int(fname, 'max_iter',  100)
@@ -152,7 +161,8 @@ contains
     ! bed composition
     par%nfractions      = read_key_int(fname, 'nfractions',      1)
     par%nlayers         = read_key_int(fname, 'nlayers',         3)
-    par%layer_thickness = read_key_dbl(fname, 'layer_thickness', 0.d0005)
+    par%layer_thickness = read_key_dbl(fname, 'layer_thickness', 0.0005d0)
+    par%minfrac         = read_key_dbl(fname, 'minfrac',         0.0001d0)
     par%rhoa            = read_key_dbl(fname, 'rhoa',            1.25d0)
     par%rhow            = read_key_dbl(fname, 'rhow',            1025.d0)
     par%rhom            = read_key_dbl(fname, 'rhom',            1650.d0)
@@ -160,7 +170,11 @@ contains
     par%porosity        = read_key_dbl(fname, 'porosity',        0.4d0)
     par%A               = read_key_dbl(fname, 'A',               100.d0)
     par%Hs              = read_key_dbl(fname, 'Hs',              1.d0)
-    par%facDOD          = read_key_dbl(fname, 'facDOD',          0.d1)
+    par%gamma           = read_key_dbl(fname, 'gamma',           0.5d0)
+    par%facDOD          = read_key_dbl(fname, 'facDOD',          0.1d0)
+    par%F               = read_key_dbl(fname, 'F',               1.0d-4)
+    par%Cw              = read_key_dbl(fname, 'Cw',              0.d0)
+    par%w               = read_key_dbl(fname, 'w',               3.0d-2)
 
     allocate(par%grain_size(par%nfractions))
     allocate(par%grain_dist(par%nfractions))
