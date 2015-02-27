@@ -1,0 +1,1650 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Modules and functions &mdash; AeoLiS 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="AeoLiS 0.1 documentation" href="index.html" />
+    <link rel="prev" title="Examples" href="examples.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="f-modindex.html" title="Fortran Module Index"
+             >fortran modules</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Examples"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">AeoLiS 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="modules-and-functions">
+<h1>Modules and functions<a class="headerlink" href="#modules-and-functions" title="Permalink to this headline">¶</a></h1>
+<dl class="program">
+<dt id="f/aeolis">
+<em class="property">program  </em><tt class="descname">aeolis</tt><a class="headerlink" href="#f/aeolis" title="Permalink to this definition">¶</a></dt>
+<dd><p>AeoLiS main program.
+Reads command line options, model parameters and start model run.</p>
+<dl class="docutils">
+<dt>Usage:</dt>
+<dd><div class="first last line-block">
+<div class="line">aeolis &lt;input&gt;</div>
+<div class="line">aeolis &lt;input&gt; [options]</div>
+</div>
+</dd>
+<dt>Options:</dt>
+<dd>-v Shows the version of this AeoLiS executable</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Use :</th><td class="field-body"><a class="reference internal" href="#f/run_module" title="f/run_module: This is a docstring of run_module"><tt class="xref f f-mod docutils literal"><span class="pre">run_module</span></tt></a>, <a class="reference internal" href="#f/constants_module" title="f/constants_module"><tt class="xref f f-mod docutils literal"><span class="pre">constants_module</span></tt></a>, <a class="reference internal" href="#f/input_module" title="f/input_module"><tt class="xref f f-mod docutils literal"><span class="pre">input_module</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/input_module/read_cmd" title="f/input_module/read_cmd"><tt class="xref f f-func docutils literal"><span class="pre">read_cmd()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_params" title="f/input_module/read_params"><tt class="xref f f-func docutils literal"><span class="pre">read_params()</span></tt></a>, <a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="f/run_module">
+<span id="run-module"></span><h2>run_module<a class="headerlink" href="#f/run_module" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Description</p>
+<p>This is a docstring of run_module</p>
+<p class="rubric">Quick access</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Routines:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a>, <a class="reference internal" href="#f/run_module/write_progress" title="f/run_module/write_progress"><tt class="xref f f-func docutils literal"><span class="pre">write_progress()</span></tt></a>, <a class="reference internal" href="#f/run_module/get_time" title="f/run_module/get_time"><tt class="xref f f-func docutils literal"><span class="pre">get_time()</span></tt></a>, <a class="reference internal" href="#f/run_module/compute_supply" title="f/run_module/compute_supply"><tt class="xref f f-func docutils literal"><span class="pre">compute_supply()</span></tt></a>, <a class="reference internal" href="#f/run_module/format_time" title="f/run_module/format_time"><tt class="xref f f-func docutils literal"><span class="pre">format_time()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Needed modules</p>
+<ul class="simple">
+<li><a class="reference internal" href="#f/moist_module" title="f/moist_module"><tt class="xref f f-mod docutils literal"><span class="pre">moist_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/utils_module" title="f/utils_module"><tt class="xref f f-mod docutils literal"><span class="pre">utils_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/wind_module" title="f/wind_module"><tt class="xref f f-mod docutils literal"><span class="pre">wind_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/input_module" title="f/input_module"><tt class="xref f f-mod docutils literal"><span class="pre">input_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/bed_module" title="f/bed_module"><tt class="xref f f-mod docutils literal"><span class="pre">bed_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/output_module" title="f/output_module"><tt class="xref f f-mod docutils literal"><span class="pre">output_module</span></tt></a></li>
+</ul>
+<p class="rubric">Subroutines and functions</p>
+<dl class="subroutine">
+<dt id="f/run_module/run_model">
+<em class="property">subroutine  </em><tt class="descclassname">run_module/</tt><tt class="descname">run_model</tt><big>(</big><em>par</em><big>)</big><a class="headerlink" href="#f/run_module/run_model" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/aeolis" title="f/aeolis"><tt class="xref f f-prog docutils literal"><span class="pre">aeolis</span></tt></a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/bed_module/generate_bed" title="f/bed_module/generate_bed"><tt class="xref f f-func docutils literal"><span class="pre">generate_bed()</span></tt></a>, <a class="reference internal" href="#f/bed_module/generate_bedcomposition" title="f/bed_module/generate_bedcomposition"><tt class="xref f f-func docutils literal"><span class="pre">generate_bedcomposition()</span></tt></a>, <a class="reference internal" href="#f/wind_module/generate_wind" title="f/wind_module/generate_wind"><tt class="xref f f-func docutils literal"><span class="pre">generate_wind()</span></tt></a>, <a class="reference internal" href="#f/moist_module/generate_tide" title="f/moist_module/generate_tide"><tt class="xref f f-func docutils literal"><span class="pre">generate_tide()</span></tt></a>, <a class="reference internal" href="#f/moist_module/generate_meteo" title="f/moist_module/generate_meteo"><tt class="xref f f-func docutils literal"><span class="pre">generate_meteo()</span></tt></a>, <a class="reference internal" href="#f/output_module/write_dimensions" title="f/output_module/write_dimensions"><tt class="xref f f-func docutils literal"><span class="pre">write_dimensions()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_init" title="f/output_module/output_init"><tt class="xref f f-func docutils literal"><span class="pre">output_init()</span></tt></a>, <a class="reference internal" href="#f/run_module/get_time" title="f/run_module/get_time"><tt class="xref f f-func docutils literal"><span class="pre">get_time()</span></tt></a>, <a class="reference internal" href="#f/run_module/write_progress" title="f/run_module/write_progress"><tt class="xref f f-func docutils literal"><span class="pre">write_progress()</span></tt></a>, <a class="reference internal" href="#f/moist_module/update_moisture" title="f/moist_module/update_moisture"><tt class="xref f f-func docutils literal"><span class="pre">update_moisture()</span></tt></a>, <a class="reference internal" href="#f/bed_module/mix_toplayer" title="f/bed_module/mix_toplayer"><tt class="xref f f-func docutils literal"><span class="pre">mix_toplayer()</span></tt></a>, <a class="reference internal" href="#f/bed_module/compute_threshold_grainsize" title="f/bed_module/compute_threshold_grainsize"><tt class="xref f f-func docutils literal"><span class="pre">compute_threshold_grainsize()</span></tt></a>, <a class="reference internal" href="#f/moist_module/compute_threshold_moisture" title="f/moist_module/compute_threshold_moisture"><tt class="xref f f-func docutils literal"><span class="pre">compute_threshold_moisture()</span></tt></a>, <a class="reference internal" href="#f/bed_module/get_layer_mass" title="f/bed_module/get_layer_mass"><tt class="xref f f-func docutils literal"><span class="pre">get_layer_mass()</span></tt></a>, <a class="reference internal" href="#f/run_module/compute_supply" title="f/run_module/compute_supply"><tt class="xref f f-func docutils literal"><span class="pre">compute_supply()</span></tt></a>, <a class="reference internal" href="#f/bed_module/update_bed" title="f/bed_module/update_bed"><tt class="xref f f-func docutils literal"><span class="pre">update_bed()</span></tt></a>, <a class="reference internal" href="#f/bed_module/sweep_toplayer" title="f/bed_module/sweep_toplayer"><tt class="xref f f-func docutils literal"><span class="pre">sweep_toplayer()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_update" title="f/output_module/output_update"><tt class="xref f f-func docutils literal"><span class="pre">output_update()</span></tt></a>, <a class="reference internal" href="#f/output_module/is_output" title="f/output_module/is_output"><tt class="xref f f-func docutils literal"><span class="pre">is_output()</span></tt></a>, <a class="reference internal" href="#f/bed_module/get_layer_percentile" title="f/bed_module/get_layer_percentile"><tt class="xref f f-func docutils literal"><span class="pre">get_layer_percentile()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_write" title="f/output_module/output_write"><tt class="xref f f-func docutils literal"><span class="pre">output_write()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_clear" title="f/output_module/output_clear"><tt class="xref f f-func docutils literal"><span class="pre">output_clear()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_close" title="f/output_module/output_close"><tt class="xref f f-func docutils literal"><span class="pre">output_close()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/run_module/compute_supply">
+<em class="property">function  </em><tt class="descclassname">run_module/</tt><tt class="descname">compute_supply</tt><big>(</big><em>par</em>, <em>mass</em>, <em>cu</em>, <em>ct</em><big>)</big><a class="headerlink" href="#f/run_module/compute_supply" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em> :: parameters structure</td>
+</tr>
+</tbody>
+</table>
+<p>:p real mass(:) [in]:
+:p real cu(:) [in]:
+:p real ct(:) [in]:
+:r real supply(size(mass):</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/assert" title="f/utils_module/assert"><tt class="xref f f-func docutils literal"><span class="pre">assert()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/run_module/write_progress">
+<em class="property">subroutine  </em><tt class="descclassname">run_module/</tt><tt class="descname">write_progress</tt><big>(</big><em>ti</em>, <em>nt</em>, <em>tstart</em><big>)</big><a class="headerlink" href="#f/run_module/write_progress" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ti</strong><em> [</em><em>integer</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>nt</strong><em> [</em><em>integer</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>tstart</strong><em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/run_module/get_time" title="f/run_module/get_time"><tt class="xref f f-func docutils literal"><span class="pre">get_time()</span></tt></a>, <a class="reference internal" href="#f/run_module/format_time" title="f/run_module/format_time"><tt class="xref f f-func docutils literal"><span class="pre">format_time()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/run_module/get_time">
+<em class="property">function  </em><tt class="descclassname">run_module/</tt><tt class="descname">get_time</tt><big>(</big><big>)</big><a class="headerlink" href="#f/run_module/get_time" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><strong>tm</strong><em> [</em><em>real</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a>, <a class="reference internal" href="#f/run_module/write_progress" title="f/run_module/write_progress"><tt class="xref f f-func docutils literal"><span class="pre">write_progress()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/run_module/format_time">
+<em class="property">function  </em><tt class="descclassname">run_module/</tt><tt class="descname">format_time</tt><big>(</big><em>tm</em><big>)</big><a class="headerlink" href="#f/run_module/format_time" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tm</strong><em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><strong>str</strong><em> [</em><em>character</em><em>]</em></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/write_progress" title="f/run_module/write_progress"><tt class="xref f f-func docutils literal"><span class="pre">write_progress()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="f/input_module">
+<span id="input-module"></span><h2>input_module<a class="headerlink" href="#f/input_module" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Quick access</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Types:</th><td class="field-body"><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><tt class="xref f f-type docutils literal"><span class="pre">parameters</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Routines:</th><td class="field-body"><a class="reference internal" href="#f/input_module/check_params" title="f/input_module/check_params"><tt class="xref f f-func docutils literal"><span class="pre">check_params()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_cmd" title="f/input_module/read_cmd"><tt class="xref f f-func docutils literal"><span class="pre">read_cmd()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_params" title="f/input_module/read_params"><tt class="xref f f-func docutils literal"><span class="pre">read_params()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key" title="f/input_module/read_key"><tt class="xref f f-func docutils literal"><span class="pre">read_key()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_dbl" title="f/input_module/read_key_dbl"><tt class="xref f f-func docutils literal"><span class="pre">read_key_dbl()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_int" title="f/input_module/read_key_int"><tt class="xref f f-func docutils literal"><span class="pre">read_key_int()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_str" title="f/input_module/read_key_str"><tt class="xref f f-func docutils literal"><span class="pre">read_key_str()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_strvec" title="f/input_module/read_key_strvec"><tt class="xref f f-func docutils literal"><span class="pre">read_key_strvec()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_dblvec" title="f/input_module/read_key_dblvec"><tt class="xref f f-func docutils literal"><span class="pre">read_key_dblvec()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Needed modules</p>
+<ul class="simple">
+<li><a class="reference internal" href="#f/utils_module" title="f/utils_module"><tt class="xref f f-mod docutils literal"><span class="pre">utils_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/constants_module" title="f/constants_module"><tt class="xref f f-mod docutils literal"><span class="pre">constants_module</span></tt></a></li>
+</ul>
+<p class="rubric">Types</p>
+<ul>
+<li><dl class="type">
+<dt id="f/input_module/parameters">
+<em class="property">type  </em><tt class="descclassname">input_module/</tt><tt class="descname">parameters</tt><a class="headerlink" href="#f/input_module/parameters" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type fields:</th><td class="field-body"><ul class="first last simple">
+<li><tt class="descname">% </tt><tt class="descname">cfl</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">dx</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">wind_file</tt><em> [</em><em>character</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">cb</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">max_error</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">vs</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">ntout</tt><em> [</em><em>integer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">cw</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">dt</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">layer_thickness</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">method_moist</tt><em> [</em><em>character</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">tp</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">moist_file</tt><em> [</em><em>character</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">nx</tt><em> [</em><em>integer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">porosity</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">g</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">output_dir</tt><em> [</em><em>character</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">scheme</tt><em> [</em><em>character</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">nt</tt><em> [</em><em>integer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">max_iter</tt><em> [</em><em>integer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">accfac</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">phi</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">minfrac</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">hs</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">rhop</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">rhow</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">facdod</tt><em> [</em><em>real</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:f real grain_size(:) [allocatable]:
+:f real rhom:
+:f real rhoa:
+:f real z0:
+:f real a:
+:f character bed_file:
+:f integer nlayers:
+:f character tide_file:
+:f real grain_dist(:) [allocatable]:
+:f real f:
+:f integer nfractions:
+:f real k:
+:f character outputvars(:) [allocatable]:
+:f real u_th:
+:f real tout:
+:f real w:
+:f real tstop:
+:f real gamma:</p>
+</dd></dl>
+
+</li>
+</ul>
+<p class="rubric">Subroutines and functions</p>
+<dl class="function">
+<dt id="f/input_module/read_cmd">
+<em class="property">function  </em><tt class="descclassname">input_module/</tt><tt class="descname">read_cmd</tt><big>(</big><big>)</big><a class="headerlink" href="#f/input_module/read_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><strong>fname</strong><em> [</em><em>character</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/aeolis" title="f/aeolis"><tt class="xref f f-prog docutils literal"><span class="pre">aeolis</span></tt></a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/split_path" title="f/utils_module/split_path"><tt class="xref f f-func docutils literal"><span class="pre">split_path()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/input_module/read_params">
+<em class="property">function  </em><tt class="descclassname">input_module/</tt><tt class="descname">read_params</tt><big>(</big><em>fname</em><big>)</big><a class="headerlink" href="#f/input_module/read_params" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fname</strong><em> [</em><em>character</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>]</em></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/aeolis" title="f/aeolis"><tt class="xref f f-prog docutils literal"><span class="pre">aeolis</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/input_module/read_key_dbl" title="f/input_module/read_key_dbl"><tt class="xref f f-func docutils literal"><span class="pre">read_key_dbl()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_str" title="f/input_module/read_key_str"><tt class="xref f f-func docutils literal"><span class="pre">read_key_str()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_int" title="f/input_module/read_key_int"><tt class="xref f f-func docutils literal"><span class="pre">read_key_int()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_dblvec" title="f/input_module/read_key_dblvec"><tt class="xref f f-func docutils literal"><span class="pre">read_key_dblvec()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_strvec" title="f/input_module/read_key_strvec"><tt class="xref f f-func docutils literal"><span class="pre">read_key_strvec()</span></tt></a>, <a class="reference internal" href="#f/input_module/check_params" title="f/input_module/check_params"><tt class="xref f f-func docutils literal"><span class="pre">check_params()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/input_module/check_params">
+<em class="property">subroutine  </em><tt class="descclassname">input_module/</tt><tt class="descname">check_params</tt><big>(</big><em>par</em><big>)</big><a class="headerlink" href="#f/input_module/check_params" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/input_module/read_params" title="f/input_module/read_params"><tt class="xref f f-func docutils literal"><span class="pre">read_params()</span></tt></a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/sort" title="f/utils_module/sort"><tt class="xref f f-func docutils literal"><span class="pre">sort()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/input_module/read_key_str">
+<em class="property">function  </em><tt class="descclassname">input_module/</tt><tt class="descname">read_key_str</tt><big>(</big><em>fname</em>, <em>key</em><span class="optional">[</span>, <em>default_bn</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#f/input_module/read_key_str" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fname</strong><em> [</em><em>character</em><em>]</em></li>
+<li><strong>key</strong><em> [</em><em>character</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><p class="first"><strong>default_bn</strong><em> [</em><em>character</em><em>,</em><em>optional</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>value</strong><em> [</em><em>character</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/input_module/read_params" title="f/input_module/read_params"><tt class="xref f f-func docutils literal"><span class="pre">read_params()</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/input_module/read_key" title="f/input_module/read_key"><tt class="xref f f-func docutils literal"><span class="pre">read_key()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/input_module/read_key_strvec">
+<em class="property">function  </em><tt class="descclassname">input_module/</tt><tt class="descname">read_key_strvec</tt><big>(</big><em>fname</em>, <em>key</em><span class="optional">[</span>, <em>default_bn</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#f/input_module/read_key_strvec" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fname</strong><em> [</em><em>character</em><em>]</em></li>
+<li><strong>key</strong><em> [</em><em>character</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><p class="first last"><strong>default_bn</strong><em> [</em><em>character</em><em>,</em><em>optional</em><em>]</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:r character value_arr(:) [allocatable]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/input_module/read_params" title="f/input_module/read_params"><tt class="xref f f-func docutils literal"><span class="pre">read_params()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/input_module/read_key" title="f/input_module/read_key"><tt class="xref f f-func docutils literal"><span class="pre">read_key()</span></tt></a>, <a class="reference internal" href="#f/utils_module/split" title="f/utils_module/split"><tt class="xref f f-func docutils literal"><span class="pre">split()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/input_module/read_key_dbl">
+<em class="property">function  </em><tt class="descclassname">input_module/</tt><tt class="descname">read_key_dbl</tt><big>(</big><em>fname</em>, <em>key</em><span class="optional">[</span>, <em>default_bn</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#f/input_module/read_key_dbl" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fname</strong><em> [</em><em>character</em><em>]</em></li>
+<li><strong>key</strong><em> [</em><em>character</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><p class="first"><strong>default_bn</strong><em> [</em><em>real</em><em>,</em><em>optional</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>value_dbl</strong><em> [</em><em>real</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/input_module/read_params" title="f/input_module/read_params"><tt class="xref f f-func docutils literal"><span class="pre">read_params()</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/input_module/read_key" title="f/input_module/read_key"><tt class="xref f f-func docutils literal"><span class="pre">read_key()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/input_module/read_key_dblvec">
+<em class="property">function  </em><tt class="descclassname">input_module/</tt><tt class="descname">read_key_dblvec</tt><big>(</big><em>fname</em>, <em>key</em>, <em>n</em><span class="optional">[</span>, <em>default_bn</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#f/input_module/read_key_dblvec" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fname</strong><em> [</em><em>character</em><em>]</em></li>
+<li><strong>key</strong><em> [</em><em>character</em><em>]</em></li>
+<li><strong>n</strong><em> [</em><em>integer</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><p class="first"><strong>default_bn</strong><em> [</em><em>real</em><em>,</em><em>optional</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>value_dbl</strong> (n)<em> [</em><em>real</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/input_module/read_params" title="f/input_module/read_params"><tt class="xref f f-func docutils literal"><span class="pre">read_params()</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/input_module/read_key" title="f/input_module/read_key"><tt class="xref f f-func docutils literal"><span class="pre">read_key()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/input_module/read_key_int">
+<em class="property">function  </em><tt class="descclassname">input_module/</tt><tt class="descname">read_key_int</tt><big>(</big><em>fname</em>, <em>key</em><span class="optional">[</span>, <em>default_bn</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#f/input_module/read_key_int" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fname</strong><em> [</em><em>character</em><em>]</em></li>
+<li><strong>key</strong><em> [</em><em>character</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><p class="first"><strong>default_bn</strong><em> [</em><em>integer</em><em>,</em><em>optional</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>value_int</strong><em> [</em><em>integer</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/input_module/read_params" title="f/input_module/read_params"><tt class="xref f f-func docutils literal"><span class="pre">read_params()</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/input_module/read_key" title="f/input_module/read_key"><tt class="xref f f-func docutils literal"><span class="pre">read_key()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/input_module/read_key">
+<em class="property">function  </em><tt class="descclassname">input_module/</tt><tt class="descname">read_key</tt><big>(</big><em>fname</em>, <em>key</em><big>)</big><a class="headerlink" href="#f/input_module/read_key" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fname</strong><em> [</em><em>character</em><em>]</em></li>
+<li><strong>key</strong><em> [</em><em>character</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>value</strong><em> [</em><em>character</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/input_module/read_key_dbl" title="f/input_module/read_key_dbl"><tt class="xref f f-func docutils literal"><span class="pre">read_key_dbl()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_strvec" title="f/input_module/read_key_strvec"><tt class="xref f f-func docutils literal"><span class="pre">read_key_strvec()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_str" title="f/input_module/read_key_str"><tt class="xref f f-func docutils literal"><span class="pre">read_key_str()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_dblvec" title="f/input_module/read_key_dblvec"><tt class="xref f f-func docutils literal"><span class="pre">read_key_dblvec()</span></tt></a>, <a class="reference internal" href="#f/input_module/read_key_int" title="f/input_module/read_key_int"><tt class="xref f f-func docutils literal"><span class="pre">read_key_int()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="f/wind_module">
+<span id="wind-module"></span><h2>wind_module<a class="headerlink" href="#f/wind_module" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Quick access</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Routines:</th><td class="field-body"><a class="reference internal" href="#f/wind_module/generate_wind" title="f/wind_module/generate_wind"><tt class="xref f f-func docutils literal"><span class="pre">generate_wind()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Needed modules</p>
+<ul class="simple">
+<li><a class="reference internal" href="#f/utils_module" title="f/utils_module"><tt class="xref f f-mod docutils literal"><span class="pre">utils_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/constants_module" title="f/constants_module"><tt class="xref f f-mod docutils literal"><span class="pre">constants_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/input_module" title="f/input_module"><tt class="xref f f-mod docutils literal"><span class="pre">input_module</span></tt></a></li>
+</ul>
+<p class="rubric">Subroutines and functions</p>
+<dl class="subroutine">
+<dt id="f/wind_module/generate_wind">
+<em class="property">subroutine  </em><tt class="descclassname">wind_module/</tt><tt class="descname">generate_wind</tt><big>(</big><em>par</em>, <em>u</em><big>)</big><a class="headerlink" href="#f/wind_module/generate_wind" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p real u(:) [out,allocatable]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/rand_normal" title="f/utils_module/rand_normal"><tt class="xref f f-func docutils literal"><span class="pre">rand_normal()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="f/moist_module">
+<span id="moist-module"></span><h2>moist_module<a class="headerlink" href="#f/moist_module" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Quick access</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Types:</th><td class="field-body"><a class="reference internal" href="#f/moist_module/meteorology" title="f/moist_module/meteorology"><tt class="xref f f-type docutils literal"><span class="pre">meteorology</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Routines:</th><td class="field-body"><a class="reference internal" href="#f/moist_module/generate_meteo" title="f/moist_module/generate_meteo"><tt class="xref f f-func docutils literal"><span class="pre">generate_meteo()</span></tt></a>, <a class="reference internal" href="#f/moist_module/compute_threshold_moisture" title="f/moist_module/compute_threshold_moisture"><tt class="xref f f-func docutils literal"><span class="pre">compute_threshold_moisture()</span></tt></a>, <a class="reference internal" href="#f/moist_module/generate_tide" title="f/moist_module/generate_tide"><tt class="xref f f-func docutils literal"><span class="pre">generate_tide()</span></tt></a>, <a class="reference internal" href="#f/moist_module/generate_moist" title="f/moist_module/generate_moist"><tt class="xref f f-func docutils literal"><span class="pre">generate_moist()</span></tt></a>, <a class="reference internal" href="#f/moist_module/update_moisture" title="f/moist_module/update_moisture"><tt class="xref f f-func docutils literal"><span class="pre">update_moisture()</span></tt></a>, <a class="reference internal" href="#f/moist_module/map_moisture" title="f/moist_module/map_moisture"><tt class="xref f f-func docutils literal"><span class="pre">map_moisture()</span></tt></a>, <a class="reference internal" href="#f/moist_module/saturation_pressure" title="f/moist_module/saturation_pressure"><tt class="xref f f-func docutils literal"><span class="pre">saturation_pressure()</span></tt></a>, <a class="reference internal" href="#f/moist_module/vaporation_pressure_slope" title="f/moist_module/vaporation_pressure_slope"><tt class="xref f f-func docutils literal"><span class="pre">vaporation_pressure_slope()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Needed modules</p>
+<ul class="simple">
+<li><a class="reference internal" href="#f/utils_module" title="f/utils_module"><tt class="xref f f-mod docutils literal"><span class="pre">utils_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/constants_module" title="f/constants_module"><tt class="xref f f-mod docutils literal"><span class="pre">constants_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/input_module" title="f/input_module"><tt class="xref f f-mod docutils literal"><span class="pre">input_module</span></tt></a></li>
+</ul>
+<p class="rubric">Types</p>
+<ul>
+<li><dl class="type">
+<dt id="f/moist_module/meteorology">
+<em class="property">type  </em><tt class="descclassname">moist_module/</tt><tt class="descname">meteorology</tt><a class="headerlink" href="#f/moist_module/meteorology" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type fields:</th><td class="field-body"><ul class="first last simple">
+<li><tt class="descname">% </tt><tt class="descname">latent_heat</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">relative_humidity</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">air_temperature</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">solar_radiation</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">atmospheric_pressure</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">air_specific_heat</tt><em> [</em><em>real</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</li>
+</ul>
+<p class="rubric">Subroutines and functions</p>
+<dl class="subroutine">
+<dt id="f/moist_module/generate_moist">
+<em class="property">subroutine  </em><tt class="descclassname">moist_module/</tt><tt class="descname">generate_moist</tt><big>(</big><em>par</em>, <em>z</em>, <em>m</em><big>)</big><a class="headerlink" href="#f/moist_module/generate_moist" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p real z(:) [out,allocatable]:
+:p real m(:,:) [out,allocatable]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/moist_module/generate_tide">
+<em class="property">subroutine  </em><tt class="descclassname">moist_module/</tt><tt class="descname">generate_tide</tt><big>(</big><em>par</em>, <em>tide</em><big>)</big><a class="headerlink" href="#f/moist_module/generate_tide" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p real tide(:) [out,allocatable]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/moist_module/generate_meteo">
+<em class="property">subroutine  </em><tt class="descclassname">moist_module/</tt><tt class="descname">generate_meteo</tt><big>(</big><em>par</em>, <em>meteo</em><big>)</big><a class="headerlink" href="#f/moist_module/generate_meteo" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p meteorology meteo(:) [out,allocatable]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/moist_module/compute_threshold_moisture">
+<em class="property">subroutine  </em><tt class="descclassname">moist_module/</tt><tt class="descname">compute_threshold_moisture</tt><big>(</big><em>par</em>, <em>moist</em>, <em>u_th</em><big>)</big><a class="headerlink" href="#f/moist_module/compute_threshold_moisture" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p real moist(:) [in]:
+:p real u_th(:,:) [inout]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/moist_module/update_moisture">
+<em class="property">subroutine  </em><tt class="descclassname">moist_module/</tt><tt class="descname">update_moisture</tt><big>(</big><em>par</em>, <em>z</em>, <em>tide</em>, <em>meteo</em>, <em>u</em>, <em>moist</em><big>)</big><a class="headerlink" href="#f/moist_module/update_moisture" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p real z(:) [in]:
+:p real tide [in]:
+:p meteorology meteo [in]:
+:p real u [in]:
+:p real moist(:,:) [inout]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/moist_module/vaporation_pressure_slope" title="f/moist_module/vaporation_pressure_slope"><tt class="xref f f-func docutils literal"><span class="pre">vaporation_pressure_slope()</span></tt></a>, <a class="reference internal" href="#f/moist_module/saturation_pressure" title="f/moist_module/saturation_pressure"><tt class="xref f f-func docutils literal"><span class="pre">saturation_pressure()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/moist_module/vaporation_pressure_slope">
+<em class="property">function  </em><tt class="descclassname">moist_module/</tt><tt class="descname">vaporation_pressure_slope</tt><big>(</big><em>t</em><big>)</big><a class="headerlink" href="#f/moist_module/vaporation_pressure_slope" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong><em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><strong>s</strong><em> [</em><em>real</em><em>]</em></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/moist_module/update_moisture" title="f/moist_module/update_moisture"><tt class="xref f f-func docutils literal"><span class="pre">update_moisture()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/moist_module/saturation_pressure">
+<em class="property">function  </em><tt class="descclassname">moist_module/</tt><tt class="descname">saturation_pressure</tt><big>(</big><em>t</em><big>)</big><a class="headerlink" href="#f/moist_module/saturation_pressure" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong><em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><strong>vp</strong><em> [</em><em>real</em><em>]</em></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/moist_module/update_moisture" title="f/moist_module/update_moisture"><tt class="xref f f-func docutils literal"><span class="pre">update_moisture()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/moist_module/map_moisture">
+<em class="property">function  </em><tt class="descclassname">moist_module/</tt><tt class="descname">map_moisture</tt><big>(</big><em>par</em>, <em>zm</em>, <em>m</em>, <em>z</em><big>)</big><a class="headerlink" href="#f/moist_module/map_moisture" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p real zm(:):
+:p real m(:):
+:p real z(:):
+:r real mg(par%nx+1):</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="f/bed_module">
+<span id="bed-module"></span><h2>bed_module<a class="headerlink" href="#f/bed_module" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Quick access</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#f/bed_module/message" title="f/bed_module/message"><tt class="xref f f-var docutils literal"><span class="pre">message</span></tt></a>, <a class="reference internal" href="#f/bed_module/messages" title="f/bed_module/messages"><tt class="xref f f-var docutils literal"><span class="pre">messages</span></tt></a>, <a class="reference internal" href="#f/bed_module/morlyr" title="f/bed_module/morlyr"><tt class="xref f f-var docutils literal"><span class="pre">morlyr</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Routines:</th><td class="field-body"><a class="reference internal" href="#f/bed_module/sweep_toplayer" title="f/bed_module/sweep_toplayer"><tt class="xref f f-func docutils literal"><span class="pre">sweep_toplayer()</span></tt></a>, <a class="reference internal" href="#f/bed_module/compute_threshold_grainsize" title="f/bed_module/compute_threshold_grainsize"><tt class="xref f f-func docutils literal"><span class="pre">compute_threshold_grainsize()</span></tt></a>, <a class="reference internal" href="#f/bed_module/generate_bedcomposition" title="f/bed_module/generate_bedcomposition"><tt class="xref f f-func docutils literal"><span class="pre">generate_bedcomposition()</span></tt></a>, <a class="reference internal" href="#f/bed_module/generate_bed" title="f/bed_module/generate_bed"><tt class="xref f f-func docutils literal"><span class="pre">generate_bed()</span></tt></a>, <a class="reference internal" href="#f/bed_module/compute_threshold_bedslope" title="f/bed_module/compute_threshold_bedslope"><tt class="xref f f-func docutils literal"><span class="pre">compute_threshold_bedslope()</span></tt></a>, <a class="reference internal" href="#f/bed_module/mix_toplayer" title="f/bed_module/mix_toplayer"><tt class="xref f f-func docutils literal"><span class="pre">mix_toplayer()</span></tt></a>, <a class="reference internal" href="#f/bed_module/get_layer_mass" title="f/bed_module/get_layer_mass"><tt class="xref f f-func docutils literal"><span class="pre">get_layer_mass()</span></tt></a>, <a class="reference internal" href="#f/bed_module/get_layer_massfraction" title="f/bed_module/get_layer_massfraction"><tt class="xref f f-func docutils literal"><span class="pre">get_layer_massfraction()</span></tt></a>, <a class="reference internal" href="#f/bed_module/get_layer_volumefraction" title="f/bed_module/get_layer_volumefraction"><tt class="xref f f-func docutils literal"><span class="pre">get_layer_volumefraction()</span></tt></a>, <a class="reference internal" href="#f/bed_module/get_layer_percentile" title="f/bed_module/get_layer_percentile"><tt class="xref f f-func docutils literal"><span class="pre">get_layer_percentile()</span></tt></a>, <a class="reference internal" href="#f/bed_module/update_bed" title="f/bed_module/update_bed"><tt class="xref f f-func docutils literal"><span class="pre">update_bed()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Needed modules</p>
+<ul class="simple">
+<li><a class="reference internal" href="#f/moist_module" title="f/moist_module"><tt class="xref f f-mod docutils literal"><span class="pre">moist_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/utils_module" title="f/utils_module"><tt class="xref f f-mod docutils literal"><span class="pre">utils_module</span></tt></a></li>
+<li><tt class="xref f f-mod docutils literal"><span class="pre">precision</span></tt></li>
+<li><a class="reference internal" href="#f/constants_module" title="f/constants_module"><tt class="xref f f-mod docutils literal"><span class="pre">constants_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/input_module" title="f/input_module"><tt class="xref f f-mod docutils literal"><span class="pre">input_module</span></tt></a></li>
+<li><tt class="xref f f-mod docutils literal"><span class="pre">message_module</span></tt></li>
+<li><tt class="xref f f-mod docutils literal"><span class="pre">bedcomposition_module</span></tt></li>
+</ul>
+<p class="rubric">Variables</p>
+<ul>
+<li><dl class="variable">
+<dt id="f/bed_module/morlyr">
+<tt class="descclassname">bed_module/</tt><tt class="descname">morlyr</tt><em> [</em><em>bedcomp_data</em><em>,</em><em>pointer</em><em>]</em><a class="headerlink" href="#f/bed_module/morlyr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</li>
+<li><dl class="variable">
+<dt id="f/bed_module/message">
+<tt class="descclassname">bed_module/</tt><tt class="descname">message</tt><em> [</em><em>character</em><em>]</em><a class="headerlink" href="#f/bed_module/message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</li>
+<li><dl class="variable">
+<dt id="f/bed_module/messages">
+<tt class="descclassname">bed_module/</tt><tt class="descname">messages</tt><em> [</em><em>message_stack</em><em>,</em><em>pointer</em><em>]</em><a class="headerlink" href="#f/bed_module/messages" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</li>
+</ul>
+<p class="rubric">Subroutines and functions</p>
+<dl class="subroutine">
+<dt id="f/bed_module/generate_bed">
+<em class="property">subroutine  </em><tt class="descclassname">bed_module/</tt><tt class="descname">generate_bed</tt><big>(</big><em>par</em>, <em>x</em>, <em>z</em><big>)</big><a class="headerlink" href="#f/bed_module/generate_bed" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p real x(:) [out,allocatable]:
+:p real z(:) [out,allocatable]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/bed_module/generate_bedcomposition">
+<em class="property">subroutine  </em><tt class="descclassname">bed_module/</tt><tt class="descname">generate_bedcomposition</tt><big>(</big><em>par</em>, <em>x</em>, <em>z</em><big>)</big><a class="headerlink" href="#f/bed_module/generate_bedcomposition" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p real x(:) [in]:
+:p real z(:) [in]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/bed_module/update_bed">
+<em class="property">function  </em><tt class="descclassname">bed_module/</tt><tt class="descname">update_bed</tt><big>(</big><em>z</em>, <em>mass</em>, <em>rho</em>, <em>dt</em><big>)</big><a class="headerlink" href="#f/bed_module/update_bed" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p real z(:) [in]:
+:p real mass(:,:) [in]:
+:p real rho(:) [in]:
+:p real dt [in]:
+:r real z_new(:) [allocatable]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/bed_module/get_layer_mass">
+<em class="property">function  </em><tt class="descclassname">bed_module/</tt><tt class="descname">get_layer_mass</tt><big>(</big><big>)</big><a class="headerlink" href="#f/bed_module/get_layer_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>:r real mass(:,:,:) [pointer]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/bed_module/get_layer_percentile">
+<em class="property">function  </em><tt class="descclassname">bed_module/</tt><tt class="descname">get_layer_percentile</tt><big>(</big><em>par</em>, <em>p</em><big>)</big><a class="headerlink" href="#f/bed_module/get_layer_percentile" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></li>
+<li><strong>p</strong><em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:r real perc(:,:) [allocatable]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/bed_module/get_layer_massfraction">
+<em class="property">function  </em><tt class="descclassname">bed_module/</tt><tt class="descname">get_layer_massfraction</tt><big>(</big><em>par</em><big>)</big><a class="headerlink" href="#f/bed_module/get_layer_massfraction" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:r real fractions(:,:,:) [allocatable]:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/bed_module/get_layer_volumefraction">
+<em class="property">function  </em><tt class="descclassname">bed_module/</tt><tt class="descname">get_layer_volumefraction</tt><big>(</big><em>par</em><big>)</big><a class="headerlink" href="#f/bed_module/get_layer_volumefraction" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:r real fractions(:,:,:) [allocatable]:</p>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/bed_module/compute_threshold_grainsize">
+<em class="property">subroutine  </em><tt class="descclassname">bed_module/</tt><tt class="descname">compute_threshold_grainsize</tt><big>(</big><em>par</em>, <em>u_th</em><big>)</big><a class="headerlink" href="#f/bed_module/compute_threshold_grainsize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p real u_th(:,:) [inout]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/bed_module/compute_threshold_bedslope">
+<em class="property">subroutine  </em><tt class="descclassname">bed_module/</tt><tt class="descname">compute_threshold_bedslope</tt><big>(</big><em>par</em>, <em>x</em>, <em>z</em>, <em>u_th</em><big>)</big><a class="headerlink" href="#f/bed_module/compute_threshold_bedslope" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p real x(:) [in]:
+:p real z(:) [in]:
+:p real u_th(:,:) [inout]:</p>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/bed_module/mix_toplayer">
+<em class="property">subroutine  </em><tt class="descclassname">bed_module/</tt><tt class="descname">mix_toplayer</tt><big>(</big><em>par</em>, <em>z</em>, <em>tide</em><big>)</big><a class="headerlink" href="#f/bed_module/mix_toplayer" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p real z(:) [in]:
+:p real tide [in]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/bed_module/sweep_toplayer">
+<em class="property">subroutine  </em><tt class="descclassname">bed_module/</tt><tt class="descname">sweep_toplayer</tt><big>(</big><em>par</em><big>)</big><a class="headerlink" href="#f/bed_module/sweep_toplayer" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="f/output_module">
+<span id="output-module"></span><h2>output_module<a class="headerlink" href="#f/output_module" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Quick access</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Types:</th><td class="field-body"><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><tt class="xref f f-type docutils literal"><span class="pre">variables</span></tt></a>, <a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><tt class="xref f f-type docutils literal"><span class="pre">variables_data</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Routines:</th><td class="field-body"><a class="reference internal" href="#f/output_module/write_dimensions" title="f/output_module/write_dimensions"><tt class="xref f f-func docutils literal"><span class="pre">write_dimensions()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_close" title="f/output_module/output_close"><tt class="xref f f-func docutils literal"><span class="pre">output_close()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_update" title="f/output_module/output_update"><tt class="xref f f-func docutils literal"><span class="pre">output_update()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_write" title="f/output_module/output_write"><tt class="xref f f-func docutils literal"><span class="pre">output_write()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_clear" title="f/output_module/output_clear"><tt class="xref f f-func docutils literal"><span class="pre">output_clear()</span></tt></a>, <a class="reference internal" href="#f/output_module/alloc_variable_data" title="f/output_module/alloc_variable_data"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable_data()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_init_data" title="f/output_module/output_init_data"><tt class="xref f f-func docutils literal"><span class="pre">output_init_data()</span></tt></a>, <a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank0" title="f/output_module/get_pointer_rank0"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank0()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank1" title="f/output_module/get_pointer_rank1"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank1()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank2" title="f/output_module/get_pointer_rank2"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank2()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank3" title="f/output_module/get_pointer_rank3"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank3()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_clear_data" title="f/output_module/output_clear_data"><tt class="xref f f-func docutils literal"><span class="pre">output_clear_data()</span></tt></a>, <a class="reference internal" href="#f/output_module/output_init" title="f/output_module/output_init"><tt class="xref f f-func docutils literal"><span class="pre">output_init()</span></tt></a>, <a class="reference internal" href="#f/output_module/is_output" title="f/output_module/is_output"><tt class="xref f f-func docutils literal"><span class="pre">is_output()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Needed modules</p>
+<ul class="simple">
+<li><a class="reference internal" href="#f/constants_module" title="f/constants_module"><tt class="xref f f-mod docutils literal"><span class="pre">constants_module</span></tt></a></li>
+<li><a class="reference internal" href="#f/input_module" title="f/input_module"><tt class="xref f f-mod docutils literal"><span class="pre">input_module</span></tt></a></li>
+</ul>
+<p class="rubric">Types</p>
+<ul>
+<li><dl class="type">
+<dt id="f/output_module/variables">
+<em class="property">type  </em><tt class="descclassname">output_module/</tt><tt class="descname">variables</tt><a class="headerlink" href="#f/output_module/variables" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type fields:</th><td class="field-body"><ul class="first last simple">
+<li><tt class="descname">% </tt><tt class="descname">name</tt><em> [</em><em>character</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">val</tt><em> [</em><a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><em>variables_data</em></a><em>,</em><em>pointer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">sum</tt><em> [</em><a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><em>variables_data</em></a><em>,</em><em>pointer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">max_bn</tt><em> [</em><a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><em>variables_data</em></a><em>,</em><em>pointer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">n</tt><em> [</em><em>integer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">var</tt><em> [</em><a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><em>variables_data</em></a><em>,</em><em>pointer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">min_bn</tt><em> [</em><a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><em>variables_data</em></a><em>,</em><em>pointer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">avg</tt><em> [</em><a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><em>variables_data</em></a><em>,</em><em>pointer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">rank_bn</tt><em> [</em><em>integer</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</li>
+<li><dl class="type">
+<dt id="f/output_module/variables_data">
+<em class="property">type  </em><tt class="descclassname">output_module/</tt><tt class="descname">variables_data</tt><a class="headerlink" href="#f/output_module/variables_data" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type fields:</th><td class="field-body"><ul class="first last simple">
+<li><tt class="descname">% </tt><tt class="descname">init</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">null</tt><em> [</em><em>real</em><em>,</em><em>pointer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">fid</tt><em> [</em><em>integer</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:f real rank3(:,:,:) [pointer]:
+:f real rank2(:,:) [pointer]:
+:f real rank1(:) [pointer]:
+:f real rank0 [pointer]:</p>
+</dd></dl>
+
+</li>
+</ul>
+<p class="rubric">Subroutines and functions</p>
+<dl class="subroutine">
+<dt id="f/output_module/alloc_variable">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">alloc_variable</tt><big>(</big><em>var</em>, <em>name</em>, <em>dims</em><big>)</big><a class="headerlink" href="#f/output_module/alloc_variable" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p variables var(:) [inout,allocatable]:
+:p character name [in]:
+:p integer dims(:) [in]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/output_module/get_pointer_rank0" title="f/output_module/get_pointer_rank0"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank0()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank1" title="f/output_module/get_pointer_rank1"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank1()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank2" title="f/output_module/get_pointer_rank2"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank2()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank3" title="f/output_module/get_pointer_rank3"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank3()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable_data" title="f/output_module/alloc_variable_data"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable_data()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/alloc_variable_data">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">alloc_variable_data</tt><big>(</big><em>var</em>, <em>dims</em>, <em>rank_bn</em><span class="optional">[</span>, <em>val</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#f/output_module/alloc_variable_data" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var</strong><em> [</em><a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><em>variables_data</em></a><em>,</em><em>inout,pointer</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:p integer dims(:) [in]:
+:p integer rank_bn [out]:
+:o real val [in,optional]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/get_pointer_rank0">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">get_pointer_rank0</tt><big>(</big><em>var</em>, <em>name</em>, <em>dims</em>, <em>ptr</em><big>)</big><a class="headerlink" href="#f/output_module/get_pointer_rank0" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p variables var(:) [inout,allocatable]:
+:p character name [in]:
+:p integer dims(:) [in]:
+:p real ptr [inout,pointer]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/get_pointer_rank1">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">get_pointer_rank1</tt><big>(</big><em>var</em>, <em>name</em>, <em>dims</em>, <em>ptr</em><big>)</big><a class="headerlink" href="#f/output_module/get_pointer_rank1" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p variables var(:) [inout,allocatable]:
+:p character name [in]:
+:p integer dims(:) [in]:
+:p real ptr(:) [inout,pointer]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/get_pointer_rank2">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">get_pointer_rank2</tt><big>(</big><em>var</em>, <em>name</em>, <em>dims</em>, <em>ptr</em><big>)</big><a class="headerlink" href="#f/output_module/get_pointer_rank2" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p variables var(:) [inout,allocatable]:
+:p character name [in]:
+:p integer dims(:) [in]:
+:p real ptr(:,:) [inout,pointer]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/get_pointer_rank3">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">get_pointer_rank3</tt><big>(</big><em>var</em>, <em>name</em>, <em>dims</em>, <em>ptr</em><big>)</big><a class="headerlink" href="#f/output_module/get_pointer_rank3" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p variables var(:) [inout,allocatable]:
+:p character name [in]:
+:p integer dims(:) [in]:
+:p real ptr(:,:,:) [inout,pointer]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/output_init">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_init</tt><big>(</big><em>var</em>, <em>vars</em><span class="optional">[</span>, <em>dir</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#f/output_module/output_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p variables var(:) [inout]:
+:p character vars(:) [in]:
+:o character dir [in,optional]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/output_init_data" title="f/output_module/output_init_data"><tt class="xref f f-func docutils literal"><span class="pre">output_init_data()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/output_init_data">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_init_data</tt><big>(</big><em>var</em>, <em>dir</em>, <em>name</em>, <em>fid</em><big>)</big><a class="headerlink" href="#f/output_module/output_init_data" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong><em> [</em><a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><em>variables_data</em></a><em>,</em><em>inout</em><em>]</em></li>
+<li><strong>dir</strong><em> [</em><em>character</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>name</strong><em> [</em><em>character</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>fid</strong><em> [</em><em>integer</em><em>,</em><em>in</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/output_module/output_init" title="f/output_module/output_init"><tt class="xref f f-func docutils literal"><span class="pre">output_init()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/output_update">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_update</tt><big>(</big><em>var</em><big>)</big><a class="headerlink" href="#f/output_module/output_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p variables var(:) [inout]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/output_write">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_write</tt><big>(</big><em>var</em><big>)</big><a class="headerlink" href="#f/output_module/output_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p variables var(:) [in]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/output_clear">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_clear</tt><big>(</big><em>var</em><big>)</big><a class="headerlink" href="#f/output_module/output_clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p variables var(:) [inout]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/output_clear_data" title="f/output_module/output_clear_data"><tt class="xref f f-func docutils literal"><span class="pre">output_clear_data()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/output_clear_data">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_clear_data</tt><big>(</big><em>var</em>, <em>rank_bn</em><big>)</big><a class="headerlink" href="#f/output_module/output_clear_data" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong><em> [</em><a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><em>variables_data</em></a><em>,</em><em>inout</em><em>]</em></li>
+<li><strong>rank_bn</strong><em> [</em><em>integer</em><em>,</em><em>in</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/output_module/output_clear" title="f/output_module/output_clear"><tt class="xref f f-func docutils literal"><span class="pre">output_clear()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/output_close">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_close</tt><big>(</big><em>var</em><big>)</big><a class="headerlink" href="#f/output_module/output_close" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p variables var(:) [in]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/output_module/write_dimensions">
+<em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">write_dimensions</tt><big>(</big><em>par</em><big>)</big><a class="headerlink" href="#f/output_module/write_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/output_module/is_output">
+<em class="property">function  </em><tt class="descclassname">output_module/</tt><tt class="descname">is_output</tt><big>(</big><em>var</em>, <em>name</em><big>)</big><a class="headerlink" href="#f/output_module/is_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p variables var(:):
+:p character name:
+:r logical ret:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="f/utils_module">
+<span id="utils-module"></span><h2>utils_module<a class="headerlink" href="#f/utils_module" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Quick access</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Routines:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/assert" title="f/utils_module/assert"><tt class="xref f f-func docutils literal"><span class="pre">assert()</span></tt></a>, <a class="reference internal" href="#f/utils_module/split_path" title="f/utils_module/split_path"><tt class="xref f f-func docutils literal"><span class="pre">split_path()</span></tt></a>, <a class="reference internal" href="#f/utils_module/sort" title="f/utils_module/sort"><tt class="xref f f-func docutils literal"><span class="pre">sort()</span></tt></a>, <a class="reference internal" href="#f/utils_module/swap" title="f/utils_module/swap"><tt class="xref f f-func docutils literal"><span class="pre">swap()</span></tt></a>, <a class="reference internal" href="#f/utils_module/rand_normal" title="f/utils_module/rand_normal"><tt class="xref f f-func docutils literal"><span class="pre">rand_normal()</span></tt></a>, <a class="reference internal" href="#f/utils_module/split" title="f/utils_module/split"><tt class="xref f f-func docutils literal"><span class="pre">split()</span></tt></a>, <a class="reference internal" href="#f/utils_module/find_minimum" title="f/utils_module/find_minimum"><tt class="xref f f-func docutils literal"><span class="pre">find_minimum()</span></tt></a>, <a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a>, <a class="reference internal" href="#f/utils_module/binary_search" title="f/utils_module/binary_search"><tt class="xref f f-func docutils literal"><span class="pre">binary_search()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Needed modules</p>
+<ul class="simple">
+<li><a class="reference internal" href="#f/constants_module" title="f/constants_module"><tt class="xref f f-mod docutils literal"><span class="pre">constants_module</span></tt></a></li>
+</ul>
+<p class="rubric">Subroutines and functions</p>
+<dl class="subroutine">
+<dt id="f/utils_module/assert">
+<em class="property">subroutine  </em><tt class="descclassname">utils_module/</tt><tt class="descname">assert</tt><big>(</big><em>condition</em><big>)</big><a class="headerlink" href="#f/utils_module/assert" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>condition</strong><em> [</em><em>logical</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/compute_supply" title="f/run_module/compute_supply"><tt class="xref f f-func docutils literal"><span class="pre">compute_supply()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/utils_module/sort">
+<em class="property">subroutine  </em><tt class="descclassname">utils_module/</tt><tt class="descname">sort</tt><big>(</big><em>x</em><span class="optional">[</span>, <em>x2</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#f/utils_module/sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p real x(:) [inout]:
+:o real x2(:) [inout,optional]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/input_module/check_params" title="f/input_module/check_params"><tt class="xref f f-func docutils literal"><span class="pre">check_params()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/find_minimum" title="f/utils_module/find_minimum"><tt class="xref f f-func docutils literal"><span class="pre">find_minimum()</span></tt></a>, <a class="reference internal" href="#f/utils_module/swap" title="f/utils_module/swap"><tt class="xref f f-func docutils literal"><span class="pre">swap()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/utils_module/swap">
+<em class="property">subroutine  </em><tt class="descclassname">utils_module/</tt><tt class="descname">swap</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#f/utils_module/swap" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong><em> [</em><em>real</em><em>,</em><em>inout</em><em>]</em></li>
+<li><strong>y</strong><em> [</em><em>real</em><em>,</em><em>inout</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/utils_module/sort" title="f/utils_module/sort"><tt class="xref f f-func docutils literal"><span class="pre">sort()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/utils_module/split">
+<em class="property">function  </em><tt class="descclassname">utils_module/</tt><tt class="descname">split</tt><big>(</big><em>str</em><span class="optional">[</span>, <em>sep</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#f/utils_module/split" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>str</strong><em> [</em><em>character</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><strong>sep</strong><em> [</em><em>character</em><em>,</em><em>optional</em><em>]</em></td>
+</tr>
+</tbody>
+</table>
+<p>:r character arr(:) [allocatable]:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/input_module/read_key_strvec" title="f/input_module/read_key_strvec"><tt class="xref f f-func docutils literal"><span class="pre">read_key_strvec()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="subroutine">
+<dt id="f/utils_module/split_path">
+<em class="property">subroutine  </em><tt class="descclassname">utils_module/</tt><tt class="descname">split_path</tt><big>(</big><em>str</em>, <em>fpath</em>, <em>fname</em><big>)</big><a class="headerlink" href="#f/utils_module/split_path" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>str</strong><em> [</em><em>character</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>fpath</strong><em> [</em><em>character</em><em>,</em><em>out</em><em>]</em></li>
+<li><strong>fname</strong><em> [</em><em>character</em><em>,</em><em>out</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/input_module/read_cmd" title="f/input_module/read_cmd"><tt class="xref f f-func docutils literal"><span class="pre">read_cmd()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/utils_module/find_minimum">
+<em class="property">function  </em><tt class="descclassname">utils_module/</tt><tt class="descname">find_minimum</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#f/utils_module/find_minimum" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p real x(:) [in]:
+:r integer loc:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/sort" title="f/utils_module/sort"><tt class="xref f f-func docutils literal"><span class="pre">sort()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/utils_module/linear_interp">
+<em class="property">function  </em><tt class="descclassname">utils_module/</tt><tt class="descname">linear_interp</tt><big>(</big><em>x</em>, <em>y</em>, <em>xx</em><big>)</big><a class="headerlink" href="#f/utils_module/linear_interp" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p real x(:):
+:p real y(:):
+:p real xx:
+:r real yy:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/bed_module/get_layer_percentile" title="f/bed_module/get_layer_percentile"><tt class="xref f f-func docutils literal"><span class="pre">get_layer_percentile()</span></tt></a>, <a class="reference internal" href="#f/moist_module/generate_moist" title="f/moist_module/generate_moist"><tt class="xref f f-func docutils literal"><span class="pre">generate_moist()</span></tt></a>, <a class="reference internal" href="#f/bed_module/generate_bed" title="f/bed_module/generate_bed"><tt class="xref f f-func docutils literal"><span class="pre">generate_bed()</span></tt></a>, <a class="reference internal" href="#f/moist_module/map_moisture" title="f/moist_module/map_moisture"><tt class="xref f f-func docutils literal"><span class="pre">map_moisture()</span></tt></a>, <a class="reference internal" href="#f/moist_module/generate_tide" title="f/moist_module/generate_tide"><tt class="xref f f-func docutils literal"><span class="pre">generate_tide()</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/binary_search" title="f/utils_module/binary_search"><tt class="xref f f-func docutils literal"><span class="pre">binary_search()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/utils_module/binary_search">
+<em class="property">function  </em><tt class="descclassname">utils_module/</tt><tt class="descname">binary_search</tt><big>(</big><em>xx</em>, <em>x</em><big>)</big><a class="headerlink" href="#f/utils_module/binary_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>:p real xx(:):
+:p real x:
+:r integer j:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="f/utils_module/rand_normal">
+<em class="property">function  </em><tt class="descclassname">utils_module/</tt><tt class="descname">rand_normal</tt><big>(</big><em>mean</em>, <em>stdev</em><big>)</big><a class="headerlink" href="#f/utils_module/rand_normal" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mean</strong><em> [</em><em>real</em><em>]</em></li>
+<li><strong>stdev</strong><em> [</em><em>real</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>c</strong><em> [</em><em>real</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/wind_module/generate_wind" title="f/wind_module/generate_wind"><tt class="xref f f-func docutils literal"><span class="pre">generate_wind()</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="f/constants_module">
+<span id="constants-module"></span><h2>constants_module<a class="headerlink" href="#f/constants_module" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Quick access</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#f/constants_module/slen_bn" title="f/constants_module/slen_bn"><tt class="xref f f-var docutils literal"><span class="pre">slen_bn</span></tt></a>, <a class="reference internal" href="#f/constants_module/pi" title="f/constants_module/pi"><tt class="xref f f-var docutils literal"><span class="pre">pi</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Variables</p>
+<ul>
+<li><dl class="variable">
+<dt id="f/constants_module/pi">
+<tt class="descclassname">constants_module/</tt><tt class="descname">pi</tt><em> [</em><em>real</em><em>,</em><em>parameter=</em>3.14159265359<em>]</em><a class="headerlink" href="#f/constants_module/pi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</li>
+<li><dl class="variable">
+<dt id="f/constants_module/slen_bn">
+<tt class="descclassname">constants_module/</tt><tt class="descname">slen_bn</tt><em> [</em><em>integer</em><em>,</em><em>parameter=</em>1024<em>]</em><a class="headerlink" href="#f/constants_module/slen_bn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Modules and functions</a><ul>
+<li><a class="reference internal" href="#f/run_module">run_module</a></li>
+<li><a class="reference internal" href="#f/input_module">input_module</a></li>
+<li><a class="reference internal" href="#f/wind_module">wind_module</a></li>
+<li><a class="reference internal" href="#f/moist_module">moist_module</a></li>
+<li><a class="reference internal" href="#f/bed_module">bed_module</a></li>
+<li><a class="reference internal" href="#f/output_module">output_module</a></li>
+<li><a class="reference internal" href="#f/utils_module">utils_module</a></li>
+<li><a class="reference internal" href="#f/constants_module">constants_module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples.html"
+                        title="previous chapter">Examples</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/modules_and_functions.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="f-modindex.html" title="Fortran Module Index"
+             >fortran modules</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Examples"
+             >previous</a> |</li>
+        <li><a href="index.html">AeoLiS 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Bas Hoonhout.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

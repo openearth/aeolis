@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Processes, formulations and numerics &mdash; AeoLiS 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="AeoLiS 0.1 documentation" href="index.html" />
+    <link rel="next" title="Command-line options" href="commandline_options.html" />
+    <link rel="prev" title="Welcome to AeoLiS’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="f-modindex.html" title="Fortran Module Index"
+             >fortran modules</a> |</li>
+        <li class="right" >
+          <a href="commandline_options.html" title="Command-line options"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to AeoLiS’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">AeoLiS 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="processes-formulations-and-numerics">
+<h1>Processes, formulations and numerics<a class="headerlink" href="#processes-formulations-and-numerics" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="transport-equation">
+<h2>Transport equation<a class="headerlink" href="#transport-equation" title="Permalink to this headline">¶</a></h2>
+<div class="math">
+<p><img src="_images/math/eff56b1dcbcedca0bed24aea01eb8329338a6a0e.png" alt="q = \alpha C_b \frac{\rho}{g} \sqrt{\frac{d}{D}} \left ( u - u_{th} \right ) ^3
+
+\alpha = \left ( \frac{0.174}{log \left ( \frac{z_0}{k} \right )} \right ) ^3"/></p>
+</div></div>
+<div class="section" id="velocity-thresholds">
+<h2>Velocity thresholds<a class="headerlink" href="#velocity-thresholds" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="grain-size">
+<h3>Grain size<a class="headerlink" href="#grain-size" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="bed-slope">
+<h3>Bed slope<a class="headerlink" href="#bed-slope" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="moisture-content">
+<h3>Moisture content<a class="headerlink" href="#moisture-content" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="multiple-sediment-fractions">
+<h2>Multiple sediment fractions<a class="headerlink" href="#multiple-sediment-fractions" title="Permalink to this headline">¶</a></h2>
+<p>Sediment transport of a multiple fractions is computed equal to transport of a single fraction.
+For each fraction transport is computed given an equilibrium concentration <img class="math" src="_images/math/b44704f091962f9c4ffb3c83ed49035496effdf8.png" alt="C_{eq,i}"/>.
+Since not all fractions can be at equilibrium concentration at the same time at the same place, a distribution is needed that favors one fraction over another.
+This is the key to multiple sediment fraction transport.</p>
+<p>A common approach is to use the sediment distribution of the bed to weigh the equilibrium concentrations of the different fractions <a class="reference internal" href="#delft3dmanual" id="id1">[Delft3DManual]</a>.
+This approach has the disadvantage that not only pickup of sediment, but also deposition of sediment depends on the sediment distribution in the bed.
+This is physically incorrect since deposition is not strongly correlated to the bed composition.</p>
+<p>A concequence of this approach is that fine sediments picked up downwind cannot pass a patch of coarse sediment where the fraction of fine sediments is small.
+In this patch, the equilibrium concentration of fines is artificially lowered and fines are deposited, while coarse sediment is picked up.</p>
+<p>To overcome this behavior the distribution for erosion and deposition is determined separately according to equation <a href="#equation-distribution">(1)</a>.
+First the distribution in the air <img class="math" src="_images/math/c346cda1cb6013da86505b159570b2345dad14d4.png" alt="p_{air,i}"/> is determined.
+This distribution can sum up to a value smaller than, equal to or larger than unity that correspond to three regimes (<img class="math" src="_images/math/75e27f04188974063be3230dca208cd495b77ce1.png" alt="N"/> is the number of fractions):</p>
+<ul class="simple">
+<li><img class="math" src="_images/math/613680a0bd52b38d71d1b1f9f9d73a06bfd62613.png" alt="\sum_{i=0}^N{p_{air,i}} &lt; 1.0"/>: less than capacity transport, erosion may occur</li>
+<li><img class="math" src="_images/math/7ca3b6f6f4922661250d37ef5c4f80f3c5c8ffc2.png" alt="\sum_{i=0}^N{p_{air,i}} = 1.0"/>: capacity transport, no exchange with the bed</li>
+<li><img class="math" src="_images/math/f2f37f1d7081b4e2e8c5a857a76dd794c4a5a9a1.png" alt="\sum_{i=0}^N{p_{air,i}} &gt; 1.0"/>: more than capacity transport, deposition will occur</li>
+</ul>
+<p>In case of deposition the distribution in the air is normalized and used as distribution in the transport formulation.
+In case of erosion the distribution in the bed <img class="math" src="_images/math/6ecd13a9836fa0e6d1d61fcf8d2304aca197f73a.png" alt="p_{bed,i}"/> is used to <em>fill</em> the available space in the air column.
+The distribution of the bed is determined by the mass of each sediment fraction <img class="math" src="_images/math/21728519fb5117232be3dab5913f25e4508c8c29.png" alt="m_i"/> available in the top layer of the bed.
+This means that if a grid cell is at 70% of capacity transport, 30% of the distribution used in the transport formulation is determined by the distribition in the bed and 70% is determined by the distribution in the air.</p>
+<div class="math" id="equation-distribution">
+<p><span class="eqno">(1)</span><img src="_images/math/8424f01d01524413749ccd860404e92ebca0a2cb.png" alt="p_i = \left \{  \begin{array}{l l}
+   \frac{p_{air,i}}{\sum_{i=0}^N{p_{air,i}}} &amp;
+      \quad \text{if } \sum_{i=0}^N{p_{air,i}} \geq 1.0 \text{ (deposition)} \\
+   p_{air,i} + p_{bed,i} \left (1 - \sum_{i=0}^N{p_{air,i}} \right ) &amp;
+      \quad \text{if } \sum_{i=0}^N{p_{air,i}} &lt; 1.0 \text{ (erosion)}
+   \end{array} \right.
+
+p_{air,i} = \frac{C_{t,i}}{C_{u,i}} \quad ; \quad
+p_{bed,i} = \frac{m_i}{\sum_{i=0}^N{m_i}}"/></p>
+</div></div>
+<div class="section" id="hydraulic-mixing-and-depostion">
+<h2>Hydraulic mixing and depostion<a class="headerlink" href="#hydraulic-mixing-and-depostion" title="Permalink to this headline">¶</a></h2>
+<p>The left-hand boundary can be taken as a sea boundary imposing tides and waves onto the sandy bed.
+Apart from sheltering the bed from the wind and thus transport, it may also simulate processes of mixing and deposition.</p>
+<p>If grid cells are flooded the top layers of the bed are mixed to simulate stirring by waves.
+Mixing takes place over a certain depth indicated by the depth of disturbance (DOD).
+Over the depth of disturbance the average sediment distribution is determined and the actual sediment distributions are then replaced by its average.
+The depth of disturbance is computed based on the offshore wave height <img class="math" src="_images/math/c0c673a0aa55584a9303e2dcea093c7783483bbe.png" alt="H_s"/>, but it is maximized by a maximum wave height over depth ratio <img class="math" src="_images/math/0ebb67342b546ca42a1c634b1ef03c893c4cdedb.png" alt="\gamma"/> according to equation <a href="#equation-DOD">(2)</a>. The factor <img class="math" src="_images/math/ebab9f67f285e042e281efd68c05e7fe619324bc.png" alt="f_{DOD}"/> is an empirical ratio between onshore wave height and depth of disturbance which is 10% - 20% <a class="reference internal" href="#masselink2007" id="id2">[Masselink2007]</a>. <img class="math" src="_images/math/9172efc523d7488d4c3ed299d0be813de01503b8.png" alt="\eta"/> and <img class="math" src="_images/math/84d7271dd9e78c1e05d6c3c6ecb60309ef7dfc73.png" alt="z"/> are the water bed level respectively.</p>
+<div class="math" id="equation-DOD">
+<p><span class="eqno">(2)</span><img src="_images/math/86d1e424bdce22f882cd3f2eb56795f43741c407.png" alt="DOD(t) = f_{DOD} \cdot \min(H_s, \gamma (\eta(t) - z(t)))"/></p>
+</div><p>Flooding of grid cells may also lead to a fresh sediment deposit at these grid cells.
+The deposit is computed as adaptation of the supply term <img class="math" src="_images/math/11a85f3c69ae6702cb1d99d3de451913b8f84c04.png" alt="S"/> according to equation <a href="#equation-deposit">(3)</a>.
+The deposit is computed by multiplying the fall velocity <img class="math" src="_images/math/8659700e6646cd91bc02c32affaa5ec046ee9935.png" alt="w"/> with the sediment concentration in the water column <img class="math" src="_images/math/80704b5bea6a7ec033d45c015a4ed3b50336e1b5.png" alt="C_w"/> and the time step <img class="math" src="_images/math/5b4271afe7fc7c0ee84172e0ad19b82caf450c00.png" alt="\Delta t"/>.
+Deposition is maximized by the water depth <img class="math" src="_images/math/4d82a9321cad80bbbbc8a420922bab67c434927e.png" alt="\eta - z"/> and weighted according to the initial sediment distribution of the bed <img class="math" src="_images/math/c0a1058dbd5d593a2ee7069879d74ccede9f4268.png" alt="p_{i,initial}"/> over <img class="math" src="_images/math/75e27f04188974063be3230dca208cd495b77ce1.png" alt="N"/> fractions.</p>
+<div class="math" id="equation-deposit">
+<p><span class="eqno">(3)</span><img src="_images/math/f86dccc41bb55797b35ac156da14c4ef769d8200.png" alt="S_i(t) = S_i(t) - \frac{C_w \cdot p_{i,initial}}{\sum_{i=0}^N{p_{i,initial}}} \min( w \Delta t ; \eta(t) - z(t) )"/></p>
+</div></div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils citation" frame="void" id="delft3dmanual" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Delft3DManual]</a></td><td>Delft3D manual</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="masselink2007" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[Masselink2007]</a></td><td>Paper about DOD</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Processes, formulations and numerics</a><ul>
+<li><a class="reference internal" href="#transport-equation">Transport equation</a></li>
+<li><a class="reference internal" href="#velocity-thresholds">Velocity thresholds</a><ul>
+<li><a class="reference internal" href="#grain-size">Grain size</a></li>
+<li><a class="reference internal" href="#bed-slope">Bed slope</a></li>
+<li><a class="reference internal" href="#moisture-content">Moisture content</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#multiple-sediment-fractions">Multiple sediment fractions</a></li>
+<li><a class="reference internal" href="#hydraulic-mixing-and-depostion">Hydraulic mixing and depostion</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to AeoLiS&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="commandline_options.html"
+                        title="next chapter">Command-line options</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/processes_and_formulations.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="f-modindex.html" title="Fortran Module Index"
+             >fortran modules</a> |</li>
+        <li class="right" >
+          <a href="commandline_options.html" title="Command-line options"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to AeoLiS’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">AeoLiS 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Bas Hoonhout.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
