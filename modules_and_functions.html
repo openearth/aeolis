@@ -8,7 +8,7 @@
     
     <title>Modules and functions &mdash; AeoLiS 0.1 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -124,21 +124,22 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em> :: parameters structure</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em> :: parameters structure</li>
+<li><strong>mass</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>cu</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>ct</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p real mass(:) [in]:
-:p real cu(:) [in]:
-:p real ct(:) [in]:
-:r real supply(size(mass):</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>supply</strong> (size(mass)<em> [</em><em>real</em><em>]</em></p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/assert" title="f/utils_module/assert"><tt class="xref f f-func docutils literal"><span class="pre">assert()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/utils_module/assert" title="f/utils_module/assert"><tt class="xref f f-func docutils literal"><span class="pre">assert()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -256,29 +257,29 @@ Reads command line options, model parameters and start model run.</p>
 <li><tt class="descname">% </tt><tt class="descname">rhop</tt><em> [</em><em>real</em><em>]</em></li>
 <li><tt class="descname">% </tt><tt class="descname">rhow</tt><em> [</em><em>real</em><em>]</em></li>
 <li><tt class="descname">% </tt><tt class="descname">facdod</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">grain_size</tt> (:)<em> [</em><em>real</em><em>,</em><em>allocatable</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">rhom</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">rhoa</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">z0</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">a</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">bed_file</tt><em> [</em><em>character</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">nlayers</tt><em> [</em><em>integer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">tide_file</tt><em> [</em><em>character</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">grain_dist</tt> (:)<em> [</em><em>real</em><em>,</em><em>allocatable</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">f</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">nfractions</tt><em> [</em><em>integer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">k</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">outputvars</tt> (:)<em> [</em><em>character</em><em>,</em><em>allocatable</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">u_th</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">tout</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">w</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">tstop</tt><em> [</em><em>real</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">gamma</tt><em> [</em><em>real</em><em>]</em></li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<p>:f real grain_size(:) [allocatable]:
-:f real rhom:
-:f real rhoa:
-:f real z0:
-:f real a:
-:f character bed_file:
-:f integer nlayers:
-:f character tide_file:
-:f real grain_dist(:) [allocatable]:
-:f real f:
-:f integer nfractions:
-:f real k:
-:f character outputvars(:) [allocatable]:
-:f real u_th:
-:f real tout:
-:f real w:
-:f real tstop:
-:f real gamma:</p>
 </dd></dl>
 
 </li>
@@ -379,19 +380,17 @@ Reads command line options, model parameters and start model run.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><p class="first last"><strong>default_bn</strong><em> [</em><em>character</em><em>,</em><em>optional</em><em>]</em></p>
+<tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><p class="first"><strong>default_bn</strong><em> [</em><em>character</em><em>,</em><em>optional</em><em>]</em></p>
 </td>
 </tr>
-</tbody>
-</table>
-<p>:r character value_arr(:) [allocatable]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/input_module/read_params" title="f/input_module/read_params"><tt class="xref f f-func docutils literal"><span class="pre">read_params()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>value_arr</strong> (:)<em> [</em><em>character</em><em>,</em><em>allocatable</em><em>]</em></p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/input_module/read_key" title="f/input_module/read_key"><tt class="xref f f-func docutils literal"><span class="pre">read_key()</span></tt></a>, <a class="reference internal" href="#f/utils_module/split" title="f/utils_module/split"><tt class="xref f f-func docutils literal"><span class="pre">split()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/input_module/read_params" title="f/input_module/read_params"><tt class="xref f f-func docutils literal"><span class="pre">read_params()</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/input_module/read_key" title="f/input_module/read_key"><tt class="xref f f-func docutils literal"><span class="pre">read_key()</span></tt></a>, <a class="reference internal" href="#f/utils_module/split" title="f/utils_module/split"><tt class="xref f f-func docutils literal"><span class="pre">split()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -534,18 +533,17 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></li>
+<li><strong>u</strong> (:)<em> [</em><em>real</em><em>,</em><em>out,allocatable</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p real u(:) [out,allocatable]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/rand_normal" title="f/utils_module/rand_normal"><tt class="xref f f-func docutils literal"><span class="pre">rand_normal()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/utils_module/rand_normal" title="f/utils_module/rand_normal"><tt class="xref f f-func docutils literal"><span class="pre">rand_normal()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -604,17 +602,15 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></li>
+<li><strong>z</strong> (:)<em> [</em><em>real</em><em>,</em><em>out,allocatable</em><em>]</em></li>
+<li><strong>m</strong> (:,:)<em> [</em><em>real</em><em>,</em><em>out,allocatable</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p real z(:) [out,allocatable]:
-:p real m(:,:) [out,allocatable]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -627,18 +623,17 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></li>
+<li><strong>tide</strong> (:)<em> [</em><em>real</em><em>,</em><em>out,allocatable</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p real tide(:) [out,allocatable]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -651,16 +646,14 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></li>
+<li><strong>meteo</strong> (:)<em> [</em><a class="reference internal" href="#f/moist_module/meteorology" title="f/moist_module/meteorology"><em>meteorology</em></a><em>,</em><em>out,allocatable</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p meteorology meteo(:) [out,allocatable]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -673,17 +666,15 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></li>
+<li><strong>moist</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>u_th</strong> (:,:)<em> [</em><em>real</em><em>,</em><em>inout</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p real moist(:) [in]:
-:p real u_th(:,:) [inout]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -696,22 +687,21 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></li>
+<li><strong>z</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>tide</strong><em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>meteo</strong><em> [</em><a class="reference internal" href="#f/moist_module/meteorology" title="f/moist_module/meteorology"><em>meteorology</em></a><em>,</em><em>in</em><em>]</em></li>
+<li><strong>u</strong><em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>moist</strong> (:,:)<em> [</em><em>real</em><em>,</em><em>inout</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p real z(:) [in]:
-:p real tide [in]:
-:p meteorology meteo [in]:
-:p real u [in]:
-:p real moist(:,:) [inout]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/moist_module/vaporation_pressure_slope" title="f/moist_module/vaporation_pressure_slope"><tt class="xref f f-func docutils literal"><span class="pre">vaporation_pressure_slope()</span></tt></a>, <a class="reference internal" href="#f/moist_module/saturation_pressure" title="f/moist_module/saturation_pressure"><tt class="xref f f-func docutils literal"><span class="pre">saturation_pressure()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/moist_module/vaporation_pressure_slope" title="f/moist_module/vaporation_pressure_slope"><tt class="xref f f-func docutils literal"><span class="pre">vaporation_pressure_slope()</span></tt></a>, <a class="reference internal" href="#f/moist_module/saturation_pressure" title="f/moist_module/saturation_pressure"><tt class="xref f f-func docutils literal"><span class="pre">saturation_pressure()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -758,19 +748,19 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>]</em></li>
+<li><strong>zm</strong> (:)<em> [</em><em>real</em><em>]</em></li>
+<li><strong>m</strong> (:)<em> [</em><em>real</em><em>]</em></li>
+<li><strong>z</strong> (:)<em> [</em><em>real</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p real zm(:):
-:p real m(:):
-:p real z(:):
-:r real mg(par%nx+1):</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>mg</strong> (par%nx+1)<em> [</em><em>real</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -829,19 +819,18 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>inout</em><em>]</em></li>
+<li><strong>x</strong> (:)<em> [</em><em>real</em><em>,</em><em>out,allocatable</em><em>]</em></li>
+<li><strong>z</strong> (:)<em> [</em><em>real</em><em>,</em><em>out,allocatable</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p real x(:) [out,allocatable]:
-:p real z(:) [out,allocatable]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -854,17 +843,15 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></li>
+<li><strong>x</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>z</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p real x(:) [in]:
-:p real z(:) [in]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -873,16 +860,23 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="function">
 <dt id="f/bed_module/update_bed">
 <em class="property">function  </em><tt class="descclassname">bed_module/</tt><tt class="descname">update_bed</tt><big>(</big><em>z</em>, <em>mass</em>, <em>rho</em>, <em>dt</em><big>)</big><a class="headerlink" href="#f/bed_module/update_bed" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p real z(:) [in]:
-:p real mass(:,:) [in]:
-:p real rho(:) [in]:
-:p real dt [in]:
-:r real z_new(:) [allocatable]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>z</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>mass</strong> (:,:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>rho</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>dt</strong><em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>z_new</strong> (:)<em> [</em><em>real</em><em>,</em><em>allocatable</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -891,12 +885,13 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="function">
 <dt id="f/bed_module/get_layer_mass">
 <em class="property">function  </em><tt class="descclassname">bed_module/</tt><tt class="descname">get_layer_mass</tt><big>(</big><big>)</big><a class="headerlink" href="#f/bed_module/get_layer_mass" title="Permalink to this definition">¶</a></dt>
-<dd><p>:r real mass(:,:,:) [pointer]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><strong>mass</strong> (:,:,:)<em> [</em><em>real</em><em>,</em><em>pointer</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -909,22 +904,20 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></li>
 <li><strong>p</strong><em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
 </ul>
 </td>
 </tr>
-</tbody>
-</table>
-<p>:r real perc(:,:) [allocatable]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>perc</strong> (:,:)<em> [</em><em>real</em><em>,</em><em>allocatable</em><em>]</em></p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -939,9 +932,10 @@ Reads command line options, model parameters and start model run.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
 </tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><strong>fractions</strong> (:,:,:)<em> [</em><em>real</em><em>,</em><em>allocatable</em><em>]</em></td>
+</tr>
 </tbody>
 </table>
-<p>:r real fractions(:,:,:) [allocatable]:</p>
 </dd></dl>
 
 <dl class="function">
@@ -953,9 +947,10 @@ Reads command line options, model parameters and start model run.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
 </tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><strong>fractions</strong> (:,:,:)<em> [</em><em>real</em><em>,</em><em>allocatable</em><em>]</em></td>
+</tr>
 </tbody>
 </table>
-<p>:r real fractions(:,:,:) [allocatable]:</p>
 </dd></dl>
 
 <dl class="subroutine">
@@ -965,16 +960,14 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></li>
+<li><strong>u_th</strong> (:,:)<em> [</em><em>real</em><em>,</em><em>inout</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p real u_th(:,:) [inout]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -987,13 +980,16 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></li>
+<li><strong>x</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>z</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>u_th</strong> (:,:)<em> [</em><em>real</em><em>,</em><em>inout</em><em>]</em></li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
-<p>:p real x(:) [in]:
-:p real z(:) [in]:
-:p real u_th(:,:) [inout]:</p>
 </dd></dl>
 
 <dl class="subroutine">
@@ -1003,17 +999,15 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong><em> [</em><a class="reference internal" href="#f/input_module/parameters" title="f/input_module/parameters"><em>parameters</em></a><em>,</em><em>in</em><em>]</em></li>
+<li><strong>z</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>tide</strong><em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p real z(:) [in]:
-:p real tide [in]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1091,15 +1085,15 @@ Reads command line options, model parameters and start model run.</p>
 <li><tt class="descname">% </tt><tt class="descname">init</tt><em> [</em><em>real</em><em>]</em></li>
 <li><tt class="descname">% </tt><tt class="descname">null</tt><em> [</em><em>real</em><em>,</em><em>pointer</em><em>]</em></li>
 <li><tt class="descname">% </tt><tt class="descname">fid</tt><em> [</em><em>integer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">rank3</tt> (:,:,:)<em> [</em><em>real</em><em>,</em><em>pointer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">rank2</tt> (:,:)<em> [</em><em>real</em><em>,</em><em>pointer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">rank1</tt> (:)<em> [</em><em>real</em><em>,</em><em>pointer</em><em>]</em></li>
+<li><tt class="descname">% </tt><tt class="descname">rank0</tt><em> [</em><em>real</em><em>,</em><em>pointer</em><em>]</em></li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<p>:f real rank3(:,:,:) [pointer]:
-:f real rank2(:,:) [pointer]:
-:f real rank1(:) [pointer]:
-:f real rank0 [pointer]:</p>
 </dd></dl>
 
 </li>
@@ -1108,16 +1102,22 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="subroutine">
 <dt id="f/output_module/alloc_variable">
 <em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">alloc_variable</tt><big>(</big><em>var</em>, <em>name</em>, <em>dims</em><big>)</big><a class="headerlink" href="#f/output_module/alloc_variable" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p variables var(:) [inout,allocatable]:
-:p character name [in]:
-:p integer dims(:) [in]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/output_module/get_pointer_rank0" title="f/output_module/get_pointer_rank0"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank0()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank1" title="f/output_module/get_pointer_rank1"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank1()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank2" title="f/output_module/get_pointer_rank2"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank2()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank3" title="f/output_module/get_pointer_rank3"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank3()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> (:)<em> [</em><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><em>variables</em></a><em>,</em><em>inout,allocatable</em><em>]</em></li>
+<li><strong>name</strong><em> [</em><em>character</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>dims</strong> (:)<em> [</em><em>integer</em><em>,</em><em>in</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable_data" title="f/output_module/alloc_variable_data"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable_data()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/output_module/get_pointer_rank0" title="f/output_module/get_pointer_rank0"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank0()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank1" title="f/output_module/get_pointer_rank1"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank1()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank2" title="f/output_module/get_pointer_rank2"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank2()</span></tt></a>, <a class="reference internal" href="#f/output_module/get_pointer_rank3" title="f/output_module/get_pointer_rank3"><tt class="xref f f-func docutils literal"><span class="pre">get_pointer_rank3()</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/output_module/alloc_variable_data" title="f/output_module/alloc_variable_data"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable_data()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1130,18 +1130,18 @@ Reads command line options, model parameters and start model run.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var</strong><em> [</em><a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><em>variables_data</em></a><em>,</em><em>inout,pointer</em><em>]</em></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong><em> [</em><a class="reference internal" href="#f/output_module/variables_data" title="f/output_module/variables_data"><em>variables_data</em></a><em>,</em><em>inout,pointer</em><em>]</em></li>
+<li><strong>dims</strong> (:)<em> [</em><em>integer</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>rank_bn</strong><em> [</em><em>integer</em><em>,</em><em>out</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-</tbody>
-</table>
-<p>:p integer dims(:) [in]:
-:p integer rank_bn [out]:
-:o real val [in,optional]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><p class="first"><strong>val</strong><em> [</em><em>real</em><em>,</em><em>in,optional</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1150,15 +1150,20 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="subroutine">
 <dt id="f/output_module/get_pointer_rank0">
 <em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">get_pointer_rank0</tt><big>(</big><em>var</em>, <em>name</em>, <em>dims</em>, <em>ptr</em><big>)</big><a class="headerlink" href="#f/output_module/get_pointer_rank0" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p variables var(:) [inout,allocatable]:
-:p character name [in]:
-:p integer dims(:) [in]:
-:p real ptr [inout,pointer]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> (:)<em> [</em><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><em>variables</em></a><em>,</em><em>inout,allocatable</em><em>]</em></li>
+<li><strong>name</strong><em> [</em><em>character</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>dims</strong> (:)<em> [</em><em>integer</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>ptr</strong><em> [</em><em>real</em><em>,</em><em>inout,pointer</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1167,15 +1172,20 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="subroutine">
 <dt id="f/output_module/get_pointer_rank1">
 <em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">get_pointer_rank1</tt><big>(</big><em>var</em>, <em>name</em>, <em>dims</em>, <em>ptr</em><big>)</big><a class="headerlink" href="#f/output_module/get_pointer_rank1" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p variables var(:) [inout,allocatable]:
-:p character name [in]:
-:p integer dims(:) [in]:
-:p real ptr(:) [inout,pointer]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> (:)<em> [</em><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><em>variables</em></a><em>,</em><em>inout,allocatable</em><em>]</em></li>
+<li><strong>name</strong><em> [</em><em>character</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>dims</strong> (:)<em> [</em><em>integer</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>ptr</strong> (:)<em> [</em><em>real</em><em>,</em><em>inout,pointer</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1184,15 +1194,20 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="subroutine">
 <dt id="f/output_module/get_pointer_rank2">
 <em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">get_pointer_rank2</tt><big>(</big><em>var</em>, <em>name</em>, <em>dims</em>, <em>ptr</em><big>)</big><a class="headerlink" href="#f/output_module/get_pointer_rank2" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p variables var(:) [inout,allocatable]:
-:p character name [in]:
-:p integer dims(:) [in]:
-:p real ptr(:,:) [inout,pointer]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> (:)<em> [</em><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><em>variables</em></a><em>,</em><em>inout,allocatable</em><em>]</em></li>
+<li><strong>name</strong><em> [</em><em>character</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>dims</strong> (:)<em> [</em><em>integer</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>ptr</strong> (:,:)<em> [</em><em>real</em><em>,</em><em>inout,pointer</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1201,15 +1216,20 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="subroutine">
 <dt id="f/output_module/get_pointer_rank3">
 <em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">get_pointer_rank3</tt><big>(</big><em>var</em>, <em>name</em>, <em>dims</em>, <em>ptr</em><big>)</big><a class="headerlink" href="#f/output_module/get_pointer_rank3" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p variables var(:) [inout,allocatable]:
-:p character name [in]:
-:p integer dims(:) [in]:
-:p real ptr(:,:,:) [inout,pointer]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> (:)<em> [</em><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><em>variables</em></a><em>,</em><em>inout,allocatable</em><em>]</em></li>
+<li><strong>name</strong><em> [</em><em>character</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>dims</strong> (:)<em> [</em><em>integer</em><em>,</em><em>in</em><em>]</em></li>
+<li><strong>ptr</strong> (:,:,:)<em> [</em><em>real</em><em>,</em><em>inout,pointer</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/output_module/alloc_variable" title="f/output_module/alloc_variable"><tt class="xref f f-func docutils literal"><span class="pre">alloc_variable()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1218,16 +1238,24 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="subroutine">
 <dt id="f/output_module/output_init">
 <em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_init</tt><big>(</big><em>var</em>, <em>vars</em><span class="optional">[</span>, <em>dir</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#f/output_module/output_init" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p variables var(:) [inout]:
-:p character vars(:) [in]:
-:o character dir [in,optional]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> (:)<em> [</em><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><em>variables</em></a><em>,</em><em>inout</em><em>]</em></li>
+<li><strong>vars</strong> (:)<em> [</em><em>character</em><em>,</em><em>in</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/output_init_data" title="f/output_module/output_init_data"><tt class="xref f f-func docutils literal"><span class="pre">output_init_data()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><p class="first"><strong>dir</strong><em> [</em><em>character</em><em>,</em><em>in,optional</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/output_module/output_init_data" title="f/output_module/output_init_data"><tt class="xref f f-func docutils literal"><span class="pre">output_init_data()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1258,12 +1286,13 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="subroutine">
 <dt id="f/output_module/output_update">
 <em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_update</tt><big>(</big><em>var</em><big>)</big><a class="headerlink" href="#f/output_module/output_update" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p variables var(:) [inout]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var</strong> (:)<em> [</em><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><em>variables</em></a><em>,</em><em>inout</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -1272,12 +1301,13 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="subroutine">
 <dt id="f/output_module/output_write">
 <em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_write</tt><big>(</big><em>var</em><big>)</big><a class="headerlink" href="#f/output_module/output_write" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p variables var(:) [in]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var</strong> (:)<em> [</em><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><em>variables</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -1286,14 +1316,15 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="subroutine">
 <dt id="f/output_module/output_clear">
 <em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_clear</tt><big>(</big><em>var</em><big>)</big><a class="headerlink" href="#f/output_module/output_clear" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p variables var(:) [inout]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var</strong> (:)<em> [</em><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><em>variables</em></a><em>,</em><em>inout</em><em>]</em></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/output_clear_data" title="f/output_module/output_clear_data"><tt class="xref f f-func docutils literal"><span class="pre">output_clear_data()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/output_module/output_clear_data" title="f/output_module/output_clear_data"><tt class="xref f f-func docutils literal"><span class="pre">output_clear_data()</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -1322,12 +1353,13 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="subroutine">
 <dt id="f/output_module/output_close">
 <em class="property">subroutine  </em><tt class="descclassname">output_module/</tt><tt class="descname">output_close</tt><big>(</big><em>var</em><big>)</big><a class="headerlink" href="#f/output_module/output_close" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p variables var(:) [in]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>var</strong> (:)<em> [</em><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><em>variables</em></a><em>,</em><em>in</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -1351,14 +1383,21 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="function">
 <dt id="f/output_module/is_output">
 <em class="property">function  </em><tt class="descclassname">output_module/</tt><tt class="descname">is_output</tt><big>(</big><em>var</em>, <em>name</em><big>)</big><a class="headerlink" href="#f/output_module/is_output" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p variables var(:):
-:p character name:
-:r logical ret:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> (:)<em> [</em><a class="reference internal" href="#f/output_module/variables" title="f/output_module/variables"><em>variables</em></a><em>]</em></li>
+<li><strong>name</strong><em> [</em><em>character</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>ret</strong><em> [</em><em>logical</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/run_module/run_model" title="f/run_module/run_model"><tt class="xref f f-func docutils literal"><span class="pre">run_model()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1399,12 +1438,14 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="subroutine">
 <dt id="f/utils_module/sort">
 <em class="property">subroutine  </em><tt class="descclassname">utils_module/</tt><tt class="descname">sort</tt><big>(</big><em>x</em><span class="optional">[</span>, <em>x2</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#f/utils_module/sort" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p real x(:) [inout]:
-:o real x2(:) [inout,optional]:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (:)<em> [</em><em>real</em><em>,</em><em>inout</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><strong>x2</strong> (:)<em> [</em><em>real</em><em>,</em><em>inout,optional</em><em>]</em></td>
+</tr>
 <tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/input_module/check_params" title="f/input_module/check_params"><tt class="xref f f-func docutils literal"><span class="pre">check_params()</span></tt></a></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/find_minimum" title="f/utils_module/find_minimum"><tt class="xref f f-func docutils literal"><span class="pre">find_minimum()</span></tt></a>, <a class="reference internal" href="#f/utils_module/swap" title="f/utils_module/swap"><tt class="xref f f-func docutils literal"><span class="pre">swap()</span></tt></a></td>
@@ -1444,14 +1485,9 @@ Reads command line options, model parameters and start model run.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Options:</th><td class="field-body"><strong>sep</strong><em> [</em><em>character</em><em>,</em><em>optional</em><em>]</em></td>
 </tr>
-</tbody>
-</table>
-<p>:r character arr(:) [allocatable]:</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/input_module/read_key_strvec" title="f/input_module/read_key_strvec"><tt class="xref f f-func docutils literal"><span class="pre">read_key_strvec()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Return:</th><td class="field-body"><strong>arr</strong> (:)<em> [</em><em>character</em><em>,</em><em>allocatable</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/input_module/read_key_strvec" title="f/input_module/read_key_strvec"><tt class="xref f f-func docutils literal"><span class="pre">read_key_strvec()</span></tt></a></td>
 </tr>
 </tbody>
 </table>
@@ -1481,12 +1517,14 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="function">
 <dt id="f/utils_module/find_minimum">
 <em class="property">function  </em><tt class="descclassname">utils_module/</tt><tt class="descname">find_minimum</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#f/utils_module/find_minimum" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p real x(:) [in]:
-:r integer loc:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (:)<em> [</em><em>real</em><em>,</em><em>in</em><em>]</em></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><strong>loc</strong><em> [</em><em>integer</em><em>]</em></td>
+</tr>
 <tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/sort" title="f/utils_module/sort"><tt class="xref f f-func docutils literal"><span class="pre">sort()</span></tt></a></td>
 </tr>
 </tbody>
@@ -1496,17 +1534,25 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="function">
 <dt id="f/utils_module/linear_interp">
 <em class="property">function  </em><tt class="descclassname">utils_module/</tt><tt class="descname">linear_interp</tt><big>(</big><em>x</em>, <em>y</em>, <em>xx</em><big>)</big><a class="headerlink" href="#f/utils_module/linear_interp" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p real x(:):
-:p real y(:):
-:p real xx:
-:r real yy:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/bed_module/get_layer_percentile" title="f/bed_module/get_layer_percentile"><tt class="xref f f-func docutils literal"><span class="pre">get_layer_percentile()</span></tt></a>, <a class="reference internal" href="#f/moist_module/generate_moist" title="f/moist_module/generate_moist"><tt class="xref f f-func docutils literal"><span class="pre">generate_moist()</span></tt></a>, <a class="reference internal" href="#f/bed_module/generate_bed" title="f/bed_module/generate_bed"><tt class="xref f f-func docutils literal"><span class="pre">generate_bed()</span></tt></a>, <a class="reference internal" href="#f/moist_module/map_moisture" title="f/moist_module/map_moisture"><tt class="xref f f-func docutils literal"><span class="pre">map_moisture()</span></tt></a>, <a class="reference internal" href="#f/moist_module/generate_tide" title="f/moist_module/generate_tide"><tt class="xref f f-func docutils literal"><span class="pre">generate_tide()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (:)<em> [</em><em>real</em><em>]</em></li>
+<li><strong>y</strong> (:)<em> [</em><em>real</em><em>]</em></li>
+<li><strong>xx</strong><em> [</em><em>real</em><em>]</em></li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/binary_search" title="f/utils_module/binary_search"><tt class="xref f f-func docutils literal"><span class="pre">binary_search()</span></tt></a></td>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>yy</strong><em> [</em><em>real</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><p class="first"><a class="reference internal" href="#f/bed_module/get_layer_percentile" title="f/bed_module/get_layer_percentile"><tt class="xref f f-func docutils literal"><span class="pre">get_layer_percentile()</span></tt></a>, <a class="reference internal" href="#f/moist_module/generate_moist" title="f/moist_module/generate_moist"><tt class="xref f f-func docutils literal"><span class="pre">generate_moist()</span></tt></a>, <a class="reference internal" href="#f/bed_module/generate_bed" title="f/bed_module/generate_bed"><tt class="xref f f-func docutils literal"><span class="pre">generate_bed()</span></tt></a>, <a class="reference internal" href="#f/moist_module/map_moisture" title="f/moist_module/map_moisture"><tt class="xref f f-func docutils literal"><span class="pre">map_moisture()</span></tt></a>, <a class="reference internal" href="#f/moist_module/generate_tide" title="f/moist_module/generate_tide"><tt class="xref f f-func docutils literal"><span class="pre">generate_tide()</span></tt></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Call to:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/utils_module/binary_search" title="f/utils_module/binary_search"><tt class="xref f f-func docutils literal"><span class="pre">binary_search()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1515,14 +1561,21 @@ Reads command line options, model parameters and start model run.</p>
 <dl class="function">
 <dt id="f/utils_module/binary_search">
 <em class="property">function  </em><tt class="descclassname">utils_module/</tt><tt class="descname">binary_search</tt><big>(</big><em>xx</em>, <em>x</em><big>)</big><a class="headerlink" href="#f/utils_module/binary_search" title="Permalink to this definition">¶</a></dt>
-<dd><p>:p real xx(:):
-:p real x:
-:r integer j:</p>
-<table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xx</strong> (:)<em> [</em><em>real</em><em>]</em></li>
+<li><strong>x</strong><em> [</em><em>real</em><em>]</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first"><strong>j</strong><em> [</em><em>integer</em><em>]</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Called from:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#f/utils_module/linear_interp" title="f/utils_module/linear_interp"><tt class="xref f f-func docutils literal"><span class="pre">linear_interp()</span></tt></a></p>
+</td>
 </tr>
 </tbody>
 </table>
