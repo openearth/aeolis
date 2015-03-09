@@ -37,6 +37,7 @@ def plot_distribution(mass, locs=None, max_locs=5,
     nlayers = mass.shape[2]
 
     fig, axs = plt.subplots(nlayers, nlocs, figsize=figsize)
+    axs = axs.reshape((nlayers, nlocs))
     for i in range(axs.shape[0]):
         for j in range(axs.shape[1]):
 
