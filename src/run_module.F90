@@ -197,7 +197,7 @@ contains
           end do
 
           if (err .gt. par%max_error) &
-               write(0, '(a,i4,a,f0.4,a)') &
+               write(0, '(a,i6,a,f0.4,a)') &
                "WARNING: iteration not converged (i: ", ti, "; error: ", err, ")"
 
        end if
@@ -253,10 +253,10 @@ contains
 
     dist = Ct / max(1e-10, Cu)
 
-    if (sum(dist) < 1.d0) then ! deposition
+    if (sum(dist) < 1.d0) then ! erosion
     
        ! compute sediment distribution in bed
-       dist2 = mass / max(1e-10, sum(mass))
+       dist2 = max(0.d0, mass) / max(1e-10, sum(mass))
 
        ! compute new sediment distributuion in the air
        dist = dist + dist2 * (1.d0 - sum(dist))
@@ -267,7 +267,7 @@ contains
     if (sum(dist) == 0.d0) dist = 1.d0
     dist = dist / sum(dist)
 
-    call assert(abs(sum(dist) - 1.d0) < 1e-10)
+!    call assert(abs(sum(dist) - 1.d0) < 1e-10)
 
     ! determine weighed supply
     supply = (Cu * dist - Ct) / par%Tp * par%dt
