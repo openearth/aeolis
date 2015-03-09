@@ -96,7 +96,7 @@ contains
     real(fp) , dimension(:,:,:) , pointer :: msed
     real(prec) , dimension(:,:) , pointer :: bodsed
 
-    integer :: i
+    integer :: i, j
     integer :: l
     integer :: nm
     integer :: nstep
@@ -172,10 +172,11 @@ contains
     nfrac       = par%nfractions
     iunderlyr   = 2 ! graded sediments
     neulyr      = par%nlayers ! all layers are fixed
-    nlalyr      = 0 ! except one
+    nlalyr      = 0 !par%nlayers ! except one
     theulyr     = par%layer_thickness
-    thlalyr     = par%layer_thickness
-    updbaselyr  = 1 ! base layer is independent
+    thlalyr     = 10 * par%layer_thickness
+    updbaselyr  = 2 ! base layer is independent
+    keuler      = neulyr + nlalyr
                                
     maxwarn     = 100
     minmass     = 0.5_fp       
@@ -231,14 +232,23 @@ contains
     sedd90      = 0.0002_fp                    
     logsedsig   = log(1.34_fp)                 
 
-    nlyr = par%nlayers
+    nlyr = neulyr + nlalyr + 2
     thlyr = par%layer_thickness
     thtrlyr = par%layer_thickness
     svfrac  = 1.0_fp       
-    msed = 0.0_fp          
-    do i = 1,par%nfractions
-       msed(i,:,:) = thlyr * cdryb(i) * par%grain_dist(i) / max(1e-10, sum(par%grain_dist))
-    enddo
+    msed = 0.0_fp
+    do j = 1,nlalyr+1
+       do i = 1,par%nfractions
+          msed(i,j,:) = thlalyr * cdryb(i) * par%grain_dist(i) / &
+               max(1e-10, sum(par%grain_dist))
+       end do
+    end do
+    do j = nlalyr+2,nlyr
+       do i = 1,par%nfractions
+          msed(i,j,:) = theulyr * cdryb(i) * par%grain_dist(i) / &
+               max(1e-10, sum(par%grain_dist))
+       end do
+    end do
 
     call setbedfracprop(morlyr, sedtyp, sedd50, logsedsig, cdryb)
 
@@ -251,6 +261,11 @@ contains
     real*8, dimension(:), intent(in) :: rho
     real*8, dimension(:), allocatable :: z_new, dz
     real*8, intent(in) :: dt
+
+    integer :: istat
+    real(fp) , dimension(:,:) , pointer :: thlyr
+    real(fp) , dimension(:,:,:) , pointer :: msed
+
     
     allocate(z_new(size(z)))
     allocate(dz(size(z)))
@@ -258,6 +273,12 @@ contains
     if ( updmorlyr(morlyr, mass, 0.d0 * mass, rho, dt, 1.d0, dz, messages) /= 0 ) then
        call adderror(messages, message)
     end if
+
+!    istat = bedcomp_getpointer_realfp (morlyr, 'layer_thickness' , thlyr)
+!    istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
+!    if (istat/=0) call adderror(messages, message)
+!    write(0,*) thlyr(:,25)
+!    write(0,*) msed(5,:,25)
 
     z_new = z + dz
 
@@ -479,7 +500,8 @@ contains
              ! compute exchange of sediment between top two layers
              mass = 0.d0
              mass(i) = -msed(i,1,k)
-             mass(i+1:n) = msed(i,1,k) * sum(msed(i+1:n,2:m,k), dim=2) / max(1e-10, sum(msed(i+1:n,2:m,k)))
+             mass(i+1:n) = msed(i,1,k) * sum(msed(i+1:n,2:m,k), dim=2) / &
+                  max(1e-10, sum(msed(i+1:n,2:m,k)))
 
              if (abs(sum(mass)) < 1e-10) then
 
