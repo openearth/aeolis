@@ -1,0 +1,35 @@
+# AeoLiS parameters
+
+VS = 1.0
+Tp = 1.0
+u_th = 4
+dx = 1
+gamma = 0.5
+facDOD = 0.1
+
+# time
+dt = 600
+CFL = .9
+tstop = 31536000
+tout = 3600
+scheme = implicit
+accfac = 1
+
+# files
+wind_file = wind_2013.txt
+bed_file = bed.txt
+tide_file = tide_2013.txt
+output_dir = case_kijkduin_2013
+
+# bed composition
+nfractions = 11
+nlayers = 10
+F = 1e-4
+Cw = 1e-2
+layer_thickness = 1e-2
+max_iter = 1000
+
+grain_size = 5.0e-05 1.0e-04 1.5e-04 2.0e-04 2.5e-04 3.0e-04 3.5e-04 4.0e-04 4.5e-04 5.0e-04 5.5e-04
+grain_dist = 0.21 0.368 0.57 0.779 0.939 1. 0.939 0.779 0.57 0.368 0.21
+
+outputvars = Ct Cu z u uth mass d50 supply moist
