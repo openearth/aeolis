@@ -18,13 +18,13 @@ contains
     type(variables), dimension(:), allocatable :: var
     type(meteorology), dimension(:), allocatable :: meteo
     integer*4 :: i, j, n, ti, nx, nt
-    real*8 :: t, dt, dx, f, err, alpha
+    real*8 :: t, dt, dx, f, err1, err2, alpha
     real*8 :: tstart, tlog
     real*8, pointer :: wind
     real*8, dimension(:), pointer :: x, z
     real*8, dimension(:,:), pointer :: uth
     real*8, dimension(:), pointer :: rho, dist
-    real*8, dimension(:,:), pointer :: Cu, Ct, supply, moist
+    real*8, dimension(:,:), pointer :: Cu, Ct, supply, moist, thlyr
     real*8, dimension(:,:), pointer :: d10, d50, d90
     real*8, dimension(:,:,:), pointer :: mass
     real*8, dimension(:), allocatable :: x_tmp, z_tmp, u, tide, frac
@@ -99,15 +99,16 @@ contains
     call get_pointer(var, 'Cu',     (/par%nfractions, par%nx+1/), Cu)
     call get_pointer(var, 'Ct',     (/par%nfractions, par%nx+1/), Ct)
     call get_pointer(var, 'uth',    (/par%nfractions, par%nx+1/), uth)
-    call get_pointer(var, 'mass',   (/par%nfractions, par%nlayers+2, par%nx+1/), mass)
+    call get_pointer(var, 'mass',   (/par%nfractions, par%nlayers, par%nx+1/), mass)
     call get_pointer(var, 'supply', (/par%nfractions, par%nx+1/), supply)
-    call get_pointer(var, 'moist',  (/par%nlayers+2, par%nx+1/), moist)
+    call get_pointer(var, 'moist',  (/par%nlayers, par%nx+1/), moist)
+    call get_pointer(var, 'thlyr',  (/par%nlayers, par%nx+1/), thlyr)
 
     ! extra output
     call get_pointer(var, 'u', (/0/), wind)
-    call get_pointer(var, 'd10', (/par%nlayers+2, par%nx+1/), d10)
-    call get_pointer(var, 'd50', (/par%nlayers+2, par%nx+1/), d50)
-    call get_pointer(var, 'd90', (/par%nlayers+2, par%nx+1/), d90)
+    call get_pointer(var, 'd10', (/par%nlayers, par%nx+1/), d10)
+    call get_pointer(var, 'd50', (/par%nlayers, par%nx+1/), d50)
+    call get_pointer(var, 'd90', (/par%nlayers, par%nx+1/), d90)
 
     allocate(frac(par%nfractions))
     allocate(Ct2(par%nfractions, par%nx+1))
@@ -151,6 +152,7 @@ contains
 
        ! get available mass
        mass = get_layer_mass()
+       thlyr = get_layer_thickness()
 
        ! compute transport capacity by wind, including thresholds
        alpha = (0.174 / log10(par%z0/par%k))**3
@@ -190,16 +192,19 @@ contains
              end do
 
              ! exit iteration if change is negligible
-             err = sum(abs(Ct2 - Ct2_prev) / max(1e-10, Ct2_prev)) / &
+             err1 = sum(abs(Ct2 - Ct2_prev) / max(1e-10, Ct2_prev)) / &
                   (par%nx+1) / par%nfractions
-             if (err .le. par%max_error) exit
-
+             err2 = sum(abs(Ct2 - Ct2_prev))
+             if (err1 .le. par%max_error) exit
+             if (err2 .le. par%max_error) exit
+             
           end do
 
-          if (err .gt. par%max_error) &
-               write(0, '(a,i6,a,f0.4,a)') &
-               "WARNING: iteration not converged (i: ", ti, "; error: ", err, ")"
-
+          if (err1 .gt. par%max_error .and. err2 .gt. par%max_error) then
+             write(0, '(a,i6,a,f10.4,a,e10.2,a)') &
+                  "WARNING: iteration not converged (i: ", ti, "; error: ", err1, ",", err2, ")"
+          end if
+          
        end if
 
        Ct = Ct2

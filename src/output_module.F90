@@ -372,7 +372,7 @@ contains
     write(fid) par%nt
     write(fid) par%dt
     write(fid) par%nfractions
-    write(fid) par%nlayers+2
+    write(fid) par%nlayers
     write(fid) par%ntout
     write(fid) par%tout
     close(fid)

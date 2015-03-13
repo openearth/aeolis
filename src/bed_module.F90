@@ -64,7 +64,7 @@ contains
 
   subroutine generate_bedcomposition(par, x, z)
 
-    type(parameters), intent(in) :: par
+    type(parameters), intent(inout) :: par
     real*8, dimension(:), intent(in) :: x, z
 
     integer :: iostat
@@ -171,12 +171,11 @@ contains
 
     nfrac       = par%nfractions
     iunderlyr   = 2 ! graded sediments
-    neulyr      = par%nlayers ! all layers are fixed
-    nlalyr      = 0 !par%nlayers ! except one
-    theulyr     = par%layer_thickness
-    thlalyr     = 10 * par%layer_thickness
-    updbaselyr  = 2 ! base layer is independent
-    keuler      = neulyr + nlalyr
+    neulyr      = 1 !par%nlayers ! all layers are fixed
+    nlalyr      = par%nlayers ! except one
+    theulyr     = 1000 !par%layer_thickness
+    thlalyr     = par%layer_thickness
+    updbaselyr  = 1 ! base layer is independent
                                
     maxwarn     = 100
     minmass     = 0.5_fp       
@@ -231,24 +230,28 @@ contains
     sedd50      = 0.0001_fp                    
     sedd90      = 0.0002_fp                    
     logsedsig   = log(1.34_fp)                 
+    svfrac  = 1.0_fp
 
-    nlyr = neulyr + nlalyr + 2
-    thlyr = par%layer_thickness
-    thtrlyr = par%layer_thickness
-    svfrac  = 1.0_fp       
-    msed = 0.0_fp
+    ! set layer thickness
+    thtrlyr = thlalyr
     do j = 1,nlalyr+1
-       do i = 1,par%nfractions
-          msed(i,j,:) = thlalyr * cdryb(i) * par%grain_dist(i) / &
-               max(1e-10, sum(par%grain_dist))
-       end do
+       thlyr(j,:) = thlalyr
     end do
     do j = nlalyr+2,nlyr
+       thlyr(j,:) = theulyr
+    end do
+
+    ! set layer mass
+    msed = 0.0_fp
+    do j = 1,nlyr
        do i = 1,par%nfractions
-          msed(i,j,:) = theulyr * cdryb(i) * par%grain_dist(i) / &
+          msed(i,j,:) = thlyr(j,:) * cdryb(i) * par%grain_dist(i) / &
                max(1e-10, sum(par%grain_dist))
        end do
     end do
+
+    ! update parameters
+    par%nlayers = nlyr
 
     call setbedfracprop(morlyr, sedtyp, sedd50, logsedsig, cdryb)
 
@@ -262,23 +265,12 @@ contains
     real*8, dimension(:), allocatable :: z_new, dz
     real*8, intent(in) :: dt
 
-    integer :: istat
-    real(fp) , dimension(:,:) , pointer :: thlyr
-    real(fp) , dimension(:,:,:) , pointer :: msed
-
-    
     allocate(z_new(size(z)))
     allocate(dz(size(z)))
 
     if ( updmorlyr(morlyr, mass, 0.d0 * mass, rho, dt, 1.d0, dz, messages) /= 0 ) then
        call adderror(messages, message)
     end if
-
-!    istat = bedcomp_getpointer_realfp (morlyr, 'layer_thickness' , thlyr)
-!    istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
-!    if (istat/=0) call adderror(messages, message)
-!    write(0,*) thlyr(:,25)
-!    write(0,*) msed(5,:,25)
 
     z_new = z + dz
 
@@ -294,6 +286,16 @@ contains
 
   end function get_layer_mass
 
+  function get_layer_thickness() result (thlyr)
+
+    integer :: istat
+    real*8 , dimension(:,:), pointer :: thlyr
+
+    istat = bedcomp_getpointer_realfp(morlyr, 'layer_thickness', thlyr)
+    if (istat/=0) call adderror(messages, message)
+
+  end function get_layer_thickness
+
   function get_layer_percentile(par, p) result (perc)
 
     type(parameters), intent(in) :: par
@@ -306,14 +308,14 @@ contains
     real*8, dimension(:,:,:), pointer :: msed
 
     allocate(frac(par%nfractions))
-    allocate(perc(par%nlayers+2, par%nx+1))
-    allocate(msed_cs(par%nfractions, par%nlayers+2, par%nx+1))
+    allocate(perc(par%nlayers, par%nx+1))
+    allocate(msed_cs(par%nfractions, par%nlayers, par%nx+1))
 
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
     if (istat/=0) call adderror(messages, message)
 
     do i = 1,par%nx+1
-       do j = 1,par%nlayers+2
+       do j = 1,par%nlayers
           sedtot = 0.0_fp
           do k = 1,par%nfractions
              sedtot = sedtot + msed(k,j,i)
@@ -333,13 +335,13 @@ contains
     real*8, dimension(:,:,:), allocatable :: fractions
     real*8, dimension(:,:,:), pointer :: msed
 
-    allocate(fractions(par%nfractions, par%nlayers+2, par%nx+1))
+    allocate(fractions(par%nfractions, par%nlayers, par%nx+1))
 
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
     if (istat/=0) call adderror(messages, message)
 
     do i = 1,par%nx+1
-       do j = 1,par%nlayers+2
+       do j = 1,par%nlayers
           sedtot = 0.0_fp
           do k = 1,par%nfractions
              sedtot = sedtot + msed(k,j,i)
@@ -362,7 +364,7 @@ contains
     real*8, dimension(:,:), pointer :: thlyr
     real*8, dimension(:), pointer :: dens
 
-    allocate(fractions(par%nfractions, par%nlayers+2, par%nx+1))
+    allocate(fractions(par%nfractions, par%nlayers, par%nx+1))
 
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_thickness', thlyr)
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
@@ -484,7 +486,7 @@ contains
     if (istat/=0) call adderror(messages, message)
 
     n = par%nfractions
-    m = par%nlayers+2
+    m = par%nlayers
     
     allocate(dist(n))
     allocate(mass(n))
