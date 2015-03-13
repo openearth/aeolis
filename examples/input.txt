@@ -10,7 +10,7 @@ dx = 3
 # time
 dt = 60
 CFL = .9
-tstop = 86400
+tstop = 3600
 tout = 360
 accfac = 1
 scheme = explicit

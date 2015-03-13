@@ -7,6 +7,15 @@ module input_module
 
   include 'sedparams.inc'
 
+  type meteorology
+     real*8 :: solar_radiation = 1e4 ! [J/m2]
+     real*8 :: air_temperature = 10.d0 ! [oC]
+     real*8 :: relative_humidity = 0.4d0 ! [-]
+     real*8 :: air_specific_heat = 1.0035e-3 ! [MJ/kg/K]
+     real*8 :: atmospheric_pressure = 101.325 ! [kPa]
+     real*8 :: latent_heat = 2.45 ! [MJ/kg]
+  end type meteorology
+
   type parameters
      real*8    :: VS    = 0.d0            ! [-] ratio sediment transport velocity to wind velocity
      real*8    :: Tp    = 0.d0            ! [s] adaptation time scale in transport formulation
@@ -20,6 +29,7 @@ module input_module
      integer*4 :: nt    = 0               ! [-] number of time steps
      real*8    :: dt    = 0.d0            ! [s] duration of time step
      real*8    :: dx    = 0.d0            ! [m] size of grid cell
+     real*8    :: t     = 0.d0            ! [m] current time in simulation
      real*8    :: tstop = 0.d0            ! [s] duration of simulation
      real*8    :: tout  = 0.d0            ! [s] time interval for writing model output to disk
      integer*4 :: ntout = 0               ! [-] number of time steps written to disk
@@ -57,6 +67,10 @@ module input_module
      real*8, dimension(:), allocatable :: grain_dist ! [-] occurence of each fraction in bed
 
      character(10), dimension(:), allocatable  :: outputvars ! space separated list of output variables
+
+     real*8, dimension(:), allocatable :: uw ! [m/s] wind speed time series
+     real*8, dimension(:), allocatable :: zs ! [m] water level elevation
+     type(meteorology), dimension(:), allocatable :: meteo ! meteorological conditions
 
   end type parameters
 
@@ -143,8 +157,8 @@ contains
     par%tstop  = read_key_dbl(fname, 'tstop', 3600.d0)
     par%tout   = read_key_dbl(fname, 'tout',  1.d0)
     par%accfac = read_key_dbl(fname, 'accfac',  1.d0)
-    par%wind_file    = read_key_str(fname, 'wind_file',  '')
-    par%bed_file     = read_key_str(fname, 'bed_file',   '')
+    par%wind_file    = read_key_str(fname, 'wind_file', '')
+    par%bed_file     = read_key_str(fname, 'bed_file', '')
     par%tide_file    = read_key_str(fname, 'tide_file', '')
     par%moist_file   = read_key_str(fname, 'moist_file', '')
     par%method_moist = read_key_str(fname, 'method_moist', 'belly_johnson')

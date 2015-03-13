@@ -6,15 +6,6 @@ module moist_module
 
   implicit none
 
-  type meteorology
-     real*8 :: solar_radiation = 1e4 ! [J/m2]
-     real*8 :: air_temperature = 10.d0 ! [oC]
-     real*8 :: relative_humidity = 0.4d0 ! [-]
-     real*8 :: air_specific_heat = 1.0035e-3 ! [MJ/kg/K]
-     real*8 :: atmospheric_pressure = 101.325 ! [kPa]
-     real*8 :: latent_heat = 2.45 ! [MJ/kg]
-  end type meteorology
-
 contains
 
   subroutine generate_moist(par, z, m)
