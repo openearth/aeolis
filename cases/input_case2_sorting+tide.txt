@@ -5,7 +5,7 @@ Tp = 1.0
 u_th = 4
 dx = 1
 gamma = 0.5
-facDOD = 0.1
+facDOD = 0.
 
 # time
 dt = 600
@@ -19,7 +19,7 @@ accfac = 10
 wind_file = wind_constant.txt
 bed_file = bed.txt
 tide_file = tide.txt
-output_dir = case2_s
+output_dir = case2_la
 
 # bed composition
 nfractions = 11

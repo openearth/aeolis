@@ -68,7 +68,7 @@ def get_dims(fname):
 
     if fname in ['mass']:
         return (-1, d['nx'], d['nl'], d['nf'])
-    elif fname in ['d10', 'd50', 'd90', 'moist']:
+    elif fname in ['d10', 'd50', 'd90', 'moist', 'thlyr']:
         return (-1, d['nx'], d['nl'])
     elif fname in ['Cu', 'Ct', 'uth', 'supply']:
         return (-1, d['nx'], d['nf'])
