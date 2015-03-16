@@ -25,14 +25,14 @@ module output_module
      real*8 :: init
      integer*4 :: fid = -1
   end type variables_data
-  
-  interface get_pointer
-     module procedure get_pointer_rank0
-     module procedure get_pointer_rank1
-     module procedure get_pointer_rank2
-     module procedure get_pointer_rank3
-  end interface get_pointer
-  
+
+  interface alloc_pointer
+     module procedure alloc_pointer_rank0
+     module procedure alloc_pointer_rank1
+     module procedure alloc_pointer_rank2
+     module procedure alloc_pointer_rank3
+  end interface alloc_pointer
+
 contains
 
   subroutine alloc_variable(var, name, dims)
@@ -106,7 +106,7 @@ contains
 
   end subroutine alloc_variable_data
 
-  subroutine get_pointer_rank0(var, name, dims, ptr)
+  subroutine alloc_pointer_rank0(var, name, dims, ptr)
 
     type(variables), dimension(:), allocatable, intent(inout) :: var
     character(*), intent(in) :: name
@@ -119,9 +119,9 @@ contains
     i = size(var)
     ptr => var(i)%val%rank0
     
-  end subroutine get_pointer_rank0
+  end subroutine alloc_pointer_rank0
 
-  subroutine get_pointer_rank1(var, name, dims, ptr)
+  subroutine alloc_pointer_rank1(var, name, dims, ptr)
 
     type(variables), dimension(:), allocatable, intent(inout) :: var
     character(*), intent(in) :: name
@@ -134,9 +134,9 @@ contains
     i = size(var)
     ptr => var(i)%val%rank1
     
-  end subroutine get_pointer_rank1
+  end subroutine alloc_pointer_rank1
 
-  subroutine get_pointer_rank2(var, name, dims, ptr)
+  subroutine alloc_pointer_rank2(var, name, dims, ptr)
 
     type(variables), dimension(:), allocatable, intent(inout) :: var
     character(*), intent(in) :: name
@@ -149,9 +149,9 @@ contains
     i = size(var)
     ptr => var(i)%val%rank2
     
-  end subroutine get_pointer_rank2
+  end subroutine alloc_pointer_rank2
 
-  subroutine get_pointer_rank3(var, name, dims, ptr)
+  subroutine alloc_pointer_rank3(var, name, dims, ptr)
 
     type(variables), dimension(:), allocatable, intent(inout) :: var
     character(*), intent(in) :: name
@@ -164,7 +164,7 @@ contains
     i = size(var)
     ptr => var(i)%val%rank3
     
-  end subroutine get_pointer_rank3
+  end subroutine alloc_pointer_rank3
   
   subroutine output_init(var, vars, dir)
 
@@ -378,6 +378,49 @@ contains
     close(fid)
 
   end subroutine write_dimensions
+
+  function get_rank(var, name) result (rank)
+
+    type(variables), dimension(:) :: var
+    character(*) :: name
+    integer*4 :: rank
+    integer*4 :: i
+    
+    do i = 1,size(var)
+       if (trim(var(i)%name) == trim(name)) then
+          rank = var(i)%rank
+          exit
+       end if
+    end do
+
+  end function get_rank
+
+  function get_shape(var, name) result (shp)
+
+    type(variables), dimension(:) :: var
+    character(*) :: name
+    integer*4, dimension(:), allocatable :: shp
+    integer*4 :: i, rank
+
+    do i = 1,size(var)
+       if (trim(var(i)%name) == trim(name)) then
+          rank = var(i)%rank
+          allocate(shp(rank))
+          select case (rank)
+             case(0)
+                shp = shape(var(i)%val%rank0)
+             case(1)
+                shp = shape(var(i)%val%rank1)
+             case(2)
+                shp = shape(var(i)%val%rank2)
+             case(3)
+                shp = shape(var(i)%val%rank3)
+             end select
+          exit
+       end if
+    end do
+
+  end function get_shape
 
   function is_output(var, name) result (ret)
 

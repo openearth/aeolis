@@ -10,12 +10,19 @@ module bmi_module
 
   implicit none
 
-  integer(c_int), parameter :: MAXDIMS = 6
+  integer(c_int), parameter :: MAXDIMS = 3
 
   type(parameters) :: par
   type(spaceparams) :: s
   type(variables), dimension(:), allocatable :: var
 
+  interface set_c_pointer
+     module procedure set_c_pointer_rank0
+     module procedure set_c_pointer_rank1
+     module procedure set_c_pointer_rank2
+     module procedure set_c_pointer_rank3
+  end interface set_c_pointer
+    
 contains
 
   integer(c_int) function initialize(c_configfile) result(ierr) bind(C, name="initialize")
@@ -65,6 +72,8 @@ contains
 
     call step(par, s, var)
 
+    par%t = par%t + par%dt
+
   end function update
 
   integer(c_int) function finalize() result(ierr) bind(C, name="finalize")
@@ -89,16 +98,7 @@ contains
     character(len=MAXSTRINGLEN) :: type_name
 
     var_name = char_array_to_string(c_var_name)
-
-!    select case(var_name)
-!    case('arr1')
-!       type_name = 'double'
-!    case('arr2')
-!       type_name = 'int'
-!    case('arr3')
-!       type_name = 'bool'
-!    case default
-!    end select
+    type_name = 'double'
 
     c_type_name = string_to_char_array(trim(type_name))
 
@@ -109,44 +109,22 @@ contains
 
     character(kind=c_char), intent(in) :: c_var_name(*)
     integer(c_int), intent(out) :: rank
-
-    ! The fortran name of the attribute name
     character(len=strlen(c_var_name)) :: var_name
-    ! Store the name
-    var_name = char_array_to_string(c_var_name)
 
-!    select case(var_name)
-!    case("arr1")
-!       rank = 1
-!    case("arr2")
-!       rank = 2
-!    case("arr3")
-!       rank = 3
-!    case default
-!       rank = 0
-!    end select
+    var_name = char_array_to_string(c_var_name)
+    rank = get_rank(var, var_name)
 
   end subroutine get_var_rank
 
-  subroutine get_var_shape(c_var_name, shape) bind(C, name="get_var_shape")
+  subroutine get_var_shape(c_var_name, var_shape) bind(C, name="get_var_shape")
     !DEC$ ATTRIBUTES DLLEXPORT :: get_var_shape
 
     character(kind=c_char), intent(in) :: c_var_name(*)
-    integer(c_int), intent(inout) :: shape(MAXDIMS)
-
+    integer(c_int), intent(inout) :: var_shape(MAXDIMS)
     character(len=strlen(c_var_name)) :: var_name
 
     var_name = char_array_to_string(c_var_name)
-    shape = (/0, 0, 0, 0, 0, 0/)
-
-!    select case(var_name)
-!    case("arr1")
-!       shape(1:1) = 3
-!    case("arr2")
-!       shape(1:2) = (/2, 3/)
-!    case("arr3")
-!       shape(1:3) = (/2, 2, 3/)
-!    end select
+    var_shape = get_shape(var, var_name)
     
   end subroutine get_var_shape
 
@@ -160,58 +138,46 @@ contains
 
     ! store the name
     var_name = char_array_to_string(c_var_name)
-
-!    select case(var_name)
-!    case("arr1")
-!       x = c_loc(arr1)
-!    case("arr2")
-!       x = c_loc(arr2)
-!    case("arr3")
-!       x = c_loc(arr3)
-!    end select
+!    call get_c_pointer(var, name, x)
 
   end subroutine get_var
 
   subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
     !DEC$ ATTRIBUTES DLLEXPORT :: set_var
     
-    ! return a pointer to the variable
-    use iso_c_binding, only: c_double, c_char, c_loc, c_f_pointer
-
     character(kind=c_char), intent(in) :: c_var_name(*)
     type(c_ptr), value, intent(in) :: xptr
 
-
+    real(c_double), pointer :: x_0d_double_ptr
     real(c_double), pointer :: x_1d_double_ptr(:)
     real(c_double), pointer :: x_2d_double_ptr(:,:)
     real(c_double), pointer :: x_3d_double_ptr(:,:,:)
-    integer(c_int), pointer :: x_1d_int_ptr(:)
-    integer(c_int), pointer :: x_2d_int_ptr(:,:)
-    integer(c_int), pointer :: x_3d_int_ptr(:,:,:)
-    real(c_float), pointer  :: x_1d_float_ptr(:)
-    real(c_float), pointer  :: x_2d_float_ptr(:,:)
-    real(c_float), pointer  :: x_3d_float_ptr(:,:,:)
-    logical(c_bool), pointer  :: x_1d_bool_ptr(:)
-    logical(c_bool), pointer  :: x_2d_bool_ptr(:,:)
-    logical(c_bool), pointer  :: x_3d_bool_ptr(:,:,:)
 
-    ! the fortran name of the attribute name
     character(len=strlen(c_var_name)) :: var_name
+    integer*4, dimension(:), allocatable :: shp
+    integer*4 :: rank
 
     ! store the name
     var_name = char_array_to_string(c_var_name)
 
-!    select case(var_name)
-!    case("arr1")
-!       call c_f_pointer(xptr, x_1d_double_ptr, shape(arr1))
-!       arr1(:) = x_1d_double_ptr
-!    case("arr2")
-!       call c_f_pointer(xptr, x_2d_int_ptr, shape(arr2))
-!       arr2(:,:) = x_2d_int_ptr
-!    case("arr3")
-!       call c_f_pointer(xptr, x_3d_bool_ptr, shape(arr3))
-!       arr3(:,:,:) = x_3d_bool_ptr
-!    end select
+    rank = get_rank(var, var_name)
+    allocate(shp(rank))
+    shp = get_shape(var, var_name)
+    
+    select case(rank)
+    case(0)
+       call c_f_pointer(xptr, x_0d_double_ptr, shp)
+       call set_c_pointer(var, var_name, x_0d_double_ptr)
+    case(1)
+       call c_f_pointer(xptr, x_1d_double_ptr, shp)
+       call set_c_pointer(var, var_name, x_1d_double_ptr)
+     case(2)
+       call c_f_pointer(xptr, x_2d_double_ptr, shp)
+       call set_c_pointer(var, var_name, x_2d_double_ptr)
+     case(3)
+       call c_f_pointer(xptr, x_3d_double_ptr, shp)
+       call set_c_pointer(var, var_name, x_3d_double_ptr)
+     end select
 
   end subroutine set_var
   
@@ -238,5 +204,95 @@ contains
     time = par%tstop
 
   end subroutine get_end_time
+
+!  subroutine get_c_pointer(var, name, x)
+!
+!    type(variables), dimension(:), intent(in) :: var
+!    character(*), intent(in) :: name
+!    type(c_ptr), intent(inout) :: x
+!    integer*4 :: i, rank
+!
+!    do i = 1,size(var)
+!       if (trim(var(i)%name) == trim(name)) then
+!          rank = var(i)%rank
+!          select case (rank)
+!             case(0)
+!                x = c_loc(var(i)%val%rank0)
+!             case(1)
+!                x = c_loc(var(i)%val%rank1)
+!             case(2)
+!                x = c_loc(var(i)%val%rank2)
+!             case(3)
+!                x = c_loc(var(i)%val%rank3)
+!             end select
+!          exit
+!       end if
+!    end do
+!    
+!  end subroutine get_c_pointer
+
+  subroutine set_c_pointer_rank0(var, name, val)
+
+    type(variables), dimension(:), intent(in) :: var
+    character(*), intent(in) :: name
+    real(c_double), pointer, intent(in) :: val
+    integer*4 :: i
+
+    do i = 1,size(var)
+       if (trim(var(i)%name) == trim(name)) then
+          var(i)%val%rank0 = val
+          exit
+       end if
+    end do
+    
+  end subroutine set_c_pointer_rank0
+
+  subroutine set_c_pointer_rank1(var, name, val)
+
+    type(variables), dimension(:), intent(in) :: var
+    character(*), intent(in) :: name
+    real(c_double), pointer, intent(in) :: val(:)
+    integer*4 :: i
+
+    do i = 1,size(var)
+       if (trim(var(i)%name) == trim(name)) then
+          var(i)%val%rank1 = val
+          exit
+       end if
+    end do
+    
+  end subroutine set_c_pointer_rank1
+
+  subroutine set_c_pointer_rank2(var, name, val)
+
+    type(variables), dimension(:), intent(in) :: var
+    character(*), intent(in) :: name
+    real(c_double), pointer, intent(in) :: val(:,:)
+    integer*4 :: i
+
+    do i = 1,size(var)
+       if (trim(var(i)%name) == trim(name)) then
+          var(i)%val%rank2 = val
+          exit
+       end if
+    end do
+    
+  end subroutine set_c_pointer_rank2
+
+  subroutine set_c_pointer_rank3(var, name, val)
+
+    type(variables), dimension(:), intent(in) :: var
+    character(*), intent(in) :: name
+    real(c_double), pointer, intent(in) :: val(:,:,:)
+    integer*4 :: i
+
+    do i = 1,size(var)
+       if (trim(var(i)%name) == trim(name)) then
+          var(i)%val%rank3 = val
+          exit
+       end if
+    end do
+    
+  end subroutine set_c_pointer_rank3
 
 end module bmi_module

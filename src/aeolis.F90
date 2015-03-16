@@ -33,7 +33,7 @@ tstart = get_time()
 tlog = tstart
 call get_end_time(tend)
 do while (t < tend)
-   
+
    ! log progress
    if ( mod(dble(ti), par%nt/10.d0) < 1.d0 .or. get_time()-tlog > 60) then
       call write_progress(ti, par%nt, tstart)
@@ -51,6 +51,6 @@ do while (t < tend)
 end do
 
 if (finalize() /= 0) &
-     write(msgbuf,*) 'Initialization failed'
+     write(msgbuf,*) 'Finalization failed'
 
 end program

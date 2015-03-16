@@ -33,8 +33,8 @@ contains
     ! bed
     write(0,*) 'Generating bed profile and composition...'
     call generate_bed(par, x_tmp, zb_tmp)
-    call get_pointer(var, 'x', (/par%nx+1/), s%x)
-    call get_pointer(var, 'zb', (/par%nx+1/), s%zb)
+    call alloc_pointer(var, 'x', (/par%nx+1/), s%x)
+    call alloc_pointer(var, 'zb', (/par%nx+1/), s%zb)
     
     s%x = x_tmp
     s%zb = zb_tmp
@@ -85,27 +85,27 @@ contains
     call generate_meteo(par, par%meteo)
 
     ! fractions
-    call get_pointer(var, 'rho',    (/par%nfractions/), s%rho)
-    call get_pointer(var, 'dist',   (/par%nfractions/), s%dist)
+    call alloc_pointer(var, 'rho',    (/par%nfractions/), s%rho)
+    call alloc_pointer(var, 'dist',   (/par%nfractions/), s%dist)
 
     s%rho = par%rhom
     s%dist = par%grain_dist
 
     ! variables
-    call get_pointer(var, 'Cu',     (/par%nfractions, par%nx+1/), s%Cu)
-    call get_pointer(var, 'Ct',     (/par%nfractions, par%nx+1/), s%Ct)
-    call get_pointer(var, 'uth',    (/par%nfractions, par%nx+1/), s%uth)
-    call get_pointer(var, 'mass',   (/par%nfractions, par%nlayers, par%nx+1/), s%mass)
-    call get_pointer(var, 'supply', (/par%nfractions, par%nx+1/), s%supply)
-    call get_pointer(var, 'moist',  (/par%nlayers, par%nx+1/), s%moist)
-    call get_pointer(var, 'thlyr',  (/par%nlayers, par%nx+1/), s%thlyr)
+    call alloc_pointer(var, 'Cu',     (/par%nfractions, par%nx+1/), s%Cu)
+    call alloc_pointer(var, 'Ct',     (/par%nfractions, par%nx+1/), s%Ct)
+    call alloc_pointer(var, 'uth',    (/par%nfractions, par%nx+1/), s%uth)
+    call alloc_pointer(var, 'mass',   (/par%nfractions, par%nlayers, par%nx+1/), s%mass)
+    call alloc_pointer(var, 'supply', (/par%nfractions, par%nx+1/), s%supply)
+    call alloc_pointer(var, 'moist',  (/par%nlayers, par%nx+1/), s%moist)
+    call alloc_pointer(var, 'thlyr',  (/par%nlayers, par%nx+1/), s%thlyr)
 
     ! extra output
-    call get_pointer(var, 'uw', (/0/), s%uw)
-    call get_pointer(var, 'zs', (/0/), s%zs)
-    call get_pointer(var, 'd10', (/par%nlayers, par%nx+1/), s%d10)
-    call get_pointer(var, 'd50', (/par%nlayers, par%nx+1/), s%d50)
-    call get_pointer(var, 'd90', (/par%nlayers, par%nx+1/), s%d90)
+    call alloc_pointer(var, 'uw', (/0/), s%uw)
+    call alloc_pointer(var, 'zs', (/0/), s%zs)
+    call alloc_pointer(var, 'd10', (/par%nlayers, par%nx+1/), s%d10)
+    call alloc_pointer(var, 'd50', (/par%nlayers, par%nx+1/), s%d50)
+    call alloc_pointer(var, 'd90', (/par%nlayers, par%nx+1/), s%d90)
 
   end subroutine init
   
