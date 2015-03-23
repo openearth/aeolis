@@ -19,7 +19,7 @@ contains
     type(spaceparams), intent(inout) :: s
     type(variables), dimension(:), intent(inout) :: var
     integer*4 :: i, j, n, ti
-    real*8 :: err1, err2, alpha
+    real*8 :: err, alpha
     real*8, dimension(:,:), allocatable :: Ct2, Ct2_prev
 
     allocate(Ct2(par%nfractions, par%nx+1))
@@ -83,22 +83,19 @@ contains
                 Ct2(i,j) = max(0.d0, (par%VS * s%uw * Ct2(i,j-1) * &
                      par%dt / par%dx + s%Ct(i,j) + s%supply(i,j)) / &
                      (1 + s%uw * par%dt / par%dx))
-                
+
              end do
           end do
 
           ! exit iteration if change is negligible
-          err1 = sum(abs(Ct2 - Ct2_prev) / max(1e-10, Ct2_prev)) / &
-               (par%nx+1) / par%nfractions
-          err2 = sum(abs(Ct2 - Ct2_prev))
-          if (err1 .le. par%max_error) exit
-          if (err2 .le. par%max_error) exit
+          err = sum(abs(Ct2 - Ct2_prev))
+          if (err .le. par%max_error) exit
           
        end do
 
-       if (err1 .gt. par%max_error .and. err2 .gt. par%max_error) then
+       if (err .gt. par%max_error) then
           write(0, '(a,i6,a,f10.4,a,e10.2,a)') &
-               "WARNING: iteration not converged (i: ", ti, "; error: ", err1, ",", err2, ")"
+               "WARNING: iteration not converged (i: ", ti, "; error: ", err, ")"
        end if
        
     end if
