@@ -10,7 +10,7 @@ facDOD = 0.
 # time
 dt = 600
 CFL = .9
-tstop = 2419200
+tstop = 24192
 tout = 600
 scheme = implicit
 accfac = 10

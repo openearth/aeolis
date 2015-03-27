@@ -5,6 +5,8 @@ module iso_c_utils
 
   ! always use max stringlen for c arrays otherwise you have to specify lengths by hand
   integer(c_int), parameter :: MAXSTRINGLEN = 1024
+  integer(c_int), parameter :: MAXDIMS = 3
+
 contains
   ! Utility functions, move these to interop module
   ! Make functions pure so they can be used as input arguments.
@@ -20,7 +22,6 @@ contains
     end do
   end function strlen
 
-
   integer(c_int) pure function strcmp(char_array1, char_array2)
     character(c_char), intent(in) :: char_array1(MAXSTRINGLEN)
     character(c_char), intent(in) :: char_array2(MAXSTRINGLEN)
@@ -35,8 +36,6 @@ contains
     if (lgt(string1,string2)) strcmp = 1
 
   end function strcmp
-
-
 
   subroutine strcpy(str1, str2)
     character(c_char), intent(in) :: str1(MAXSTRINGLEN)
@@ -69,4 +68,17 @@ contains
     char_array(len(trim(string))+1) = C_NULL_CHAR
   end function string_to_char_array
 
+  subroutine arrflip(arr, n)
+    integer(c_int), intent(inout) :: arr(MAXDIMS)
+    integer(c_int) :: arr2(MAXDIMS)
+    integer, intent(in) :: n
+    integer :: i
+
+    arr2 = arr
+    do i = 1,n
+       arr(i) = arr2(n-i+1)
+    end do
+    
+  end subroutine arrflip
+    
 end module iso_c_utils

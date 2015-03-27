@@ -18,11 +18,11 @@ accfac = 1
 # files
 wind_file = wind_2013.txt
 bed_file = bed.txt
-tide_file = tide_2013.txt
-output_dir = case_kijkduin_2013
+tide_file = tide_constant.txt
+output_dir = case_kijkduin_2013_5
 
 # bed composition
-nfractions = 11
+nfractions = 1
 nlayers = 10
 F = 1e-4
 Cw = 1e-2

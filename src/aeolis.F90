@@ -27,6 +27,10 @@ c_configfile = string_to_char_array(configfile)
 if (initialize(c_configfile) /= 0) &
      write(msgbuf,*) 'Initialization failed'
 
+! initialize output
+call write_dimensions(par)
+call output_init(var, par%outputvars, par%output_dir)
+
 t = 0
 ti = 1
 tstart = get_time()
@@ -39,10 +43,12 @@ do while (t < tend)
       call write_progress(ti, par%nt, tstart)
       tlog = get_time()
    end if
-   
+
+   ! step in time
    if (update(-1.d0) /= 0) &
         write(msgbuf,*) 'Updating to timestep ', t, ' failed'
 
+   ! write output
    call write_output(par, s, var)
    call get_current_time(t)
 

@@ -31,6 +31,7 @@ contains
     ti = nint(par%t / par%dt)
     s%uw = par%uw(ti)
     s%meteo = par%meteo(1)
+    s%zs = par%zs(ti)
 
     ! update moisture contents
     call update_moisture(par, s%zb, s%zs, s%meteo, s%uw, s%moist)
@@ -129,7 +130,7 @@ contains
 
     ! write output
     if (par%t .le. par%dt  .or. par%tout < par%dt .or. &
-         mod(par%tout, par%dt) < par%dt) then
+         mod(par%t, par%tout) < par%dt) then
 
        ! update derived variables
        if (is_output(var, 'mass')) s%mass = get_layer_mass()

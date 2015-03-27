@@ -8,6 +8,7 @@ AM_INIT_AUTOMAKE
 # Checks for programs.
 
 # Checks for libraries.
+LT_INIT
 
 # Checks for header files.
 
