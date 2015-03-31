@@ -17,6 +17,14 @@ module input_module
   end type meteorology
 
   type parameters
+     logical   :: mixtoplayer   = .true.
+     logical   :: sweeptoplayer = .true.
+     logical   :: th_grainsize  = .true.
+     logical   :: th_bedslope   = .true.
+     logical   :: th_moisture   = .true.
+     logical   :: th_humidity   = .true.
+     logical   :: bedupdate     = .true.
+     
      real*8    :: VS    = 0.d0            ! [-] ratio sediment transport velocity to wind velocity
      real*8    :: Tp    = 0.d0            ! [s] adaptation time scale in transport formulation
      real*8    :: u_th  = 0.d0            ! [m/s] constant velocity threshold in transport formulation
@@ -143,6 +151,14 @@ contains
     write(*,*) '**********************************************************'
     write(*,*) 'PARAMETER SETTINGS'
     write(*,*) '**********************************************************'
+
+    par%mixtoplayer   = read_key_logical(fname, 'mixtoplayer', .true.)
+    par%sweeptoplayer = read_key_logical(fname, 'sweeptoplayer', .true.)
+    par%th_grainsize  = read_key_logical(fname, 'th_grainsize', .true.)
+    par%th_bedslope   = read_key_logical(fname, 'th_bedslope', .true.)
+    par%th_moisture   = read_key_logical(fname, 'th_moisture', .true.)
+    par%th_humidity   = read_key_logical(fname, 'th_humidity', .true.)
+    par%bedupdate     = read_key_logical(fname, 'bedupdate', .true.)
     
     par%VS     = read_key_dbl(fname, 'VS',    1.d0)
     par%Tp     = read_key_dbl(fname, 'Tp',    1.0d0)
@@ -340,7 +356,26 @@ contains
     write(0, '(a12,a,i15)') key, ' = ', value_int
     
   end function read_key_int
-  
+
+  function read_key_logical(fname, key, default) result (value_logical)
+    
+    integer*4 :: ierr
+    character(len=*) :: fname, key
+    character(slen) :: value
+    logical, optional :: default
+    logical :: value_logical
+
+    value = read_key(fname, key)
+    if (value /= ' ') then
+       read(value, '(l256)', iostat=ierr) value_logical
+    else
+       value_logical = default
+    end if
+
+    write(0, '(a12,a,l1)') key, ' = ', value_logical
+    
+  end function read_key_logical
+
   function read_key(fname, key) result (value)
     
     integer*4 :: fid, ierr, idx

@@ -123,7 +123,7 @@ contains
     s%supply(:,1) = 0.d0
 
     ! update bed elevation
-    s%zb = update_bed(s%zb, -s%supply, s%rho, par%dt)
+    s%zb = update_bed(par, s%zb, -s%supply, s%rho)
     call sweep_toplayer(par)
 
     ! incremental output

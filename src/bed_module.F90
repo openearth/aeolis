@@ -48,7 +48,7 @@ contains
        i = i + 1
     end do
     close(fid)
-        
+
     ! allocate arrays
     par%nx = nint(maxval(x_c) / par%dx)
     allocate(x(par%nx+1))
@@ -173,7 +173,7 @@ contains
     iunderlyr   = 2 ! graded sediments
     neulyr      = 1 !par%nlayers ! all layers are fixed
     nlalyr      = par%nlayers ! except one
-    theulyr     = 1000 !par%layer_thickness
+    theulyr     = 10 !par%layer_thickness
     thlalyr     = par%layer_thickness
     updbaselyr  = 1 ! base layer is independent
                                
@@ -257,23 +257,27 @@ contains
 
   end subroutine generate_bedcomposition
 
-  function update_bed(z, mass, rho, dt) result (z_new)
+  function update_bed(par, z, mass, rho) result (z_new)
 
+    type(parameters), intent(in) :: par
     real*8, dimension(:), intent(in) :: z
     real*8, dimension(:,:), intent(in) :: mass
     real*8, dimension(:), intent(in) :: rho
     real*8, dimension(:), allocatable :: z_new, dz
-    real*8, intent(in) :: dt
 
     allocate(z_new(size(z)))
     allocate(dz(size(z)))
 
-    if ( updmorlyr(morlyr, mass, 0.d0 * mass, rho, dt, 1.d0, dz, messages) /= 0 ) then
+    if ( updmorlyr(morlyr, mass, 0.d0 * mass, rho, par%dt, 1.d0, dz, messages) /= 0 ) then
        call adderror(messages, message)
     end if
 
-    z_new = z + dz
-
+    if (par%bedupdate) then
+       z_new = z + dz
+    else
+       z_new = z
+    end if
+    
   end function update_bed
 
   function get_layer_mass() result (mass)
@@ -388,6 +392,8 @@ contains
     real*8, dimension(:,:), intent(inout) :: u_th
     integer :: i
 
+    if (.not. par%th_grainsize) return
+    
     ! Bagnold
 
     do i=1,par%nfractions
@@ -404,6 +410,8 @@ contains
     real*8, dimension(:,:), intent(inout) :: u_th
     integer :: i
     real*8 :: phi, theta
+
+    if (.not. par%th_bedslope) return
 
     ! Dyer, 1986
 
@@ -432,6 +440,8 @@ contains
 
     real*8, dimension(:,:), allocatable :: dist
 
+    if (.not. par%mixtoplayer) return
+       
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass' , msed)
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_thickness' , thlyr)
     if (istat/=0) call adderror(messages, message)
@@ -481,6 +491,8 @@ contains
     real(fp), dimension(:,:,:), pointer :: msed
 
     real*8, dimension(:), allocatable :: dist, mass
+
+    if (.not. par%sweeptoplayer) return
 
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass' , msed)
     if (istat/=0) call adderror(messages, message)

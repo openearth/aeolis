@@ -165,6 +165,8 @@ contains
     real*8, dimension(par%nfractions, par%nx+1) :: u_th_m
     integer :: i, n
 
+    if (.not. par%th_moisture) return
+
 !    mg = map_moisture(par, zm, m, z)
 
     ! convert from volumetric content (percentage of volume) to
@@ -195,13 +197,13 @@ contains
 
   end subroutine compute_threshold_moisture
 
-  subroutine update_moisture(par, z, tide, meteo, u, moist)
+  subroutine update_moisture(par, zb, zs, meteo, u, moist)
 
     type(parameters), intent(in) :: par
     type(meteorology), intent(in) :: meteo
-    real*8, dimension(:), intent(in) :: z
+    real*8, dimension(:), intent(in) :: zb
     real*8, dimension(:,:), intent(inout) :: moist
-    real*8, intent(in) :: u, tide
+    real*8, intent(in) :: u, zs
     real*8 :: radiation, m, delta, gamma, evaporation
     integer :: i, t, nl, f
 
@@ -219,7 +221,7 @@ contains
     
     ! infiltration using Darcy
     do i = 1,par%nx
-       if (tide >= z(i)) then
+       if (zs >= zb(i)) then
           moist(:,i) = par%porosity
        else
           moist(:,i) = moist(:,i) * exp(-par%F * par%dt)
