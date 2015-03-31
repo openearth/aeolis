@@ -53,14 +53,7 @@ contains
          (s%uw - s%uth)**3 / (s%uw * par%VS))
 
     ! determine first dry grid cell
-    x1 = 2
-    do i=2,par%nx+1
-       if (s%zb(i) >= s%zs) then
-          x1 = i
-          exit
-       end if
-    end do
-    
+    x1 = max(2, first_exceedance(s%zb, s%zs))
     if (trim(par%scheme) .eq. 'explicit') then
        do j=x1,par%nx+1
 

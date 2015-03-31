@@ -212,5 +212,22 @@ contains
        c = mean + stdev*r*sin(theta)
     end if
   end function rand_normal
-  
+
+  function first_exceedance(x, threshold) result (ith)
+
+    real*8, dimension(:) :: x
+    real*8 :: threshold
+    integer*4 :: i, n, ith
+
+    ith = 1
+    n = size(x)
+    do i=1,n
+       if (x(i) >= threshold) then
+          ith = i
+          exit
+       end if
+    end do
+
+  end function first_exceedance
+    
 end module utils_module
