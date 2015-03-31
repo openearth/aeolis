@@ -30,7 +30,7 @@ contains
     ! update wind speed and meteo
     ti = nint(par%t / par%dt)
     s%uw = par%uw(ti)
-    s%meteo = par%meteo(1)
+    s%meteo = par%meteo(ti)
     s%zs = par%zs(ti)
 
     ! update moisture contents

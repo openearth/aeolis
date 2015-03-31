@@ -151,8 +151,63 @@ contains
 
     type(parameters), intent(in) :: par
     type(meteorology), dimension(:), allocatable, intent(out) :: meteo
+    integer*4 :: fid, ierr, n, i, nt
+    real*8, dimension(:), allocatable :: dt, t
+    real*8, dimension(:,:), allocatable :: tmp
+    
+    ! allocate arrays
+    nt = nint(par%tstop / par%dt)
+    allocate(meteo(nt))
 
-    allocate(meteo(1))
+    if (trim(par%meteo_file) /= '') then
+
+       fid = 66
+
+       ! count lines
+       n = -1
+       ierr = 0
+       open(fid, file=trim(par%meteo_file))
+       do while (ierr == 0)
+          read(fid, *, iostat=ierr)
+          n = n + 1
+       end do
+       rewind(fid)
+       
+       ! allocate arrays
+       allocate(t(n))
+       allocate(dt(n))
+       allocate(tmp(n,6))
+       
+       ! read data
+       i = 1
+       ierr = 0
+       do while (ierr == 0)
+          read(fid, *, iostat=ierr) dt(i), tmp(i,:)
+          i = i + 1
+       end do
+       close(fid)
+       
+       ! checks
+       if (sum(dt) < par%tstop) then
+          write(*,*) "ERROR: meteo definition file too short"
+          stop 1
+       end if
+
+       ! interpolate time series
+       do i = 1,n
+          t(i) = sum(dt(1:(i-1)))
+       end do
+       
+       do i = 1,nt
+          meteo(i)%solar_radiation = linear_interp(t, tmp(:,1), i*par%dt)
+          meteo(i)%air_temperature = linear_interp(t, tmp(:,2), i*par%dt)
+          meteo(i)%relative_humidity = linear_interp(t, tmp(:,3), i*par%dt)
+          meteo(i)%air_specific_heat = linear_interp(t, tmp(:,4), i*par%dt)
+          meteo(i)%atmospheric_pressure = linear_interp(t, tmp(:,5), i*par%dt)
+          meteo(i)%latent_heat = linear_interp(t, tmp(:,6), i*par%dt)
+       end do
+
+    end if
 
   end subroutine generate_meteo
   

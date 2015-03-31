@@ -47,6 +47,7 @@ module input_module
      character(slen) :: wind_file = ''    ! wind velocity time series definition file
      character(slen) :: bed_file = ''     ! bed profile definition file
      character(slen) :: tide_file = ''    ! tidal time series definition file
+     character(slen) :: meteo_file = ''   ! meteo time series definition file
      character(slen) :: moist_file = ''   ! moisture time series definition file
      character(slen) :: method_moist = '' ! method for conversion of moisture content to velocity threshold
      character(slen) :: output_dir = ''   ! output directory relative to working directory
@@ -176,6 +177,7 @@ contains
     par%wind_file    = read_key_str(fname, 'wind_file', '')
     par%bed_file     = read_key_str(fname, 'bed_file', '')
     par%tide_file    = read_key_str(fname, 'tide_file', '')
+    par%meteo_file   = read_key_str(fname, 'meteo_file', '')
     par%moist_file   = read_key_str(fname, 'moist_file', '')
     par%method_moist = read_key_str(fname, 'method_moist', 'belly_johnson')
     par%output_dir   = read_key_str(fname, 'output_dir', '')
@@ -225,6 +227,17 @@ contains
 
     type(parameters), intent(inout) :: par
     logical :: ex
+
+    ! check required fields
+    if (trim(par%bed_file) == '') then
+       write(0, '(a)') " No bathymetry defined"
+       stop 1
+    end if
+
+    if (trim(par%wind_file) == '') then
+       write(0, '(a)') " No wind defined"
+       stop 1
+    end if
 
     ! check if valid scheme is selected
     select case (trim(par%scheme))

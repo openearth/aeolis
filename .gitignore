@@ -1,5 +1,7 @@
 *.mod
 *.o
+*.lo
+*.la
 *.in
 *.out
 *.sum
