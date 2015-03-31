@@ -18,7 +18,7 @@ contains
     type(parameters), intent(inout) :: par
     type(spaceparams), intent(inout) :: s
     type(variables), dimension(:), intent(inout) :: var
-    integer*4 :: i, j, n, ti
+    integer*4 :: i, j, n, ti, x1
     real*8 :: err, alpha
     real*8, dimension(:,:), allocatable :: Ct2, Ct2_prev
 
@@ -52,8 +52,17 @@ contains
     s%Cu = max(0.d0, alpha * par%Cb * par%rhoa / par%g * &
          (s%uw - s%uth)**3 / (s%uw * par%VS))
 
+    ! determine first dry grid cell
+    x1 = 2
+    do i=2,par%nx+1
+       if (s%zb(i) >= s%zs) then
+          x1 = i
+          exit
+       end if
+    end do
+    
     if (trim(par%scheme) .eq. 'explicit') then
-       do j=2,par%nx+1
+       do j=x1,par%nx+1
 
           ! compute supply based on sediment availability
           s%supply(:,j) = compute_supply(par, s%mass(:,1,j), &
@@ -72,7 +81,7 @@ contains
           
           Ct2_prev = Ct2
           
-          do j=2,par%nx+1
+          do j=x1,par%nx+1
              
              ! compute supply based on sediment availability
              s%supply(:,j) = compute_supply(par, s%mass(:,1,j), &
