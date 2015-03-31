@@ -229,5 +229,21 @@ contains
     end do
 
   end function first_exceedance
+
+  function cumsum(x) result (xc)
+
+    real*8, dimension(:) :: x
+    real*8, dimension(:), allocatable :: xc
+    integer*4 :: i, n
     
+    n = size(x)
+    allocate(xc(n))
+    xc = 0.d0
+    
+    do i=1,n
+       xc(i) = sum(x(1:i))
+    end do
+
+  end function cumsum
+  
 end module utils_module

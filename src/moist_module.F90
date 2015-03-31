@@ -194,11 +194,9 @@ contains
        end if
 
        ! interpolate time series
-       do i = 1,n
-          t(i) = sum(dt(1:(i-1)))
-       end do
-       
+       t = cumsum(dt)
        do i = 1,nt
+          meteo(i)%t = i*par%dt
           meteo(i)%solar_radiation = linear_interp(t, tmp(:,1), i*par%dt)
           meteo(i)%air_temperature = linear_interp(t, tmp(:,2), i*par%dt)
           meteo(i)%relative_humidity = linear_interp(t, tmp(:,3), i*par%dt)

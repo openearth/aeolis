@@ -13,7 +13,7 @@ contains
     type(parameters), intent(inout) :: par
     integer*4 :: fid, ierr, n, i, it, nt, l
     real*8, dimension(:), allocatable, intent(out) :: u
-    real*8, dimension(:), allocatable :: duration, u_m, u_std, g_m, g_std
+    real*8, dimension(:), allocatable :: duration, u_dir, u_m, u_std, g_m, g_std
 
     fid = 88
 
@@ -29,10 +29,13 @@ contains
 
     ! allocate arrays
     allocate(duration(n))
+    allocate(u_dir(n))
     allocate(u_m(n))
     allocate(u_std(n))
     allocate(g_m(n))
     allocate(g_std(n))
+
+    u_dir = 0.d0 ! FIXME: read from file
 
     ! read data
     i = 1

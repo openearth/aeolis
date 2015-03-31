@@ -7,7 +7,18 @@ module input_module
 
   include 'sedparams.inc'
 
+  type wind
+     real*8 :: t = 0.d0
+     real*8 :: duration = 0.d0
+     real*8 :: direction = 0.d0
+     real*8 :: u_mean = 0.d0
+     real*8 :: u_std = 0.d0
+     real*8 :: gust_mean = 0.d0
+     real*8 :: gist_std = 0.d0
+  end type wind
+       
   type meteorology
+     real*8 :: t = 0.d0 ! [s]
      real*8 :: solar_radiation = 1e4 ! [J/m2]
      real*8 :: air_temperature = 10.d0 ! [oC]
      real*8 :: relative_humidity = 0.4d0 ! [-]
