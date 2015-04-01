@@ -8,12 +8,13 @@ module wind_module
 
 contains
 
-  subroutine generate_wind(par, u)
+  subroutine generate_wind(par, gusty_wind)
 
     type(parameters), intent(inout) :: par
+    type(windstat), dimension(:), allocatable :: wind
+    type(windspeed), dimension(:), allocatable, intent(out) :: gusty_wind
+    real*8, dimension(5) :: tmp
     integer*4 :: fid, ierr, n, i, it, nt, l
-    real*8, dimension(:), allocatable, intent(out) :: u
-    real*8, dimension(:), allocatable :: duration, u_dir, u_m, u_std, g_m, g_std
 
     fid = 88
 
@@ -28,70 +29,91 @@ contains
     rewind(fid)
 
     ! allocate arrays
-    allocate(duration(n))
-    allocate(u_dir(n))
-    allocate(u_m(n))
-    allocate(u_std(n))
-    allocate(g_m(n))
-    allocate(g_std(n))
-
-    u_dir = 0.d0 ! FIXME: read from file
+    allocate(wind(n))
 
     ! read data
     i = 1
     ierr = 0
     do while (ierr == 0)
-       read(fid, *, iostat=ierr) duration(i), u_m(i), u_std(i), g_m(i), g_std(i)
+       read(fid, *, iostat=ierr) tmp(:)
+       wind(i)%duration = tmp(1)
+       wind(i)%u_mean = tmp(2)
+       wind(i)%u_std = tmp(3)
+       wind(i)%gust_mean = tmp(4)
+       wind(i)%gust_std = tmp(5)
+
+       if (sum(wind(1:i)%duration) > par%tstop) exit
+       
        i = i + 1
     end do
     close(fid)
-        
+
     ! checks
-    if (sum(duration) < par%tstop) then
+    if (sum(wind%duration) < par%tstop) then
        write(*,*) "ERROR: wind definition file too short"
        stop 1
     end if
 
-    ! maximize optimization tries
-    do n=1,20
+    ! determine time axis
+    wind(i)%duration = wind(i)%duration - (sum(wind%duration) - par%tstop)
+    wind(2:n)%t = cumsum(wind(1:n-1)%duration)
 
-       ! allocate arrays
-       nt = nint(par%tstop / par%dt)
-       if (allocated(u)) deallocate(u)
-       allocate(u(nt))
-   
-       ! compute random time series
-       i = 1
-       it = 1
-       do while (it < nt)
-          l = nint(max(par%dt, rand_normal(g_m(i), g_std(i))) / par%dt)
-          u(it:min(nt,it+l)) = max(0.d0, rand_normal(u_m(i), u_std(i)))
-          it = it + l
-          if (it > sum(duration(1:i)) / par%dt) then
-             i = i + 1
-          end if
-       end do
-   
-       ! courant check
-       if (trim(par%scheme) .eq. 'explicit') then
-          if (par%CFL > 0.d0) then
-             if (abs(maxval(u) / par%dx * par%dt - par%CFL) < .005) then
-                write(0, '(a, f6.4)') " Adapted timestep based on CFL condition: ", par%dt
-                exit
-             end if
-             par%dt = par%CFL * par%dx / maxval(u)
-
-             ! make time step fit with output time step
-             par%dt = par%tout / ceiling(par%tout / par%dt)
-          else
-             exit
-          end if
-       else
-          exit
-       end if
-
-    end do
+    ! simulate wind gusts
+    if (par%gusts .and. par%scheme == 'explicit') then
+       call simulate_gusts(wind, gusty_wind)
+    else
+       allocate(gusty_wind(size(wind)))
+       gusty_wind%t = wind%t
+       gusty_wind%duration = wind%duration
+       gusty_wind%direction = wind%direction
+       gusty_wind%u = wind%u_mean
+    end if
 
   end subroutine generate_wind
 
+  subroutine interpolate_wind(wind, t, uw)
+
+    type(windspeed), dimension(:), intent(in) :: wind
+    real*8, intent(in) :: t
+    real*8, intent(out) :: uw
+
+    uw = linear_interp(wind%t, wind%u, t)
+    
+  end subroutine interpolate_wind
+
+  subroutine simulate_gusts(wind, gusty_wind)
+
+    type(windstat), dimension(:), intent(in) :: wind
+    type(windspeed), dimension(:), allocatable, intent(out) :: gusty_wind
+    real*8, dimension(:), allocatable :: l, u, l2, u2
+    integer*4 :: i, n, m
+
+    m = nint(2 * sum(wind%duration / wind%gust_mean))
+
+    allocate(l(m))
+    allocate(u(m))
+    l = 0.d0
+    u = 0.d0
+
+    n = 1
+    do i = 1,size(wind)
+       do while (sum(l) < sum(wind(1:i)%duration))
+          l(n) = max(0.d01, rand_normal(wind(i)%gust_mean, wind(i)%gust_std))
+          u(n) = max(0.d0, rand_normal(wind(i)%u_mean, wind(i)%u_std))
+          n = n+1
+       end do
+    end do
+
+    allocate(gusty_wind(n-1))
+
+    do i = 1,n-1
+       gusty_wind(i)%duration = l(i)
+       gusty_wind(i)%u = u(i)
+    end do
+
+    ! determine time axis
+    gusty_wind(2:n)%t = cumsum(gusty_wind(1:n-1)%duration)
+
+  end subroutine simulate_gusts
+  
 end module wind_module

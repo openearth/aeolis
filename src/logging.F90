@@ -1,6 +1,7 @@
 module logging
 
   use iso_c_utils
+  use input_module
   
   implicit none
 
@@ -51,22 +52,22 @@ contains
     end if
   end subroutine log
 
-  subroutine write_progress(ti, nt, tstart)
+  subroutine write_progress(par, tstart)
 
-    integer*4, intent(in) :: ti, nt
+    type(parameters), intent(in) :: par
     real*8, intent(in) :: tstart
     real*8 :: p, dt1, dt2, dt3
 
-    p = dble(ti) / nt
+    p = par%t / par%tstop
     dt1 = get_time() - tstart
     dt2 = dt1 / p
     dt3 = dt2 * (1 - p)
 
-    write(*,'(f5.1,a2,a8,a3,a8,a3,a8)') &
+    write(*,'(f5.1,a2,a8,a3,a8,a3,a8,a10,f4.2,a1)') &
          100.d0*p, '% ', &
          format_time(dt1), ' / ', &
          format_time(dt2), ' / ', &
-         format_time(dt3)
+         format_time(dt3), ' (avg. dt=', (par%t / par%nt), ')'
 
   end subroutine write_progress
 

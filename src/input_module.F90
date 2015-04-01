@@ -7,18 +7,37 @@ module input_module
 
   include 'sedparams.inc'
 
-  type wind
+  type windstat
      real*8 :: t = 0.d0
      real*8 :: duration = 0.d0
      real*8 :: direction = 0.d0
      real*8 :: u_mean = 0.d0
      real*8 :: u_std = 0.d0
      real*8 :: gust_mean = 0.d0
-     real*8 :: gist_std = 0.d0
-  end type wind
-       
+     real*8 :: gust_std = 0.d0
+  end type windstat
+
+  type windspeed
+     real*8 :: t = 0.d0
+     real*8 :: duration = 0.d0
+     real*8 :: direction = 0.d0
+     real*8 :: u = 0.d0
+  end type windspeed
+
+  type tide
+     real*8 :: t = 0.d0
+     real*8 :: level = 0.d0
+  end type tide
+
+  type moisture
+     real*8 :: t = 0.d0
+     real*8 :: z = 0.d0
+     real*8 :: moisture = 0.d0
+  end type moisture
+  
   type meteorology
      real*8 :: t = 0.d0 ! [s]
+     real*8 :: duration = 0.d0 ! [s]
      real*8 :: solar_radiation = 1e4 ! [J/m2]
      real*8 :: air_temperature = 10.d0 ! [oC]
      real*8 :: relative_humidity = 0.4d0 ! [-]
@@ -35,6 +54,8 @@ module input_module
      logical   :: th_moisture   = .true.
      logical   :: th_humidity   = .true.
      logical   :: bedupdate     = .true.
+     logical   :: evaporation   = .true.
+     logical   :: gusts         = .true.
      
      real*8    :: VS    = 0.d0            ! [-] ratio sediment transport velocity to wind velocity
      real*8    :: Tp    = 0.d0            ! [s] adaptation time scale in transport formulation
@@ -88,9 +109,10 @@ module input_module
 
      character(10), dimension(:), allocatable  :: outputvars ! space separated list of output variables
 
-     real*8, dimension(:), allocatable :: uw ! [m/s] wind speed time series
-     real*8, dimension(:), allocatable :: zs ! [m] water level elevation
+     type(windspeed), dimension(:), allocatable :: uw ! [m/s] wind speed time series
+     type(tide), dimension(:), allocatable :: zs ! [m] water level elevation
      type(meteorology), dimension(:), allocatable :: meteo ! meteorological conditions
+     type(moisture), dimension(:,:), allocatable :: moist ! [-] moisture content
 
   end type parameters
 
@@ -171,6 +193,8 @@ contains
     par%th_moisture   = read_key_logical(fname, 'th_moisture', .true.)
     par%th_humidity   = read_key_logical(fname, 'th_humidity', .true.)
     par%bedupdate     = read_key_logical(fname, 'bedupdate', .true.)
+    par%evaporation   = read_key_logical(fname, 'evaporation', .true.)
+    par%gusts         = read_key_logical(fname, 'gusts', .true.)
     
     par%VS     = read_key_dbl(fname, 'VS',    1.d0)
     par%Tp     = read_key_dbl(fname, 'Tp',    1.0d0)

@@ -9,7 +9,7 @@ dx = 3
 
 # time
 dt = 60
-CFL = .9
+CFL = 1
 tstop = 3600
 tout = 360
 accfac = 1
@@ -18,7 +18,7 @@ scheme = explicit
 # files
 wind_file = wind_constant.txt
 bed_file = bed.txt
-moist_file = moist_constant.txt
+tide_file = tide.txt
 
 # bed composition
 nfractions = 11
@@ -29,3 +29,5 @@ grain_size = 1e-3 0.8e-3 0.6e-3 0.4e-3 0.3e-3 0.25e-3 0.2e-3 0.15e-3 0.1e-3 0.05
 grain_dist = 1 2 5 10 20 25 20 15 10 5 2
 
 outputvars = Ct Cu z u uth mass d50 supply
+
+

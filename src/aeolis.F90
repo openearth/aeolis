@@ -19,7 +19,6 @@ implicit none
 character(slen) :: configfile
 character(kind=c_char) :: c_configfile(slen)
 real*8 :: t, tstart, tend, tlog
-integer*4 :: ti
 
 configfile = read_cmd()
 c_configfile = string_to_char_array(configfile)
@@ -32,17 +31,10 @@ call write_dimensions(par)
 call output_init(var, par%outputvars, par%output_dir)
 
 t = 0
-ti = 1
 tstart = get_time()
 tlog = tstart
 call get_end_time(tend)
 do while (t < tend)
-
-   ! log progress
-   if ( mod(dble(ti), par%nt/10.d0) < 1.d0 .or. get_time()-tlog > 60) then
-      call write_progress(ti, par%nt, tstart)
-      tlog = get_time()
-   end if
 
    ! step in time
    if (update(-1.d0) /= 0) &
@@ -52,8 +44,12 @@ do while (t < tend)
    call write_output(par, s, var)
    call get_current_time(t)
 
-   ti = ti + 1
-   
+   ! log progress
+   if ( mod(par%t, par%tstop/10.0) < par%dt .or. get_time()-tlog > 60) then
+      call write_progress(par, tstart)
+      tlog = get_time()
+   end if
+
 end do
 
 if (finalize() /= 0) &

@@ -18,7 +18,7 @@ contains
     type(parameters), intent(inout) :: par
     type(spaceparams), intent(inout) :: s
     type(variables), dimension(:), intent(inout) :: var
-    integer*4 :: i, j, n, ti, x1
+    integer*4 :: i, j, n, x1
     real*8 :: err, alpha
     real*8, dimension(:,:), allocatable :: Ct2, Ct2_prev
 
@@ -27,11 +27,21 @@ contains
     Ct2 = 0.d0
     Ct2_prev = 0.d0
 
-    ! update wind speed and meteo
-    ti = nint(par%t / par%dt)
-    s%uw = par%uw(ti)
-    s%meteo = par%meteo(ti)
-    s%zs = par%zs(ti)
+    ! interpolate wind
+    call interpolate_wind(par%uw, par%t, s%uw)
+
+    ! courant check
+    if (trim(par%scheme) .eq. 'explicit') then
+       if (par%CFL > 0.d0) then
+          par%dt = par%CFL * par%dx / s%uw
+          !write(0, '(a, f4.2)') "  adapted time step: ", par%dt
+       end if
+    end if
+
+    ! interpolate time series
+    call interpolate_moist(par%moist, par%t, s%zb, s%moist)
+    call interpolate_meteo(par%meteo, par%t, s%meteo)
+    call interpolate_tide(par%zs, par%t, s%zs)
 
     ! update moisture contents
     call update_moisture(par, s%zb, s%zs, s%meteo, s%uw, s%moist)
@@ -98,7 +108,7 @@ contains
 
        if (err .gt. par%max_error) then
           write(0, '(a,i6,a,f10.4,a,e10.2,a)') &
-               "WARNING: iteration not converged (i: ", ti, "; error: ", err, ")"
+               "WARNING: iteration not converged (i: ", par%nt, "; error: ", err, ")"
        end if
        
     end if
@@ -122,6 +132,9 @@ contains
     ! incremental output
     call output_update(var)
 
+    par%t = par%t + par%dt
+    par%nt = par%nt + 1
+    
   end subroutine step
 
   subroutine write_output(par, s, var)

@@ -11,8 +11,8 @@ module init_module
      real*8, pointer :: uw, zs
      real*8, dimension(:), pointer :: x, zb
      real*8, dimension(:), pointer :: rho, dist
-     real*8, dimension(:,:), pointer :: uth
-     real*8, dimension(:,:), pointer :: Cu, Ct, supply, moist, thlyr
+     real*8, dimension(:,:), pointer :: uth, moist
+     real*8, dimension(:,:), pointer :: Cu, Ct, supply, thlyr
      real*8, dimension(:,:), pointer :: d10, d50, d90
      real*8, dimension(:,:,:), pointer :: mass
      type(meteorology) :: meteo
@@ -53,31 +53,16 @@ contains
     call generate_wind(par, par%uw)
     open(unit=fid, file=trim(par%output_dir) // "wind.in", &
          action="write", status="replace", form="unformatted")
-    write(fid) par%uw
+    write(fid) par%uw%t
+    write(fid) par%uw%u
     close(fid)
 
-    ! courant check
-    if (trim(par%scheme) .eq. 'explicit') then
-       write(0, '(a, f4.2)') " Courant condition: ", maxval(par%uw) / par%dx * par%dt   
-       if (par%dx / par%dt < maxval(par%uw)) then
-          write(0, '(a)') " Courant condition violated. Please adapt numerical parameters."
-          stop 1
-       end if
-    end if
-    
     ! time
-    par%nt = int(par%tstop / par%dt)
     par%ntout = int(par%tstop / par%tout) + 1
 
     ! moist
-!    write(*,*) 'Generating moisture time series...'
-!    call generate_moist(par, zmoist, moist)
-!    open(unit=fid, file=trim(par%output_dir) // "moist.in", &
-!         action="write", status="replace", form="unformatted")
-!    do i = 1,par%nt
-!       write(fid) moist(i,:)
-!    end do
-    !    close(fid)
+    write(*,*) 'Generating moisture time series...'
+    call generate_moist(par, par%moist)
 
     ! tide and meteo
     write(*,*) 'Generating tide and meteo time series...'
