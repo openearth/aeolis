@@ -102,7 +102,7 @@ contains
     call alloc_pointer(var, 'Ct',     (/par%nfractions, par%ny+1, par%nx+1/), s%Ct)
     call alloc_pointer(var, 'p',      (/par%nfractions, par%ny+1, par%nx+1/), s%p)
     call alloc_pointer(var, 'uth',    (/par%nfractions, par%ny+1, par%nx+1/), s%uth)
-    call alloc_pointer(var, 'mass',   (/par%nfractions, par%ny+1, par%nlayers, par%nx+1/), s%mass)
+    call alloc_pointer(var, 'mass',   (/par%nfractions, par%nlayers, par%ny+1, par%nx+1/), s%mass)
     call alloc_pointer(var, 'supply', (/par%nfractions, par%ny+1, par%nx+1/), s%supply)
     call alloc_pointer(var, 'moist',  (/par%nlayers, par%ny+1, par%nx+1/), s%moist)
     call alloc_pointer(var, 'thlyr',  (/par%nlayers, par%ny+1, par%nx+1/), s%thlyr)

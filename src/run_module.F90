@@ -23,8 +23,8 @@ contains
     real*8 :: err, alpha
     real*8, dimension(:,:), allocatable :: Ct2, Ct2p
 
-    allocate(Ct(par%nfractions, par%ny+1, par%nx+1))
-    allocate(Ct_prev(par%nfractions, par%ny+1, par%nx+1))
+    allocate(Ct2(par%nfractions, par%ny+1, par%nx+1))
+    allocate(Ct2p(par%nfractions, par%ny+1, par%nx+1))
     Ct2 = 0.d0
     Ct2p = 0.d0
 
@@ -53,7 +53,7 @@ contains
     sl%uth = par%u_th
     call compute_threshold_grainsize(par, sl%uth)
     call compute_threshold_bedslope(par, s%x, s%zb, s%uth)
-    call compute_threshold_moisture(par, s%moist(1,:), s%uth)
+    call compute_threshold_moisture(par, sl%moist(1,:), sl%uth)
 
     ! get available mass
     sl%mass = get_layer_mass(par)
@@ -70,73 +70,39 @@ contains
           do j = 1,par%ny+1
 
              ! compute supply based on sediment availability
-             s%supply(:,j,i) = compute_supply(par, s%mass(:,1,j,i), &
-                  par%accfac * s%Cu(:,j,i), s%Ct(:,j,i))
-
+             call compute_supply(par, s%mass(:,1,j,i), &
+                  par%accfac * s%Cu(:,j,i), s%Ct(:,j,i), s%supply(:,j,i), s%p(:,j,i))
+          
              do k = 1,par%nfractions
 
                 ! compute sediment advection by wind
-                Ct(k,j,i) = -par%VS * s%uw * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) * &
-                     par%dt / par%dx + s%Ct(k,j,i) + s%supply(k,j,i)
+                Ct(k,j,i) = max(0.d0, &
+                     s%Ct(k,j,i)
+                     - par%VS * s%uw * par%dt / par%dx * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) &
+                     + s%supply(k,j,i)
              
              end do
           end do
        end do
-    elseif (trim(par%scheme) .eq. 'maccormack') then
-       do j=1,par%nx
-             
-          ! compute supply based on sediment availability (predictor)
-          call compute_supply(par, s%mass(:,1,j), &
-               par%accfac * s%Cu(:,j), s%Ct(:,j), s%supply(:,j), s%p(:,j))
-
-          do i=1,par%nfractions
-             
-             ! compute sediment advection by wind (predictor)
-             Ct2p(i,j) = max(0.d0, &
-                  s%Ct(i,j) &
-                  - par%VS * s%uw * par%dt / par%dx * (s%Ct(i,j+1) - s%Ct(i,j)) &
-                  + s%supply(i,j))
-             
-          end do
-       end do
-
-       do j=2,par%nx+1
-
-          ! compute supply based on sediment availability (corrector)
-          call compute_supply(par, s%mass(:,1,j), &
-               par%accfac * s%Cu(:,j), Ct2p(:,j), s%supply(:,j), s%p(:,j))
-
-          do i=1,par%nfractions
-                
-             ! compute sediment advection by wind (corrector)
-             Ct2(i,j) = max(0.d0, &
-                  (s%Ct(i,j) + Ct2p(i,j)) / 2.d0 &
-                  - par%VS * s%uw * par%dt / par%dx / 2.d0 * (s%Ct(i,j) - s%Ct(i,j-1)) &
-                  + s%supply(i,j))
-
-          end do
-       end do
     elseif (trim(par%scheme) .eq. 'euler_backward') then
-
-       Ct = s%Ct
-
        do n = 1,par%max_iter
-          
+
           Ct_prev = Ct
 
-          do i = x1,par%nx+1
+          do i = 2,par%nx+1
              do j = 1,par%ny+1
-
+             
                 ! compute supply based on sediment availability
-                s%supply(:,j,i) = compute_supply(par, s%mass(:,1,j,i), &
-                     par%accfac * s%Cu(:,j,i), Ct(:,j,i))
-
+                call compute_supply(par, s%mass(:,1,j,i), &
+                     par%accfac * s%Cu(:,j,i), Ct2(:,j,i), s%supply(:,j,i), s%p(:,j,i))
+             
                 do k = 1,par%nfractions
-
+                
                    ! compute sediment advection by wind
-                   Ct(k,j,i) = (par%VS * s%uw * Ct(k,j,i-1) * &
-                        par%dt / par%dx + s%Ct(k,j,i) + s%supply(k,j,i)) / &
-                        (1 + par%VS * s%uw * par%dt / par%dx)
+                   Ct2p(i,j) = max(0.d0, &
+                        s%Ct(k,j,j) &
+                        - par%VS * s%uw * par%dt / par%dx * (Ct2p(k,j,i) - Ct2p(k,j,i-1)) &
+                        + s%supply(k,j,i))
                    
                 end do
              end do
