@@ -210,7 +210,7 @@ contains
 
        ! determine time axis
        meteo(2:n)%t = cumsum(meteo(1:n-1)%duration)
-       
+
        ! checks
        if (meteo(n)%t < par%tstop) then
           write(*,*) "ERROR: meteo definition file too short"
@@ -240,10 +240,10 @@ contains
 
     type(parameters), intent(in) :: par
     real*8, dimension(:), intent(in) :: moist
-    real*8, dimension(par%nx+1) :: mg
+    real*8, dimension(par%nc) :: mg
     real*8, dimension(:,:), intent(inout) :: u_th
-    real*8, dimension(par%nfractions, par%nx+1) :: u_th_m
-    integer :: i, n
+    real*8, dimension(par%nfractions, par%nc) :: u_th_m
+    integer :: i, j, n
 
     if (.not. par%th_moisture) return
 
@@ -283,10 +283,8 @@ contains
     real*8, dimension(:,:), intent(inout) :: moist
     real*8, intent(in) :: u, zs
     real*8 :: radiation, m, delta, gamma, evaporation
-    integer :: i, t, nl, f
+    integer :: i, j
 
-    nl = par%nlayers+2
-    
     ! evaporation using Penman
     radiation = meteo%solar_radiation / 1e6 / par%dt * 3600 * 24 ! conversion from J/m2 to MJ/m2/day
     m = vaporation_pressure_slope(meteo%air_temperature) ! [kPa/K]
@@ -298,7 +296,7 @@ contains
     evaporation = evaporation / 24 / 3600 / 1000 ! conversion from mm/day to m/s
     
     ! infiltration using Darcy
-    do i = 1,par%nx
+    do i = 1,par%nc
        if (zs >= zb(i)) then
           moist(:,i) = par%porosity
        else
@@ -337,20 +335,23 @@ contains
 
   end function saturation_pressure
     
-  function map_moisture(zm, m, z) result (mg)
+  function map_moisture(zm, m, zb) result (mg)
     
-    real*8, dimension(:) :: zm, m, z
-    real*8, dimension(size(z)) :: mg
+    real*8, dimension(:) :: zm, m
+    real*8, dimension(:) :: zb
+    real*8, dimension(:), allocatable :: mg
     integer :: i, n
 
+    allocate(mg(size(zb)))
+    
     n = size(m)
-    do i = 1,size(z)
-       if (z(i) < minval(zm)) then
+    do i = 1,size(zb)
+       if (zb(i) < minval(zm)) then
           mg(i) = m(1)
-       elseif (z(i) > maxval(zm)) then
+       elseif (zb(i) > maxval(zm)) then
           mg(i) = m(n)
        else
-          mg(i) = linear_interp(zm(2:n-1), m(2:n-1), z(i))
+          mg(i) = linear_interp(zm(2:n-1), m(2:n-1), zb(i))
        end if
     end do
 

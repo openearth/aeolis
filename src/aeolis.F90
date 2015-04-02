@@ -41,7 +41,7 @@ do while (t < tend)
         write(msgbuf,*) 'Updating to timestep ', t, ' failed'
 
    ! write output
-   call write_output(par, s, var)
+   call write_output(par, sl, var)
    call get_current_time(t)
 
    ! log progress

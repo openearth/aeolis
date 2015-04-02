@@ -65,10 +65,13 @@ module input_module
      real*8    :: Cb    = 0.d0            ! [-] empirical constant in transport formulation
      real*8    :: phi   = 0.d0            ! [-] angle of repose of sediment
      real*8    :: g     = 0.d0            ! [m/s^2] gravitational acceleration
-     integer*4 :: nx    = 0               ! [-] number of grid cells
+     integer*4 :: nx    = 0               ! [-] number of grid cells in x direction
+     integer*4 :: ny    = 0               ! [-] number of grid cells in y direction
+     integer*4 :: nc    = 0               ! [-] number of grid cells
      integer*4 :: nt    = 0               ! [-] number of time steps
      real*8    :: dt    = 0.d0            ! [s] duration of time step
      real*8    :: dx    = 0.d0            ! [m] size of grid cell
+     real*8    :: dy    = 0.d0            ! [m] size of grid cell
      real*8    :: t     = 0.d0            ! [m] current time in simulation
      real*8    :: tstop = 0.d0            ! [s] duration of simulation
      real*8    :: tout  = 0.d0            ! [s] time interval for writing model output to disk
@@ -77,6 +80,8 @@ module input_module
      real*8    :: accfac = 0.d0           ! [-] acceleration factor applied to transport capacity
 
      character(slen) :: wind_file = ''    ! wind velocity time series definition file
+     character(slen) :: xgrid_file = ''   ! x grid definition file
+     character(slen) :: ygrid_file = ''   ! y grid definition file
      character(slen) :: bed_file = ''     ! bed profile definition file
      character(slen) :: tide_file = ''    ! tidal time series definition file
      character(slen) :: meteo_file = ''   ! meteo time series definition file
@@ -205,11 +210,14 @@ contains
     par%g      = read_key_dbl(fname, 'g',     9.81d0)
     par%phi    = read_key_dbl(fname, 'phi',   40.d0)
     par%dt     = read_key_dbl(fname, 'dt',    0.05d0)
-    par%dx     = read_key_dbl(fname, 'dx',    1.d0)
+    par%nx     = read_key_dbl(fname, 'nx',    1.d0)
+    par%ny     = read_key_dbl(fname, 'ny',    1.d0)
     par%tstop  = read_key_dbl(fname, 'tstop', 3600.d0)
     par%tout   = read_key_dbl(fname, 'tout',  1.d0)
     par%accfac = read_key_dbl(fname, 'accfac',  1.d0)
     par%wind_file    = read_key_str(fname, 'wind_file', '')
+    par%xgrid_file   = read_key_str(fname, 'xgrid_file', '')
+    par%ygrid_file   = read_key_str(fname, 'ygrid_file', '')
     par%bed_file     = read_key_str(fname, 'bed_file', '')
     par%tide_file    = read_key_str(fname, 'tide_file', '')
     par%meteo_file   = read_key_str(fname, 'meteo_file', '')
@@ -264,6 +272,11 @@ contains
     logical :: ex
 
     ! check required fields
+    if (trim(par%xgrid_file) == '') then
+       write(0, '(a)') " No grid defined"
+       stop 1
+    end if
+
     if (trim(par%bed_file) == '') then
        write(0, '(a)') " No bathymetry defined"
        stop 1
@@ -288,6 +301,9 @@ contains
 
     ! make time step fit with output time step
     par%dt = par%tout / ceiling(par%tout / par%dt)
+
+    ! store total number of grid cells
+    par%nc = (par%nx+1) * (par%ny+1)
 
     ! create output directory
     if (trim(par%output_dir) .ne. '') then

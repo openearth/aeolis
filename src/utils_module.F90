@@ -215,17 +215,18 @@ contains
 
   function first_exceedance(x, threshold) result (ith)
 
-    real*8, dimension(:) :: x
+    real*8, dimension(:,:) :: x
     real*8 :: threshold
-    integer*4 :: i, n, ith
+    integer*4 :: i, j, ith
 
     ith = 1
-    n = size(x)
-    do i=1,n
-       if (x(i) >= threshold) then
-          ith = i
-          exit
-       end if
+    do i = 1,size(x,1)
+       do j = 1,size(x,2)
+          if (x(i,j) >= threshold) then
+             ith = i
+             return
+          end if
+       end do
     end do
 
   end function first_exceedance

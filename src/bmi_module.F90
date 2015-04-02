@@ -12,6 +12,7 @@ module bmi_module
 
   type(parameters) :: par
   type(spaceparams) :: s
+  type(spaceparams_linear) :: sl
   type(variables), dimension(:), allocatable :: var
 
   interface get_c_pointer
@@ -19,6 +20,7 @@ module bmi_module
      module procedure get_c_pointer_rank1
      module procedure get_c_pointer_rank2
      module procedure get_c_pointer_rank3
+     module procedure get_c_pointer_rank4
   end interface get_c_pointer
     
 contains
@@ -44,7 +46,7 @@ contains
     par = read_params(configfile)
 
     ! initialize structures
-    call init(par, var, s)
+    call init(par, var, s, sl)
     par%t = 0
 
     write(*,*) 'Model run started...'
@@ -64,7 +66,7 @@ contains
        par%dt = dt
     end if
 
-    call step(par, s, var)
+    call step(par, s, sl, var)
 
   end function update
 
@@ -135,6 +137,7 @@ contains
     real(c_double), allocatable, target, save :: x_1d_double_ptr(:)
     real(c_double), allocatable, target, save :: x_2d_double_ptr(:,:)
     real(c_double), allocatable, target, save :: x_3d_double_ptr(:,:,:)
+    real(c_double), allocatable, target, save :: x_4d_double_ptr(:,:,:,:)
 
     character(len=strlen(c_var_name)) :: var_name
     integer*4, dimension(:), allocatable :: shp
@@ -171,6 +174,13 @@ contains
        allocate(x_3d_double_ptr(shp(1), shp(2), shp(3)))
        call get_c_pointer(var, var_name, x_3d_double_ptr)
        xptr = c_loc(x_3d_double_ptr)
+     case(4)
+       if (allocated(x_4d_double_ptr)) then
+          deallocate(x_4d_double_ptr)
+       end if
+       allocate(x_4d_double_ptr(shp(1), shp(2), shp(3), shp(4)))
+       call get_c_pointer(var, var_name, x_4d_double_ptr)
+       xptr = c_loc(x_4d_double_ptr)
      end select
 
   end subroutine get_var
@@ -282,6 +292,22 @@ contains
     end do
     
   end subroutine get_c_pointer_rank3
+
+  subroutine get_c_pointer_rank4(var, name, val)
+
+    type(variables), dimension(:), intent(in) :: var
+    character(*), intent(in) :: name
+    real(c_double), intent(out) :: val(:,:,:,:)
+    integer*4 :: i
+
+    do i = 1,size(var)
+       if (trim(var(i)%name) == trim(name)) then
+          val = var(i)%val%rank4
+          exit
+       end if
+    end do
+    
+  end subroutine get_c_pointer_rank4
 
   subroutine set_c_pointer(var, name, val, rank, shp)
 
