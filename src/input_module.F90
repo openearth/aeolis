@@ -70,8 +70,6 @@ module input_module
      integer*4 :: nc    = 0               ! [-] number of grid cells
      integer*4 :: nt    = 0               ! [-] number of time steps
      real*8    :: dt    = 0.d0            ! [s] duration of time step
-     real*8    :: dx    = 0.d0            ! [m] size of grid cell
-     real*8    :: dy    = 0.d0            ! [m] size of grid cell
      real*8    :: t     = 0.d0            ! [m] current time in simulation
      real*8    :: tstop = 0.d0            ! [s] duration of simulation
      real*8    :: tout  = 0.d0            ! [s] time interval for writing model output to disk

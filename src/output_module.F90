@@ -421,24 +421,24 @@ contains
 
   end subroutine output_close
   
-  subroutine write_dimensions(par)
-
-    integer*4, parameter :: fid=1
-    type(parameters), intent(in) :: par
-  
-    open(unit=fid, file=trim(par%output_dir) // "dims.out", &
-         action="write", status="replace", form="unformatted")
-    write(fid) par%nx
-    write(fid) par%dx
-    write(fid) par%nt
-    write(fid) par%dt
-    write(fid) par%nfractions
-    write(fid) par%nlayers
-    write(fid) par%ntout
-    write(fid) par%tout
-    close(fid)
-
-  end subroutine write_dimensions
+!  subroutine write_dimensions(par)
+!
+!    integer*4, parameter :: fid=1
+!    type(parameters), intent(in) :: par
+!  
+!    open(unit=fid, file=trim(par%output_dir) // "dims.out", &
+!         action="write", status="replace", form="unformatted")
+!    write(fid) par%nx
+!    write(fid) par%dx
+!    write(fid) par%nt
+!    write(fid) par%dt
+!    write(fid) par%nfractions
+!    write(fid) par%nlayers
+!    write(fid) par%ntout
+!    write(fid) par%tout
+!    close(fid)
+!
+!  end subroutine write_dimensions
 
   function get_rank(var, name) result (rank)
 

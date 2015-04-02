@@ -35,7 +35,7 @@ contains
     par%dx = 5.d0
     if (trim(par%scheme) .eq. 'euler_forward') then
        if (par%CFL > 0.d0) then
-          par%dt = par%CFL * par%dx / s%uw
+          par%dt = par%CFL * max(maxval(s%dsz), maxval(s%dnz)) / s%uw
           !write(0, '(a, f4.2)') "  adapted time step: ", par%dt
        end if
     end if
@@ -52,7 +52,7 @@ contains
     ! update threshold
     sl%uth = par%u_th
     call compute_threshold_grainsize(par, sl%uth)
-    call compute_threshold_bedslope(par, s%x, s%zb, s%uth)
+    call compute_threshold_bedslope(par, s%xz, s%zb, s%uth)
     call compute_threshold_moisture(par, sl%moist(1,:), sl%uth)
 
     ! get available mass
@@ -78,7 +78,7 @@ contains
                 ! compute sediment advection by wind
                 Ct(k,j,i) = max(0.d0, &
                      s%Ct(k,j,i)
-                     - par%VS * s%uw * par%dt / par%dx * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) &
+                     - par%VS * s%uw * par%dt / par%dsz * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) &
                      + s%supply(k,j,i)
              
              end do
@@ -101,9 +101,9 @@ contains
                    ! compute sediment advection by wind
                    Ct2p(i,j) = max(0.d0, &
                         s%Ct(k,j,j) &
-                        - par%VS * s%uw * par%dt / par%dx * (Ct2p(k,j,i) - Ct2p(k,j,i-1)) &
+                        - par%VS * s%uw * par%dt / par%dsz * (Ct2p(k,j,i) - Ct2p(k,j,i-1)) &
                         + s%supply(k,j,i))
-                   
+
                 end do
              end do
           end do

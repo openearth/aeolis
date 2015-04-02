@@ -15,7 +15,6 @@ tstop = 3600
 tout = 360
 accfac = 1
 scheme = implicit
-max_iter = 100000
 
 # files
 wind_file = wind_constant.txt

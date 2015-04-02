@@ -10,18 +10,23 @@ module init_module
   type spaceparams
      real*8, pointer :: uw, zs
      real*8, dimension(:), pointer :: rho, dist
-     real*8, dimension(:,:), pointer :: x, y, zb
+     real*8, dimension(:,:), pointer :: xz, yz, xu, yu, xv, yv
+     real*8, dimension(:,:), pointer :: zb
      real*8, dimension(:,:,:), pointer :: uth, moist
      real*8, dimension(:,:,:), pointer :: Cu, Ct, supply, thlyr
      real*8, dimension(:,:,:), pointer :: d10, d50, d90
      real*8, dimension(:,:,:,:), pointer :: mass
+     real*8, dimension(:,:), pointer :: dsz, dnz, dsdnzi, alfaz
+     real*8, dimension(:,:), pointer :: dsu, dnu, dsdnui, alfau
+     real*8, dimension(:,:), pointer :: dsv, dnv, dsdnvi, alfav
+     real*8, dimension(:,:), pointer :: dsc, dnc
      type(meteorology) :: meteo
   end type spaceparams
 
   type spaceparams_linear
      real*8, pointer :: uw, zs
      real*8, dimension(:), pointer :: rho, dist
-     real*8, dimension(:), pointer :: x, y, zb
+     real*8, dimension(:), pointer :: xz, yz, zb
      real*8, dimension(:,:), pointer :: uth, moist
      real*8, dimension(:,:), pointer :: Cu, Ct, p, supply, thlyr
      real*8, dimension(:,:), pointer :: d10, d50, d90
@@ -49,16 +54,16 @@ contains
     call alloc_variable(var, 'y',  (/par%ny+1, par%nx+1/))
     call alloc_variable(var, 'zb', (/par%ny+1, par%nx+1/))
 
-    call get_pointer(var, 'x',  (/par%ny+1, par%nx+1/), s%x)
-    call get_pointer(var, 'y',  (/par%ny+1, par%nx+1/), s%y)
+    call get_pointer(var, 'x',  (/par%ny+1, par%nx+1/), s%xz)
+    call get_pointer(var, 'y',  (/par%ny+1, par%nx+1/), s%yz)
     call get_pointer(var, 'zb', (/par%ny+1, par%nx+1/), s%zb)
     
-    call get_pointer(var, 'x',  (/par%nc/), sl%x)
-    call get_pointer(var, 'y',  (/par%nc/), sl%y)
+    call get_pointer(var, 'x',  (/par%nc/), sl%xz)
+    call get_pointer(var, 'y',  (/par%nc/), sl%yz)
     call get_pointer(var, 'zb', (/par%nc/), sl%zb)
 
-    s%x = x_tmp
-    s%y = y_tmp
+    s%xz = x_tmp
+    s%yz = y_tmp
     s%zb = zb_tmp
     deallocate(x_tmp)
     deallocate(y_tmp)
@@ -67,8 +72,8 @@ contains
     call generate_bedcomposition(par)
     open(unit=fid, file=trim(par%output_dir) // "bed.in", &
          action="write", status="replace", form="unformatted")
-    write(fid) s%x
-    write(fid) s%y
+    write(fid) s%xz
+    write(fid) s%yz
     write(fid) s%zb
     close(fid)
 
@@ -148,6 +153,279 @@ contains
     s%rho = par%rhom
     s%dist = par%grain_dist
 
+    ! create spatial grid matrixes
+    call gridprops(par, s)
+    
   end subroutine init
-  
+
+  subroutine gridprops(par, s)
+
+    implicit none
+
+    type(parameters), intent(in) :: par
+    type(spaceparams), intent(inout) :: s
+
+    integer                           :: i, j
+    real*8,dimension(:,:),allocatable :: xc      ! x-coordinate c-points
+    real*8,dimension(:,:),allocatable :: yc      ! y-coordinate c-points
+    real*8                            :: dsdnu   ! surface of cell centered around u-point
+    real*8                            :: dsdnv   ! surface of cell centered around v-point
+    real*8                            :: dsdnz   ! surface of cell centered around z-point
+    real*8                            :: x1,y1,x2,y2,x3,y3,x4,y4
+
+    allocate(s%xu(par%ny+1,par%nx+1))
+    allocate(s%yu(par%ny+1,par%nx+1))
+    allocate(s%xv(par%ny+1,par%nx+1))
+    allocate(s%yv(par%ny+1,par%nx+1))
+    allocate(s%dsz(par%ny+1,par%nx+1))
+    allocate(s%dnz(par%ny+1,par%nx+1))
+    allocate(s%dsdnzi(par%ny+1,par%nx+1))
+    allocate(s%alfaz(par%ny+1,par%nx+1))
+    allocate(s%dsu(par%ny+1,par%nx+1))
+    allocate(s%dnu(par%ny+1,par%nx+1))
+    allocate(s%dsdnui(par%ny+1,par%nx+1))
+    allocate(s%alfau(par%ny+1,par%nx+1))
+    allocate(s%dsv(par%ny+1,par%nx+1))
+    allocate(s%dnv(par%ny+1,par%nx+1))
+    allocate(s%dsdnvi(par%ny+1,par%nx+1))
+    allocate(s%alfav(par%ny+1,par%nx+1))
+    allocate(s%dsc(par%ny+1,par%nx+1))
+    allocate(s%dnc(par%ny+1,par%nx+1))
+
+    allocate(xc(par%ny+1,par%nx+1))
+    allocate(yc(par%ny+1,par%nx+1))
+
+    ! world coordinates of u-points
+    do j=1,par%ny+1
+       do i=1,par%nx
+          s%xu(j,i)=.5d0*(s%xz(j,i)+s%xz(j,i+1))
+          s%yu(j,i)=.5d0*(s%yz(j,i)+s%yz(j,i+1))
+       enddo
+       s%xu(j,par%nx+1)=1.5d0*s%xz(j,par%nx+1)-0.5d0*s%xz(j,par%nx)
+       s%yu(j,par%nx+1)=1.5d0*s%yz(j,par%nx+1)-0.5d0*s%yz(j,par%nx)
+    enddo
+
+    ! world coordinates of v-points
+    if (par%ny>0) then
+       do i=1,par%nx+1
+          do j=1,par%ny
+             s%xv(j,i)=.5d0*(s%xz(j,i)+s%xz(j+1,i))
+             s%yv(j,i)=.5d0*(s%yz(j,i)+s%yz(j+1,i))
+          enddo
+          s%xv(par%ny+1,i)=1.5d0*s%xz(par%ny+1,i)-0.5d0*s%xz(par%ny,i)
+          s%yv(par%ny+1,i)=1.5d0*s%yz(par%ny+1,i)-0.5d0*s%yz(par%ny,i)
+       enddo
+    else
+       s%xv=s%xz
+       s%yv=s%yz
+    endif
+
+    ! world coordinates of corner points
+    if (par%ny>0) then
+       do j=1,par%ny
+          do i=1,par%nx
+             xc(j,i)=.25d0*(s%xz(j,i)+s%xz(j,i+1)+s%xz(j+1,i)+s%xz(j+1,i+1))
+             yc(j,i)=.25d0*(s%yz(j,i)+s%yz(j,i+1)+s%yz(j+1,i)+s%yz(j+1,i+1))
+          enddo
+          xc(j,par%nx+1)=0.5d0*(s%xu(j,par%nx+1)+s%xu(j+1,par%nx+1))
+          yc(j,par%nx+1)=0.5d0*(s%yu(j,par%nx+1)+s%yu(j+1,par%nx+1))
+       enddo
+       do i=1,par%nx
+          xc(par%ny+1,i)=0.5d0*(s%xv(par%ny+1,i)+s%xv(par%ny+1,i+1))
+          yc(par%ny+1,i)=0.5d0*(s%yv(par%ny+1,i)+s%yv(par%ny+1,i+1))
+       enddo
+       xc(par%ny+1,par%nx+1)=1.5d0*s%xu(par%ny+1,par%nx+1)-0.5*s%xu(par%ny,par%nx+1)
+       yc(par%ny+1,par%nx+1)=1.5d0*s%yu(par%ny+1,par%nx+1)-0.5*s%yu(par%ny,par%nx+1)
+    else
+       xc=s%xu
+       yc=s%yu
+    endif
+
+    ! s%dsu
+    do j=1,par%ny+1
+       do i=1,par%nx
+          s%dsu(j,i)=((s%xz(j,i+1)-s%xz(j,i))**2+(s%yz(j,i+1)-s%yz(j,i))**2)**(0.5d0)
+       enddo
+    enddo
+    s%dsu(:,par%nx+1)=s%dsu(:,par%nx)
+
+    ! s%dsz
+    do j=1,par%ny+1
+       do i=2,par%nx+1
+          s%dsz(j,i)=((s%xu(j,i)-s%xu(j,i-1))**2+(s%yu(j,i)-s%yu(j,i-1))**2)**(0.5d0)
+       enddo
+    enddo
+    s%dsz(:,1)=s%dsz(:,2)
+
+    ! s%dsv
+    if (par%ny>0) then
+       do j=1,par%ny+1
+          do i=2,par%nx+1
+             s%dsv(j,i)=((xc(j,i)-xc(j,i-1))**2+(yc(j,i)-yc(j,i-1))**2)**(0.5d0)
+          enddo
+       enddo
+       s%dsv(:,par%nx+1)=s%dsv(:,par%nx)
+    else
+       s%dsv=s%dsz
+    endif
+
+    ! s%dsc
+    if (par%ny>0) then
+       do j=1,par%ny+1
+          do i=1,par%nx
+             s%dsc(j,i)=((s%xv(j,i+1)-s%xv(j,i))**2+(s%yv(j,i+1)-s%yv(j,i))**2)**(0.5d0)
+          enddo
+       enddo
+       s%dsc(:,par%nx+1)=s%dsc(:,par%nx)
+    else
+       s%dsc=s%dsu
+    endif
+
+    ! s%dnu
+    if (par%ny>0) then
+       do j=2,par%ny+1
+          do i=1,par%nx+1
+             s%dnu(j,i)=((xc(j,i)-xc(j-1,i))**2+(yc(j,i)-yc(j-1,i))**2)**(0.5d0)
+          enddo
+       enddo
+       s%dnu(1,:)=s%dnu(2,:)
+    else
+       s%dnu=100.d0
+    endif
+
+    ! s%dnz
+    if (par%ny>0) then
+       do j=2,par%ny+1
+          do i=1,par%nx+1
+             s%dnz(j,i)=((s%xv(j,i)-s%xv(j-1,i))**2+(s%yv(j,i)-s%yv(j-1,i))**2)**(0.5d0)
+          enddo
+       enddo
+       s%dnz(1,:)=s%dnz(2,:)
+    else
+       s%dnz=100.d0
+    endif
+
+    ! s%dnv
+    if (par%ny>0) then  
+       do j=1,par%ny
+          do i=1,par%nx+1
+             s%dnv(j,i)=((s%xz(j+1,i)-s%xz(j,i))**2+(s%yz(j+1,i)-s%yz(j,i))**2)**(0.5d0)
+          enddo
+       enddo
+       s%dnv(par%ny+1,:)=s%dnv(par%ny,:)
+    else
+       s%dnv=100.d0
+    endif
+
+    ! s%dnc
+    if (par%ny>0) then  
+       do j=1,par%ny
+          do i=1,par%nx+1
+             s%dnc(j,i)=((s%xu(j+1,i)-s%xu(j,i))**2+(s%yu(j+1,i)-s%yu(j,i))**2)**(0.5d0)
+          enddo
+       enddo
+       s%dnc(par%ny+1,:)=s%dnc(par%ny,:)
+    else
+       s%dnc=100.d0
+    endif
+
+
+    if (par%ny>0) then 
+
+       ! dsdnu
+       do j=2,par%ny+1
+          do i=1,par%nx
+             x1=s%xv(j  ,i  ) - s%xv(j-1,i  )
+             x3=s%xv(j-1,i+1) - s%xv(j-1,i  )
+             x2=s%xv(j  ,i+1) - s%xv(j-1,i+1)
+             x4=s%xv(j  ,i+1) - s%xv(j  ,i  )
+             y1=s%yv(j  ,i  ) - s%yv(j-1,i  )
+             y3=s%yv(j-1,i+1) - s%yv(j-1,i  )
+             y2=s%yv(j  ,i+1) - s%yv(j-1,i+1)
+             y4=s%yv(j  ,i+1) - s%yv(j  ,i  )
+             dsdnu=0.5d0*(abs(x1*y3-x3*y1)+abs(x2*y4-x4*y2))
+             s%dsdnui(j,i)=1.d0/dsdnu
+          enddo
+       enddo
+       s%dsdnui(1,:)=s%dsdnui(2,:)
+       s%dsdnui(:,par%nx+1)=s%dsdnui(:,par%nx)
+
+       ! dsdnv
+       do j=1,par%ny
+          do i=2,par%nx+1
+             x1=s%xu(j+1,i-1) - s%xu(j  ,i-1)
+             x3=s%xu(j  ,i  ) - s%xu(j  ,i-1)
+             x2=s%xu(j+1,i  ) - s%xu(j  ,i  )
+             x4=s%xu(j+1,i  ) - s%xu(j+1,i-1)
+             y1=s%yu(j+1,i-1) - s%yu(j  ,i-1)
+             y3=s%yu(j  ,i  ) - s%yu(j  ,i-1)
+             y2=s%yu(j+1,i  ) - s%yu(j  ,i  )
+             y4=s%yu(j+1,i  ) - s%yu(j+1,i-1)
+             dsdnv=0.5d0*(abs(x1*y3-x3*y1)+abs(x2*y4-x4*y2))
+             s%dsdnvi(j,i)=1.d0/dsdnv
+          enddo
+       enddo
+       s%dsdnvi(par%ny+1,:)=s%dsdnvi(par%ny,:)
+       s%dsdnvi(:,1)=s%dsdnvi(:,2)
+
+       ! dsdnz
+       do j=2,par%ny+1
+          do i=2,par%nx+1
+             x1=xc(j  ,i-1) - xc(j-1,i-1)
+             x3=xc(j-1,i  ) - xc(j-1,i-1)
+             x2=xc(j  ,i  ) - xc(j-1,i  )
+             x4=xc(j  ,i  ) - xc(j  ,i-1)
+             y1=yc(j  ,i-1) - yc(j-1,i-1)
+             y3=yc(j-1,i  ) - yc(j-1,i-1)
+             y2=yc(j  ,i  ) - yc(j-1,i  )
+             y4=yc(j  ,i  ) - yc(j  ,i-1)
+             dsdnz=0.5d0*(abs(x1*y3-x3*y1)+abs(x2*y4-x4*y2))
+             s%dsdnzi(j,i)=1.d0/dsdnz
+          enddo
+       enddo
+       s%dsdnzi(1,:)=s%dsdnzi(2,:)
+       s%dsdnzi(:,1)=s%dsdnzi(:,2)
+
+    else
+
+       s%dsdnui=1.d0/(s%dsu*s%dnu)
+       s%dsdnvi=1.d0/(s%dsv*s%dnv)
+       s%dsdnzi=1.d0/(s%dsz*s%dnz)
+
+    endif
+
+    ! s%alfaz, grid orientation in z-points
+    do j=1,par%ny+1
+       do i=2,par%nx
+          s%alfaz(j,i)=atan2(s%yz(j,i+1)-s%yz(j,i-1),s%xz(j,i+1)-s%xz(j,i-1))
+       enddo
+       s%alfaz(j,1)=s%alfaz(j,2)
+       s%alfaz(j,par%nx+1)=s%alfaz(j,par%nx)
+    enddo
+
+    ! s%alfau, grid orientation in u-points
+    do j=1,par%ny+1
+       do i=1,par%nx
+          s%alfau(j,i)=atan2(s%yz(j,i+1)-s%yz(j,i),s%xz(j,i+1)-s%xz(j,i))
+       enddo
+       s%alfau(j,par%nx+1)=s%alfau(j,par%nx)
+    enddo
+
+    ! s%alfav, grid orientation in v-points
+    if (par%ny>0) then
+       do i=1,par%nx+1
+          do j=1,par%ny
+             s%alfav(j,i)=atan2(s%yz(j+1,i)-s%yz(j,i),s%xz(j+1,i)-s%xz(j,i))
+          enddo
+          s%alfav(par%ny+1,i)=s%alfav(par%ny,i)
+       enddo
+    else
+       s%alfav=s%alfaz
+    endif
+
+    deallocate (xc)
+    deallocate (yc)
+
+  end subroutine gridprops
+
 end module init_module
