@@ -14,7 +14,7 @@ CFL = .9
 tstop = 3600
 tout = 360
 accfac = 1
-scheme = implicit
+scheme = explicit
 
 # files
 wind_file = wind_constant.txt

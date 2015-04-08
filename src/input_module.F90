@@ -10,18 +10,19 @@ module input_module
   type windstat
      real*8 :: t = 0.d0
      real*8 :: duration = 0.d0
-     real*8 :: direction = 0.d0
      real*8 :: u_mean = 0.d0
      real*8 :: u_std = 0.d0
      real*8 :: gust_mean = 0.d0
      real*8 :: gust_std = 0.d0
+     real*8 :: dir_mean = 0.d0
+     real*8 :: dir_std = 0.d0
   end type windstat
 
   type windspeed
      real*8 :: t = 0.d0
      real*8 :: duration = 0.d0
-     real*8 :: direction = 0.d0
      real*8 :: u = 0.d0
+     real*8 :: dir = 0.d0
   end type windspeed
 
   type tide
@@ -57,7 +58,6 @@ module input_module
      logical   :: evaporation   = .true.
      logical   :: gusts         = .true.
      
-     real*8    :: VS    = 0.d0            ! [-] ratio sediment transport velocity to wind velocity
      real*8    :: Tp    = 0.d0            ! [s] adaptation time scale in transport formulation
      real*8    :: u_th  = 0.d0            ! [m/s] constant velocity threshold in transport formulation
      real*8    :: z0    = 0.d0            ! [m] height of wind measurement
@@ -201,7 +201,6 @@ contains
     par%evaporation   = read_key_logical(fname, 'evaporation', .true.)
     par%gusts         = read_key_logical(fname, 'gusts', .true.)
     
-    par%VS     = read_key_dbl(fname, 'VS',    1.d0)
     par%Tp     = read_key_dbl(fname, 'Tp',    1.0d0)
     par%u_th   = read_key_dbl(fname, 'u_th',  0.4d0)
     par%z0     = read_key_dbl(fname, 'z0',    1.d0)

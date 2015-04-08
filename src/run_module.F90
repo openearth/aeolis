@@ -29,7 +29,9 @@ contains
     Ct2p = 0.d0
 
     ! interpolate wind
-    call interpolate_wind(par%uw, par%t, s%uw)
+    call interpolate_wind(par%uw, par%t, s%uw, s%udir)
+    s%uws = s%uw * cos(s%alfaz + s%udir)
+    s%uwn = s%uw * sin(s%alfaz + s%udir)
 
     ! courant check
     par%dx = 5.d0
@@ -67,7 +69,7 @@ contains
     ! determine first dry grid cell
     if (trim(par%scheme) .eq. 'euler_forward') then
        do i = 2,par%nx+1
-          do j = 1,par%ny+1
+          do j = 2,par%ny+1
 
              ! compute supply based on sediment availability
              call compute_supply(par, s%mass(:,1,j,i), &
@@ -76,9 +78,9 @@ contains
              do k = 1,par%nfractions
 
                 ! compute sediment advection by wind
-                Ct(k,j,i) = max(0.d0, &
-                     s%Ct(k,j,i)
-                     - par%VS * s%uw * par%dt / par%dsz * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) &
+                Ct(k,j,i) = s%Ct(k,j,i) &
+                     - s%uws(j,i) * par%dt / s%dsz(j,i) * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) &
+                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * (s%Ct(k,j,i) - s%Ct(k,j-1,i)) &
                      + s%supply(k,j,i)
              
              end do
@@ -90,7 +92,7 @@ contains
           Ct_prev = Ct
 
           do i = 2,par%nx+1
-             do j = 1,par%ny+1
+             do j = 2,par%ny+1
              
                 ! compute supply based on sediment availability
                 call compute_supply(par, s%mass(:,1,j,i), &
@@ -103,7 +105,7 @@ contains
                         s%Ct(k,j,j) &
                         - par%VS * s%uw * par%dt / par%dsz * (Ct2p(k,j,i) - Ct2p(k,j,i-1)) &
                         + s%supply(k,j,i))
-
+                   
                 end do
              end do
           end do
@@ -122,6 +124,7 @@ contains
     end if
 
     s%Ct = Ct
+    s%Ct(:,1,:) = s%Ct(:,par%ny+1,:)
     
     ! add sediment deposit
     do i = 1,par%nfractions
@@ -132,6 +135,7 @@ contains
        end where
     end do
     s%supply(:,:,1) = 0.d0
+    s%supply(:,1,:) = s%supply(:,par%ny+1,:)
 
     ! update bed elevation
     sl%zb = update_bed(par, sl%zb, -sl%supply, sl%rho)

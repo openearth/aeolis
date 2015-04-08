@@ -8,10 +8,10 @@ module init_module
   implicit none
 
   type spaceparams
-     real*8, pointer :: uw, zs
+     real*8, pointer :: uw, udir, zs
      real*8, dimension(:), pointer :: rho, dist
      real*8, dimension(:,:), pointer :: xz, yz, xu, yu, xv, yv
-     real*8, dimension(:,:), pointer :: zb
+     real*8, dimension(:,:), pointer :: zb, uws, uwn
      real*8, dimension(:,:,:), pointer :: uth, moist
      real*8, dimension(:,:,:), pointer :: Cu, Ct, supply, thlyr
      real*8, dimension(:,:,:), pointer :: d10, d50, d90
@@ -24,7 +24,7 @@ module init_module
   end type spaceparams
 
   type spaceparams_linear
-     real*8, pointer :: uw, zs
+     real*8, pointer :: uw, udir, zs
      real*8, dimension(:), pointer :: rho, dist
      real*8, dimension(:), pointer :: xz, yz, zb
      real*8, dimension(:,:), pointer :: uth, moist
@@ -84,6 +84,7 @@ contains
          action="write", status="replace", form="unformatted")
     write(fid) par%uw%t
     write(fid) par%uw%u
+    write(fid) par%uw%dir
     close(fid)
 
     ! time
@@ -114,6 +115,9 @@ contains
 
     ! extra output
     call alloc_variable(var, 'uw',     (/0/))
+    call alloc_variable(var, 'uws',    (/par%ny+1, par%nx+1/))
+    call alloc_variable(var, 'uwn',    (/par%ny+1, par%nx+1/))
+    call alloc_variable(var, 'udir',   (/0/))
     call alloc_variable(var, 'zs',     (/0/))
     call alloc_variable(var, 'd10',    (/par%nlayers, par%ny+1, par%nx+1/))
     call alloc_variable(var, 'd50',    (/par%nlayers, par%ny+1, par%nx+1/))
@@ -130,6 +134,9 @@ contains
     call get_pointer(var, 'moist',  (/par%nlayers, par%ny+1, par%nx+1/), s%moist)
     call get_pointer(var, 'thlyr',  (/par%nlayers, par%ny+1, par%nx+1/), s%thlyr)
     call get_pointer(var, 'uw',     (/0/), s%uw)
+    call get_pointer(var, 'uws',    (/par%ny+1, par%nx+1/), s%uws)
+    call get_pointer(var, 'uwn',    (/par%ny+1, par%nx+1/), s%uwn)
+    call get_pointer(var, 'udir',   (/0/), s%udir)
     call get_pointer(var, 'zs',     (/0/), s%zs)
     call get_pointer(var, 'd10',    (/par%nlayers, par%ny+1, par%nx+1/), s%d10)
     call get_pointer(var, 'd50',    (/par%nlayers, par%ny+1, par%nx+1/), s%d50)
@@ -145,6 +152,7 @@ contains
     call get_pointer(var, 'moist',  (/par%nlayers, par%nc/), sl%moist)
     call get_pointer(var, 'thlyr',  (/par%nlayers, par%nc/), sl%thlyr)
     call get_pointer(var, 'uw',     (/0/), sl%uw)
+    call get_pointer(var, 'udir',   (/0/), sl%udir)
     call get_pointer(var, 'zs',     (/0/), sl%zs)
     call get_pointer(var, 'd10',    (/par%nlayers, par%nc/), sl%d10)
     call get_pointer(var, 'd50',    (/par%nlayers, par%nc/), sl%d50)
@@ -160,6 +168,9 @@ contains
 
   subroutine gridprops(par, s)
 
+    ! THIS FUNCTION IS BASED ON THE XBEACH GRIDPROPS FUNCTION
+    ! https://svn.oss.deltares.nl/repos/xbeach/trunk/src/xbeachlibrary/spaceparams.F90
+    
     implicit none
 
     type(parameters), intent(in) :: par
