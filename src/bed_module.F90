@@ -396,11 +396,10 @@ contains
 
   end subroutine compute_threshold_grainsize
 
-  subroutine compute_threshold_bedslope(par, x, zb, u_th)
+  subroutine compute_threshold_bedslope(par, s)
 
     type(parameters), intent(in) :: par
-    real*8, dimension(:,:), pointer, intent(in) :: x, zb
-    real*8, dimension(:,:,:), pointer, intent(inout) :: u_th
+    type(spaceparams), intent(inout) :: s
     integer :: i, j, k
     real*8 :: phi, theta
 
@@ -410,15 +409,21 @@ contains
 
     phi = par%phi / 180.d0 * pi
 
-    do i = 1,par%nx
-       do j = 1,par%ny+1
-          theta = -atan((zb(j,i+1) - zb(j,i)) / (x(j,i+1) - x(j,i)))
+    do i = 2,par%nx+1
+       do j = 2,par%ny+1
+          ! theta = -atan((s%zb(j,i+1) - s%zb(j,i)) / s%dsz(j,i))
+          
+          theta = -atan( ( &
+               (s%zb(j,i) - s%zb(j,i-1)) * s%dnz(j,i) * cos(s%alfaz(j,i) + s%udir) + &
+               (s%zb(j,i) - s%zb(j-1,i)) * s%dsz(j,i) * sin(s%alfaz(j,i) + s%udir) ) * s%dsdnzi(j,i) )
+          
           do k = 1,par%nfractions
-             u_th(k,j,i) = sqrt((tan(phi) - tan(theta)) / tan(phi) * cos(theta)) * u_th(k,j,i)
+             s%uth(k,j,i) = sqrt((tan(phi) - tan(theta)) / tan(phi) * cos(theta)) * s%uth(k,j,i)
           end do
        end do
     end do
-    u_th(:,:,par%nx+1) = u_th(:,:,par%nx)
+    s%uth(:,:,1) = s%uth(:,:,par%nx+1)
+    s%uth(:,1,:) = s%uth(:,par%ny+1,:)
 
   end subroutine compute_threshold_bedslope
 

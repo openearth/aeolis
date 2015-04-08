@@ -220,11 +220,11 @@ contains
     else
 
        allocate(meteo(2))
-       meteo(1)%t = 0.d0
-       meteo(2)%t = par%tstop
-       meteo(1)%duration = par%tstop
-       meteo(2)%duration = 0.d0
-
+       meteo(1)%t = par%tstop
+       meteo%solar_radiation = 0.d0
+       meteo%air_temperature = 0.d0
+       meteo%relative_humidity = 0.d0
+       
     end if
 
   end subroutine generate_meteo

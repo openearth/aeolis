@@ -37,8 +37,8 @@ contains
     par%dx = 5.d0
     if (trim(par%scheme) .eq. 'euler_forward') then
        if (par%CFL > 0.d0) then
-          par%dt = par%CFL * max(maxval(s%dsz), maxval(s%dnz)) / s%uw
-          !write(0, '(a, f4.2)') "  adapted time step: ", par%dt
+          par%dt = par%CFL * min(minval(s%dsz / abs(s%uws)), &
+                                 minval(s%dnz / abs(s%uwn))) / 2.d0
        end if
     end if
 
@@ -54,7 +54,7 @@ contains
     ! update threshold
     sl%uth = par%u_th
     call compute_threshold_grainsize(par, sl%uth)
-    call compute_threshold_bedslope(par, s%xz, s%zb, s%uth)
+    call compute_threshold_bedslope(par, s)
     call compute_threshold_moisture(par, sl%moist(1,:), sl%uth)
 
     ! get available mass
@@ -64,7 +64,7 @@ contains
     ! compute transport capacity by wind, including thresholds
     alpha = (0.174 / log10(par%z0/par%k))**3
     s%Cu = max(0.d0, alpha * par%Cb * par%rhoa / par%g * &
-         (s%uw - s%uth)**3 / (s%uw * par%VS))
+         (s%uw - s%uth)**3 / s%uw)
 
     ! determine first dry grid cell
     if (trim(par%scheme) .eq. 'euler_forward') then
@@ -79,8 +79,8 @@ contains
 
                 ! compute sediment advection by wind
                 Ct(k,j,i) = s%Ct(k,j,i) &
-                     - s%uws(j,i) * par%dt / s%dsz(j,i) * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) &
-                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * (s%Ct(k,j,i) - s%Ct(k,j-1,i)) &
+                     - s%uws(j,i) * par%dt / s%dsz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) &
+                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j-1,i)) &
                      + s%supply(k,j,i)
              
              end do
@@ -101,10 +101,10 @@ contains
                 do k = 1,par%nfractions
                 
                    ! compute sediment advection by wind
-                   Ct2p(i,j) = max(0.d0, &
-                        s%Ct(k,j,j) &
-                        - par%VS * s%uw * par%dt / par%dsz * (Ct2p(k,j,i) - Ct2p(k,j,i-1)) &
-                        + s%supply(k,j,i))
+                   Ct2p(k,j,i) = s%Ct(k,j,i) &
+                     - s%uws(j,i) * par%dt / s%dsz(j,i) * s%dsdnzi(j,i) * (Ct2p(k,j,i) - Ct2p(k,j,i-1)) &
+                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * s%dsdnzi(j,i) * (Ct2p(k,j,i) - Ct2p(k,j-1,i)) &
+                     + s%supply(k,j,i)
                    
                 end do
              end do
@@ -134,7 +134,7 @@ contains
                par%grain_dist(i) / max(1e-10, sum(par%grain_dist))
        end where
     end do
-    s%supply(:,:,1) = 0.d0
+    s%supply(:,:,1:x1-1) = 0.d0
     s%supply(:,1,:) = s%supply(:,par%ny+1,:)
 
     ! update bed elevation

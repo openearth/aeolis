@@ -46,6 +46,32 @@ module input_module
      real*8 :: atmospheric_pressure = 101.325 ! [kPa]
      real*8 :: latent_heat = 2.45 ! [MJ/kg]
   end type meteorology
+  
+  type spaceparams
+     real*8, pointer :: uw, udir, zs
+     real*8, dimension(:), pointer :: rho, dist
+     real*8, dimension(:,:), pointer :: xz, yz, xu, yu, xv, yv
+     real*8, dimension(:,:), pointer :: zb, uws, uwn
+     real*8, dimension(:,:,:), pointer :: uth, moist
+     real*8, dimension(:,:,:), pointer :: Cu, Ct, supply, thlyr
+     real*8, dimension(:,:,:), pointer :: d10, d50, d90
+     real*8, dimension(:,:,:,:), pointer :: mass
+     real*8, dimension(:,:), pointer :: dsz, dnz, dsdnzi, alfaz
+     real*8, dimension(:,:), pointer :: dsu, dnu, dsdnui, alfau
+     real*8, dimension(:,:), pointer :: dsv, dnv, dsdnvi, alfav
+     real*8, dimension(:,:), pointer :: dsc, dnc
+     type(meteorology) :: meteo
+  end type spaceparams
+
+  type spaceparams_linear
+     real*8, pointer :: uw, udir, zs
+     real*8, dimension(:), pointer :: rho, dist
+     real*8, dimension(:), pointer :: xz, yz, zb
+     real*8, dimension(:,:), pointer :: uth, moist
+     real*8, dimension(:,:), pointer :: Cu, Ct, supply, thlyr
+     real*8, dimension(:,:), pointer :: d10, d50, d90
+     real*8, dimension(:,:,:), pointer :: mass
+  end type spaceparams_linear
 
   type parameters
      logical   :: mixtoplayer   = .true.

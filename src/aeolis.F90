@@ -41,7 +41,12 @@ do while (t < tend)
         write(msgbuf,*) 'Updating to timestep ', t, ' failed'
 
    ! write output
-   call write_output(par, sl, var)
+   if (par%t .le. par%dt  .or. par%tout < par%dt .or. &
+        mod(par%t, par%tout) < par%dt .or. par%tout - par%t < par%dt) then
+      call write_output(par, sl, var)
+   end if
+
+   ! update time
    call get_current_time(t)
 
    ! log progress
