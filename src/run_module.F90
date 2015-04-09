@@ -37,8 +37,8 @@ contains
     par%dx = 5.d0
     if (trim(par%scheme) .eq. 'euler_forward') then
        if (par%CFL > 0.d0) then
-          par%dt = par%CFL * min(minval(s%dsz / abs(s%uws)), &
-                                 minval(s%dnz / abs(s%uwn))) / 2.d0
+          par%dt = par%CFL / (maxval(abs(s%uws) / s%dsz) + &
+                              maxval(abs(s%uwn) / s%dnz))
        end if
     end if
 
