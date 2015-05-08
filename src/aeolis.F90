@@ -27,8 +27,8 @@ if (initialize(c_configfile) /= 0) &
      write(msgbuf,*) 'Initialization failed'
 
 ! initialize output
-call write_dimensions(par)
-call output_init(var, par%outputvars, par%output_dir)
+call output_init(par, var)
+call write_output(par, s, var)
 
 t = 0
 tstart = get_time()
@@ -52,6 +52,7 @@ do while (t < tend)
 
 end do
 
+call write_dimensions(par)
 if (finalize() /= 0) &
      write(msgbuf,*) 'Finalization failed'
 

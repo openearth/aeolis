@@ -2,6 +2,7 @@ module output_module
 
   use constants_module
   use input_module
+  use utils_module
   
   implicit none
 
@@ -201,29 +202,31 @@ contains
 
   end subroutine get_pointer_rank4
   
-  subroutine output_init(var, vars, dir)
+  subroutine output_init(par, var)
 
+    type(parameters), intent(in) :: par
     type(variables), dimension(:), intent(inout) :: var
-    character(*), dimension(:), intent(in) :: vars
-    character(*), optional, intent(in) :: dir
-    character(slen) :: dir0
     integer*4 :: i, j
 
-    if (present(dir)) then
-       dir0 = dir
-    else
-       dir0 = dir
-    end if
-    
-    do i = 1,size(vars)
+    do i = 1,size(par%outputvars)
        do j = 1,size(var)
-          if (trim(var(j)%name) == trim(vars(i))) then
-             call output_init_data(var(j)%val, dir0, trim(vars(i))//".out", 100+i)
-             call output_init_data(var(j)%sum, dir0, trim(vars(i))//".sum.out", 200+i)
-             call output_init_data(var(j)%avg, dir0, trim(vars(i))//".avg.out", 300+i)
-             call output_init_data(var(j)%var, dir0, trim(vars(i))//".var.out", 400+i)
-             call output_init_data(var(j)%min, dir0, trim(vars(i))//".min.out", 500+i)
-             call output_init_data(var(j)%max, dir0, trim(vars(i))//".max.out", 600+i)
+          if (trim(var(j)%name) == trim(par%outputvars(i))) then
+             call output_init_data(var(j)%val, par%output_dir, trim(par%outputvars(i))//".out", 100+i)
+             if (isin(par%outputtypes, 'sum')) then
+                call output_init_data(var(j)%sum, par%output_dir, trim(par%outputvars(i))//".sum.out", 200+i)
+             end if
+             if (isin(par%outputtypes, 'avg')) then
+                call output_init_data(var(j)%avg, par%output_dir, trim(par%outputvars(i))//".avg.out", 300+i)
+             end if
+             if (isin(par%outputtypes, 'var')) then
+                call output_init_data(var(j)%var, par%output_dir, trim(par%outputvars(i))//".var.out", 400+i)
+             end if
+             if (isin(par%outputtypes, 'min')) then
+                call output_init_data(var(j)%min, par%output_dir, trim(par%outputvars(i))//".min.out", 500+i)
+             end if
+             if (isin(par%outputtypes, 'max')) then
+                call output_init_data(var(j)%max, par%output_dir, trim(par%outputvars(i))//".max.out", 600+i)
+             end if
           end if
        end do
     end do

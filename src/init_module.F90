@@ -23,7 +23,7 @@ module init_module
      real*8, dimension(:), pointer :: rho, dist
      real*8, dimension(:), pointer :: x, y, zb
      real*8, dimension(:,:), pointer :: uth, moist
-     real*8, dimension(:,:), pointer :: Cu, Ct, supply, thlyr
+     real*8, dimension(:,:), pointer :: Cu, Ct, p, supply, thlyr
      real*8, dimension(:,:), pointer :: d10, d50, d90
      real*8, dimension(:,:,:), pointer :: mass
   end type spaceparams_linear
@@ -98,13 +98,14 @@ contains
     call alloc_variable(var, 'dist',   (/par%nfractions/))
 
     ! variables
-    call alloc_variable(var, 'Cu',     (/par%nfractions, par%ny+1, par%nx+1/))
-    call alloc_variable(var, 'Ct',     (/par%nfractions, par%ny+1, par%nx+1/))
-    call alloc_variable(var, 'uth',    (/par%nfractions, par%ny+1, par%nx+1/))
-    call alloc_variable(var, 'mass',   (/par%nfractions, par%nlayers, par%ny+1, par%nx+1/))
-    call alloc_variable(var, 'supply', (/par%nfractions, par%ny+1, par%nx+1/))
-    call alloc_variable(var, 'moist',  (/par%nlayers, par%ny+1, par%nx+1/))
-    call alloc_variable(var, 'thlyr',  (/par%nlayers, par%ny+1, par%nx+1/))
+    call alloc_pointer(var, 'Cu',     (/par%nfractions, par%ny+1, par%nx+1/), s%Cu)
+    call alloc_pointer(var, 'Ct',     (/par%nfractions, par%ny+1, par%nx+1/), s%Ct)
+    call alloc_pointer(var, 'p',      (/par%nfractions, par%ny+1, par%nx+1/), s%p)
+    call alloc_pointer(var, 'uth',    (/par%nfractions, par%ny+1, par%nx+1/), s%uth)
+    call alloc_pointer(var, 'mass',   (/par%nfractions, par%ny+1, par%nlayers, par%nx+1/), s%mass)
+    call alloc_pointer(var, 'supply', (/par%nfractions, par%ny+1, par%nx+1/), s%supply)
+    call alloc_pointer(var, 'moist',  (/par%nlayers, par%ny+1, par%nx+1/), s%moist)
+    call alloc_pointer(var, 'thlyr',  (/par%nlayers, par%ny+1, par%nx+1/), s%thlyr)
 
     ! extra output
     call alloc_variable(var, 'uw',     (/0/))

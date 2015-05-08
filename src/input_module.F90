@@ -109,10 +109,12 @@ module input_module
      real*8    :: F = 0.d0                ! [m/s] hydraulic infiltration rate
      real*8    :: Cw = 0.d0               ! [-] sediment concentration in water column
      real*8    :: w = 0.d0                ! [m/s] fall velocity of sediment in water column
+     real*8    :: bi = 0.d0               ! [-] bed interaction factor
      real*8, dimension(:), allocatable :: grain_size ! [m] median grain size for each fraction
      real*8, dimension(:), allocatable :: grain_dist ! [-] occurence of each fraction in bed
 
-     character(10), dimension(:), allocatable  :: outputvars ! space separated list of output variables
+     character(10), dimension(:), allocatable  :: outputvars  ! space separated list of output variables
+     character(10), dimension(:), allocatable  :: outputtypes ! space separated list of output types (sum, avg, min, max, var)
 
      type(windspeed), dimension(:), allocatable :: uw ! [m/s] wind speed time series
      type(tide), dimension(:), allocatable :: zs ! [m] water level elevation
@@ -250,6 +252,7 @@ contains
     par%F               = read_key_dbl(fname, 'F',               1.0d-4)
     par%Cw              = read_key_dbl(fname, 'Cw',              0.d0)
     par%w               = read_key_dbl(fname, 'w',               3.0d-2)
+    par%bi              = read_key_dbl(fname, 'bi',              1.d0)
 
     allocate(par%grain_size(par%nfractions))
     allocate(par%grain_dist(par%nfractions))
@@ -258,6 +261,7 @@ contains
     par%grain_dist = read_key_dblvec(fname, 'grain_dist', par%nfractions, 1.d0)
 
     par%outputvars = read_key_strvec(fname, 'outputvars', 'z')
+    par%outputtypes = read_key_strvec(fname, 'outputtypes', '')
 
     write(*,*) '**********************************************************'
     write(*,*) ' '

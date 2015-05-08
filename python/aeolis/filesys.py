@@ -70,9 +70,9 @@ def get_dims(fname):
         return (-1, d['nx'], d['nl'], d['nf'])
     elif fname in ['d10', 'd50', 'd90', 'moist', 'thlyr']:
         return (-1, d['nx'], d['nl'])
-    elif fname in ['Cu', 'Ct', 'uth', 'supply']:
+    elif fname in ['Cu', 'Ct', 'uth', 'supply', 'p']:
         return (-1, d['nx'], d['nf'])
-    elif fname in ['x', 'z', 'moist_map']:
+    elif fname in ['x', 'z', 'zb', 'moist_map']:
         return (-1, d['nx'])
     elif fname in ['rho', 'dist']:
         return (-1, d['nf'])

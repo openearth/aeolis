@@ -3,6 +3,7 @@
 *.lo
 *.la
 *.in
+*.nc
 *.out
 *.sum
 *.avg
@@ -11,6 +12,8 @@
 *.max
 *.pyc
 *.egg
+*.png
 *.egg-info
+aeolis*.txt
 .dirstamp
 _build/

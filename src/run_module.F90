@@ -53,8 +53,8 @@ contains
     sl%uth = par%u_th
     call compute_threshold_grainsize(par, sl%uth)
     call compute_threshold_bedslope(par, s%x, s%zb, s%uth)
-    call compute_threshold_moisture(par, sl%moist(1,:), sl%uth)
-    
+    call compute_threshold_moisture(par, s%moist(1,:), s%uth)
+
     ! get available mass
     sl%mass = get_layer_mass(par)
     sl%thlyr = get_layer_thickness(par)
@@ -65,7 +65,7 @@ contains
          (s%uw - s%uth)**3 / (s%uw * par%VS))
 
     ! determine first dry grid cell
-    x1 = max(2, first_exceedance(s%zb, s%zs))
+    x1 = 2 !max(2, first_exceedance(s%zb, s%zs))
     if (trim(par%scheme) .eq. 'explicit') then
 
        do i = x1,par%nx+1
@@ -147,36 +147,36 @@ contains
     
   end subroutine step
   
-  function compute_supply(par, mass, Cu, Ct) result(supply)
+  subroutine compute_supply(par, mass, Cu, Ct, supply, p)
 
-    type(parameters), intent(in) :: par ! parameters structure
+    type(parameters), intent(in) :: par
     real*8, dimension(:), intent(in) :: mass, Cu, Ct
-    real*8, dimension(size(mass)) :: dist, dist2, supply
-
-    dist = Ct / max(1e-10, Cu)
-
-    if (sum(dist) < 1.d0) then ! erosion
-    
-       ! compute sediment distribution in bed
-       dist2 = max(0.d0, mass) / max(1e-10, sum(mass))
-
-       ! compute new sediment distributuion in the air
-       dist = dist + dist2 * (1.d0 - sum(dist))
-
-    end if
+    real*8, dimension(size(mass)), intent(inout) :: p, supply
+    real*8, dimension(size(mass)) :: p_air, p_bed
 
     ! compute distribution in air
-    if (sum(dist) == 0.d0) dist = 1.d0
-    dist = dist / sum(dist)
+    p_air = Ct / max(1e-10, Cu)
 
+<<<<<<< HEAD
 !    call assert(abs(sum(dist) - 1.d0) < 1e-3)
+=======
+    ! compute sediment distribution in bed
+    p_bed = max(0.d0, mass) / max(1e-10, sum(mass))
+>>>>>>> Rewrote supply function. Added AeoLiS Python object
 
+    ! compute new sediment distributuion in the air
+    p = (1 - par%bi) * p_air + p_bed * (1.d0 - min(1.d0, (1 - par%bi) * sum(p_air)))
+
+    if (sum(p) == 0.d0) p = 1.d0
+    p = p / sum(p)
+    
     ! determine weighed supply
-    supply = (Cu * dist - Ct) / par%Tp * par%dt
+    supply = (Cu * p - Ct) / par%Tp * par%dt
 
     ! limit advection by available mass
     supply = min(mass, supply)
 
+<<<<<<< HEAD
   end function compute_supply
 
   subroutine write_output(par, sl, var)
@@ -201,5 +201,35 @@ contains
     end if
 
   end subroutine write_output
+=======
+!     real*8, dimension(size(mass)) :: dist, dist2, supply
+! 
+!     dist = Ct / max(1e-10, Cu)
+! 
+!     if (sum(dist) < 1.d0) then ! erosion
+! 
+!        ! compute sediment distribution in bed
+!        dist2 = max(0.d0, mass) / max(1e-10, sum(mass))
+! 
+!        ! compute new sediment distributuion in the air
+!        dist = dist + dist2 * (1.d0 - sum(dist))
+! 
+!     end if
+! 
+!     ! compute distribution in air
+!     if (sum(dist) == 0.d0) dist = 1.d0
+!     dist = dist / sum(dist)
+!     write(0,*) sum(dist), dist(1:5)
+! 
+!     !    call assert(abs(sum(dist) - 1.d0) < 1e-10)
+! 
+!     ! determine weighed supply
+!     supply = (Cu * dist - Ct) / par%Tp * par%dt
+! 
+!     ! limit advection by available mass
+!     supply = min(mass, supply)
+    
+  end subroutine compute_supply
+>>>>>>> Rewrote supply function. Added AeoLiS Python object
   
 end module run_module
