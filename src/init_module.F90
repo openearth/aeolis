@@ -12,7 +12,7 @@ module init_module
      real*8, dimension(:), pointer :: x, zb
      real*8, dimension(:), pointer :: rho, dist
      real*8, dimension(:,:), pointer :: uth, moist
-     real*8, dimension(:,:), pointer :: Cu, Ct, supply, thlyr
+     real*8, dimension(:,:), pointer :: Cu, Ct, p, supply, thlyr
      real*8, dimension(:,:), pointer :: d10, d50, d90
      real*8, dimension(:,:,:), pointer :: mass
      type(meteorology) :: meteo
@@ -79,6 +79,7 @@ contains
     ! variables
     call alloc_pointer(var, 'Cu',     (/par%nfractions, par%nx+1/), s%Cu)
     call alloc_pointer(var, 'Ct',     (/par%nfractions, par%nx+1/), s%Ct)
+    call alloc_pointer(var, 'p',      (/par%nfractions, par%nx+1/), s%p)
     call alloc_pointer(var, 'uth',    (/par%nfractions, par%nx+1/), s%uth)
     call alloc_pointer(var, 'mass',   (/par%nfractions, par%nlayers, par%nx+1/), s%mass)
     call alloc_pointer(var, 'supply', (/par%nfractions, par%nx+1/), s%supply)

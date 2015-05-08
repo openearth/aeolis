@@ -66,6 +66,8 @@ contains
 
     call step(par, s, var)
 
+    par%nt = par%nt + 1
+    
   end function update
 
   integer(c_int) function finalize() result(ierr) bind(C, name="finalize")

@@ -92,6 +92,23 @@ contains
 
   end function split
 
+  function isin(arr, x) result (found)
+
+    character(*), dimension(:) :: arr
+    character(*) :: x
+    integer*4 :: i
+    logical :: found
+
+    found = .false.
+    do i = 1,size(arr)
+       if (arr(i) == x) then
+          found = .true.
+          exit
+       end if
+    end do
+
+  end function isin
+
   subroutine split_path(str, fpath, fname)
 
     character(*),    intent(in) :: str

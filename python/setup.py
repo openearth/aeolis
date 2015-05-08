@@ -10,7 +10,12 @@ setup(
     long_description=open('README.txt').read(),
     install_requires=[
         'matplotlib',
+        'netCDF4',
         'pandas',
         'numpy'
     ],
+    entry_points={'console_scripts': [
+        '{0} = aeolis:cmd'.format(
+            'aeolis'),
+    ]},
 )
