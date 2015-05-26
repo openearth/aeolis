@@ -31,7 +31,7 @@ contains
     call interpolate_wind(par%uw, par%t, s%uw)
 
     ! courant check
-    if (trim(par%scheme) .eq. 'explicit') then
+    if (trim(par%scheme) .eq. 'euler_forward') then
        if (par%CFL > 0.d0) then
           par%dt = par%CFL * par%dx / s%uw
           !write(0, '(a, f4.2)') "  adapted time step: ", par%dt
@@ -64,7 +64,7 @@ contains
 
     ! determine first dry grid cell
     x1 = 2 !max(2, first_exceedance(s%zb, s%zs))
-    if (trim(par%scheme) .eq. 'explicit') then
+    if (trim(par%scheme) .eq. 'euler_forward') then
        do j=x1,par%nx+1
 
           ! compute supply based on sediment availability
@@ -79,7 +79,40 @@ contains
              
           end do
        end do
-    else
+    elseif (trim(par%scheme) .eq. 'maccormack') then
+
+       do j=x1,par%nx+1
+             
+          ! compute supply based on sediment availability
+          call compute_supply(par, s%mass(:,1,j), &
+               par%accfac * s%Cu(:,j), s%Ct(:,j), s%supply(:,j), s%p(:,j))
+
+          do i=1,par%nfractions
+             
+             ! compute sediment advection by wind (predictor)
+             Ct2(i,j) = max(0.d0, -par%VS * s%uw * (s%Ct(i,j) - s%Ct(i,j-1)) * &
+                  par%dt / par%dx + s%Ct(i,j) + s%supply(i,j))
+             
+          end do
+
+          ! take temporal average of predictor and current
+          Ct2(:,j) = ( Ct2(:,j) + s%Ct(:,j) ) / 2
+          
+          ! compute supply based on sediment availability
+          call compute_supply(par, s%mass(:,1,j), &
+               par%accfac * s%Cu(:,j), Ct2(:,j), s%supply(:,j), s%p(:,j))
+
+          do i=1,par%nfractions
+                
+             ! compute sediment advection by wind (corrector)
+             Ct2(i,j) = max(0.d0, (par%VS * s%uw * Ct2(i,j-1) * &
+                  par%dt / par%dx / 2.d0 + Ct2(i,j) + s%supply(i,j)) / &
+                  (1 + s%uw * par%dt / par%dx / 2.d0))
+
+             end do
+          end do
+          
+    elseif (trim(par%scheme) .eq. 'euler_backward') then
        do n=1,par%max_iter
 
           Ct2_prev = Ct2
