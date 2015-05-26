@@ -33,7 +33,7 @@ contains
 
     ! courant check
     par%dx = 5.d0
-    if (trim(par%scheme) .eq. 'explicit') then
+    if (trim(par%scheme) .eq. 'euler_forward') then
        if (par%CFL > 0.d0) then
           par%dt = par%CFL * par%dx / s%uw
           !write(0, '(a, f4.2)') "  adapted time step: ", par%dt
@@ -66,7 +66,7 @@ contains
 
     ! determine first dry grid cell
     x1 = 2 !max(2, first_exceedance(s%zb, s%zs))
-    if (trim(par%scheme) .eq. 'explicit') then
+    if (trim(par%scheme) .eq. 'euler_forward') then
 
        do i = x1,par%nx+1
           do j = 1,par%ny+1
@@ -84,7 +84,40 @@ contains
              end do
           end do
        end do
-    else
+    elseif (trim(par%scheme) .eq. 'maccormack') then
+
+       do j=x1,par%nx+1
+             
+          ! compute supply based on sediment availability
+          call compute_supply(par, s%mass(:,1,j), &
+               par%accfac * s%Cu(:,j), s%Ct(:,j), s%supply(:,j), s%p(:,j))
+
+          do i=1,par%nfractions
+             
+             ! compute sediment advection by wind (predictor)
+             Ct2(i,j) = max(0.d0, -par%VS * s%uw * (s%Ct(i,j) - s%Ct(i,j-1)) * &
+                  par%dt / par%dx + s%Ct(i,j) + s%supply(i,j))
+             
+          end do
+
+          ! take temporal average of predictor and current
+          Ct2(:,j) = ( Ct2(:,j) + s%Ct(:,j) ) / 2
+          
+          ! compute supply based on sediment availability
+          call compute_supply(par, s%mass(:,1,j), &
+               par%accfac * s%Cu(:,j), Ct2(:,j), s%supply(:,j), s%p(:,j))
+
+          do i=1,par%nfractions
+                
+             ! compute sediment advection by wind (corrector)
+             Ct2(i,j) = max(0.d0, (par%VS * s%uw * Ct2(i,j-1) * &
+                  par%dt / par%dx / 2.d0 + Ct2(i,j) + s%supply(i,j)) / &
+                  (1 + s%uw * par%dt / par%dx / 2.d0))
+
+             end do
+          end do
+          
+    elseif (trim(par%scheme) .eq. 'euler_backward') then
 
        Ct = s%Ct
 
@@ -157,12 +190,8 @@ contains
     ! compute distribution in air
     p_air = Ct / max(1e-10, Cu)
 
-<<<<<<< HEAD
-!    call assert(abs(sum(dist) - 1.d0) < 1e-3)
-=======
     ! compute sediment distribution in bed
     p_bed = max(0.d0, mass) / max(1e-10, sum(mass))
->>>>>>> Rewrote supply function. Added AeoLiS Python object
 
     ! compute new sediment distributuion in the air
     p = (1 - par%bi) * p_air + p_bed * (1.d0 - min(1.d0, (1 - par%bi) * sum(p_air)))
@@ -176,32 +205,6 @@ contains
     ! limit advection by available mass
     supply = min(mass, supply)
 
-<<<<<<< HEAD
-  end function compute_supply
-
-  subroutine write_output(par, sl, var)
-
-    type(parameters), intent(inout) :: par
-    type(spaceparams_linear), intent(inout) :: sl
-    type(variables), dimension(:), intent(inout) :: var
-
-    ! write output
-    if (par%t .le. par%dt  .or. par%tout < par%dt .or. &
-         mod(par%t, par%tout) < par%dt) then
-
-       ! update derived variables
-       if (is_output(var, 'mass')) sl%mass = get_layer_mass(par)
-       if (is_output(var, 'd10')) sl%d10 = get_layer_percentile(par, 0.1d0)
-       if (is_output(var, 'd50')) sl%d50 = get_layer_percentile(par, 0.5d0)
-       if (is_output(var, 'd90')) sl%d90 = get_layer_percentile(par, 0.9d0)
-       
-       call output_write(var)
-       call output_clear(var)
-       
-    end if
-
-  end subroutine write_output
-=======
 !     real*8, dimension(size(mass)) :: dist, dist2, supply
 ! 
 !     dist = Ct / max(1e-10, Cu)
@@ -230,6 +233,5 @@ contains
 !     supply = min(mass, supply)
     
   end subroutine compute_supply
->>>>>>> Rewrote supply function. Added AeoLiS Python object
   
 end module run_module

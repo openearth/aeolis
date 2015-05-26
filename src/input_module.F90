@@ -89,9 +89,9 @@ module input_module
      character(slen) :: method_moist = '' ! method for conversion of moisture content to velocity threshold
      character(slen) :: output_dir = ''   ! output directory relative to working directory
 
-     character(10) :: scheme              ! numerical scheme (implicit/explicit)
-     integer*4 :: max_iter = 0            ! [-] maximum number of point iterations per time step in implicit scheme
-     real*8    :: max_error = 0d0         ! [-] maximum relative error allowed in time step in implicit scheme
+     character(10) :: scheme              ! numerical scheme (euler_forward/euler_backward/maccormack)
+     integer*4 :: max_iter = 0            ! [-] maximum number of point iterations per time step in euler backward scheme
+     real*8    :: max_error = 0d0         ! [-] maximum relative error allowed in time step in euler backward scheme
 
      integer*4 :: nfractions = 0          ! [-] number of sediment fractions
      integer*4 :: nlayers = 0             ! [-] number of bed layers additional to transport and base layer
@@ -226,9 +226,9 @@ contains
     par%moist_file   = read_key_str(fname, 'moist_file', '')
     par%method_moist = read_key_str(fname, 'method_moist', 'belly_johnson')
     par%output_dir   = read_key_str(fname, 'output_dir', '')
-    par%scheme       = read_key_str(fname, 'scheme', 'implicit')
+    par%scheme       = read_key_str(fname, 'scheme', 'euler_backward')
 
-    if (trim(par%scheme) .eq. 'implicit') then
+    if (trim(par%scheme) .eq. 'euler_backward') then
        par%max_iter  = read_key_int(fname, 'max_iter',  100)
        par%max_error = read_key_dbl(fname, 'max_error', 1d-6)
     else
@@ -254,7 +254,14 @@ contains
     par%w               = read_key_dbl(fname, 'w',               3.0d-2)
     par%bi              = read_key_dbl(fname, 'bi',              1.d0)
 
+    if (allocated(par%grain_size)) then
+       deallocate(par%grain_size)
+    end if
     allocate(par%grain_size(par%nfractions))
+    
+    if (allocated(par%grain_dist)) then
+       deallocate(par%grain_dist)
+    end if
     allocate(par%grain_dist(par%nfractions))
 
     par%grain_size = read_key_dblvec(fname, 'grain_size', par%nfractions, 0.d0003)
@@ -293,7 +300,7 @@ contains
 
     ! check if valid scheme is selected
     select case (trim(par%scheme))
-    case ('implicit', 'explicit')
+    case ('euler_backward', 'euler_forward', 'maccormack')
        ! all ok
     case default
        write(0, '(a,a)') " Unsupported scheme: ",trim(par%scheme)

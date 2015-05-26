@@ -38,7 +38,7 @@ contains
     type(variables), dimension(:), allocatable, intent(out) :: var
     real*8, dimension(:,:), allocatable :: x_tmp, y_tmp, zb_tmp
     integer*4, parameter :: fid=20
-    
+
     write(0,*) 'Initialization started...'
     
     ! bed
@@ -73,7 +73,7 @@ contains
     close(fid)
 
     ! wind
-    write(*,*) 'Generating bed wind time series...'
+    write(*,*) 'Generating wind time series...'
     call generate_wind(par, par%uw)
     open(unit=fid, file=trim(par%output_dir) // "wind.in", &
          action="write", status="replace", form="unformatted")
@@ -85,11 +85,11 @@ contains
     par%ntout = int(par%tstop / par%tout) + 1
 
     ! moist
-    write(*,*) 'Generating moisture time series...'
+    write(0,*) 'Generating moisture time series...'
     call generate_moist(par, par%moist)
 
     ! tide and meteo
-    write(*,*) 'Generating tide and meteo time series...'
+    write(0,*) 'Generating tide and meteo time series...'
     call generate_tide(par, par%zs)
     call generate_meteo(par, par%meteo)
 
