@@ -89,7 +89,7 @@ module input_module
      character(slen) :: method_moist = '' ! method for conversion of moisture content to velocity threshold
      character(slen) :: output_dir = ''   ! output directory relative to working directory
 
-     character(10) :: scheme              ! numerical scheme (euler_forward/euler_backward/maccormack)
+     character(20) :: scheme              ! numerical scheme (euler_forward/euler_backward/maccormack)
      integer*4 :: max_iter = 0            ! [-] maximum number of point iterations per time step in euler backward scheme
      real*8    :: max_error = 0d0         ! [-] maximum relative error allowed in time step in euler backward scheme
 
