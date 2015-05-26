@@ -3,7 +3,6 @@ module bmi_module
   use iso_c_binding
   use iso_c_utils
   use logging
-  use output_module
   use init_module
   use moist_module
   use run_module
@@ -47,7 +46,7 @@ contains
     call init(par, var, s)
     par%t = 0
 
-    write(*,*) 'Model run started...'
+!    write(0,*) 'Model run started...'
 
   end function initialize
 
@@ -76,9 +75,46 @@ contains
     ierr = 0
     call log(LEVEL_INFO, 'Finalize')
 
-    call output_close(var)
+    if (allocated(par%grain_size)) then
+       deallocate(par%grain_size)
+    end if
+    if (allocated(par%grain_dist)) then
+       deallocate(par%grain_dist)
+    end if
+    if (allocated(par%uw)) then
+       deallocate(par%uw)
+    end if
+    if (allocated(par%zs)) then
+       deallocate(par%zs)
+    end if
+    if (allocated(par%meteo)) then
+       deallocate(par%meteo)
+    end if
+    if (allocated(par%moist)) then
+       deallocate(par%moist)
+    end if
 
-    write(*,*) 'Done.'
+    nullify(s%uw)
+    nullify(s%zs)
+    nullify(s%x)
+    nullify(s%zb)
+    nullify(s%rho)
+    nullify(s%dist)
+    nullify(s%uth)
+    nullify(s%moist)
+    nullify(s%Cu)
+    nullify(s%Ct)
+    nullify(s%p)
+    nullify(s%supply)
+    nullify(s%thlyr)
+    nullify(s%d10)
+    nullify(s%d50)
+    nullify(s%d90)
+    nullify(s%mass)
+
+    deallocate(var)
+
+!    write(0,*) 'Done.'
 
   end function finalize
 
