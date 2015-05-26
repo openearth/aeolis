@@ -810,6 +810,7 @@ class AeoLiS_Variables:
 
                     dfs.append(df)
                 except:
+                    raise
                     print 'Skipped %s' % fpath
                     
             df = pd.concat(dfs)

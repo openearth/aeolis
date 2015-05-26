@@ -49,7 +49,7 @@ contains
     close(fid)
 
     ! wind
-    write(*,*) 'Generating wind time series...'
+    write(0,*) 'Generating wind time series...'
     call generate_wind(par, par%uw)
     open(unit=fid, file=trim(par%output_dir) // "wind.in", &
          action="write", status="replace", form="unformatted")

@@ -18,14 +18,14 @@ contains
     type(parameters), intent(inout) :: par
     type(spaceparams), intent(inout) :: s
     type(variables), dimension(:), intent(inout) :: var
-    integer*4 :: i, j, n, x1
+    integer*4 :: i, j, n
     real*8 :: err, alpha
-    real*8, dimension(:,:), allocatable :: Ct2, Ct2_prev
+    real*8, dimension(:,:), allocatable :: Ct2, Ct2p
 
     allocate(Ct2(par%nfractions, par%nx+1))
-    allocate(Ct2_prev(par%nfractions, par%nx+1))
+    allocate(Ct2p(par%nfractions, par%nx+1))
     Ct2 = 0.d0
-    Ct2_prev = 0.d0
+    Ct2p = 0.d0
 
     ! interpolate wind
     call interpolate_wind(par%uw, par%t, s%uw)
@@ -63,9 +63,8 @@ contains
          (s%uw - s%uth)**3 / (s%uw * par%VS))
 
     ! determine first dry grid cell
-    x1 = 2 !max(2, first_exceedance(s%zb, s%zs))
     if (trim(par%scheme) .eq. 'euler_forward') then
-       do j=x1,par%nx+1
+       do j=2,par%nx+1
 
           ! compute supply based on sediment availability
           call compute_supply(par, s%mass(:,1,j), &
@@ -74,50 +73,53 @@ contains
           do i=1,par%nfractions
              
              ! compute sediment advection by wind
-             Ct2(i,j) = max(0.d0, -par%VS * s%uw * (s%Ct(i,j) - s%Ct(i,j-1)) * &
-                  par%dt / par%dx + s%Ct(i,j) + s%supply(i,j))
+             Ct2(i,j) = max(0.d0, &
+                  s%Ct(i,j) &
+                  - par%VS * s%uw * par%dt / par%dx *(s%Ct(i,j) - s%Ct(i,j-1)) &
+                  + s%supply(i,j))
              
           end do
        end do
     elseif (trim(par%scheme) .eq. 'maccormack') then
-
-       do j=x1,par%nx+1
+       do j=1,par%nx
              
-          ! compute supply based on sediment availability
+          ! compute supply based on sediment availability (predictor)
           call compute_supply(par, s%mass(:,1,j), &
                par%accfac * s%Cu(:,j), s%Ct(:,j), s%supply(:,j), s%p(:,j))
 
           do i=1,par%nfractions
              
              ! compute sediment advection by wind (predictor)
-             Ct2(i,j) = max(0.d0, -par%VS * s%uw * (s%Ct(i,j) - s%Ct(i,j-1)) * &
-                  par%dt / par%dx + s%Ct(i,j) + s%supply(i,j))
+             Ct2p(i,j) = max(0.d0, &
+                  s%Ct(i,j) &
+                  - par%VS * s%uw * par%dt / par%dx * (s%Ct(i,j+1) - s%Ct(i,j)) &
+                  + s%supply(i,j))
              
           end do
+       end do
 
-          ! take temporal average of predictor and current
-          Ct2(:,j) = ( Ct2(:,j) + s%Ct(:,j) ) / 2
-          
-          ! compute supply based on sediment availability
+       do j=2,par%nx+1
+
+          ! compute supply based on sediment availability (corrector)
           call compute_supply(par, s%mass(:,1,j), &
-               par%accfac * s%Cu(:,j), Ct2(:,j), s%supply(:,j), s%p(:,j))
+               par%accfac * s%Cu(:,j), Ct2p(:,j), s%supply(:,j), s%p(:,j))
 
           do i=1,par%nfractions
                 
              ! compute sediment advection by wind (corrector)
-             Ct2(i,j) = max(0.d0, (par%VS * s%uw * Ct2(i,j-1) * &
-                  par%dt / par%dx / 2.d0 + Ct2(i,j) + s%supply(i,j)) / &
-                  (1 + s%uw * par%dt / par%dx / 2.d0))
+             Ct2(i,j) = max(0.d0, &
+                  (s%Ct(i,j) + Ct2p(i,j)) / 2.d0 &
+                  - par%VS * s%uw * par%dt / par%dx / 2.d0 * (s%Ct(i,j) - s%Ct(i,j-1)) &
+                  + s%supply(i,j))
 
-             end do
           end do
-          
+       end do
     elseif (trim(par%scheme) .eq. 'euler_backward') then
        do n=1,par%max_iter
 
-          Ct2_prev = Ct2
+          Ct2p = Ct2
           
-          do j=x1,par%nx+1
+          do j=2,par%nx+1
              
              ! compute supply based on sediment availability
              call compute_supply(par, s%mass(:,1,j), &
@@ -126,15 +128,16 @@ contains
              do i=1,par%nfractions
                 
                 ! compute sediment advection by wind
-                Ct2(i,j) = max(0.d0, (par%VS * s%uw * Ct2(i,j-1) * &
-                     par%dt / par%dx + s%Ct(i,j) + s%supply(i,j)) / &
-                     (1 + s%uw * par%dt / par%dx))
+                Ct2p(i,j) = max(0.d0, &
+                     s%Ct(i,j) &
+                     - par%VS * s%uw * par%dt / par%dx * (Ct2p(i,j) - Ct2p(i,j-1)) &
+                     + s%supply(i,j))
 
              end do
           end do
 
           ! exit iteration if change is negligible
-          err = sum(abs(Ct2 - Ct2_prev))
+          err = sum(abs(Ct2 - Ct2p))
           if (err .le. par%max_error) exit
           
        end do
