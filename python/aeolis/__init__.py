@@ -16,9 +16,11 @@ import filesys
 
 import os
 import re
+import sys
 import time
 import glob
 import netCDF4
+import itertools
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -106,7 +108,7 @@ class AeoLiS:
         self.set_outputfile(outputfile)
 
         self.set_params(**kwargs)
-
+        
 
     def __repr__(self):
         s =  'AeoLiS_Input instance:\n'
@@ -155,16 +157,23 @@ class AeoLiS:
             self.ncattrs[k] = v
 
             
-    def write_params(self):
+    def write_params(self, standalone=False):
 
         print 'Writing input to %s' % self.configfile
 
+        params = self.params
+        
         # set tout to large to prevent slow computations
-        if not self.params.has_key('tout'):
-            self.params['tout'] = self.params['tstop']
+        if not params.has_key('tout'):
+            params['tout'] = params['tstop']
+
+        if standalone:
+            params['output_dir'] = self.outputfile.replace('.nc','')
+            params['outputvars'] = self.outputvars
+            params['outputtypes'] = self.outputtypes
         
         with open(self.configfile, 'w') as fp:
-            for k, v in sorted(self.params.iteritems()):
+            for k, v in sorted(params.iteritems()):
                 if isinstance(v, bool):
                     fp.write('%s = %s\n' % (k, 'T' if v else 'F'))
                 elif isinstance(v, int):
@@ -421,16 +430,17 @@ class AeoLiS:
             
     def update_output(self, model):
 
-        for var in self.outputvars:
-            data = model.get_var(var)
-            if 'sum' in self.outputtypes:
-                self.output_stats[var]['sum'] += data
-            if 'var' in self.outputtypes:
-                self.output_stats[var]['var'] += data**2
-            if 'min' in self.outputtypes:
-                self.output_stats[var]['min'] = np.min(self.output_stats[var]['min'], data)
-            if 'max' in self.outputtypes:
-                self.output_stats[var]['max'] = np.max(self.output_stats[var]['max'], data)
+        if len(self.outputtypes) > 0:
+            for var in self.outputvars:
+                data = model.get_var(var)
+                if 'sum' in self.outputtypes:
+                    self.output_stats[var]['sum'] += data
+                if 'var' in self.outputtypes:
+                    self.output_stats[var]['var'] += data**2
+                if 'min' in self.outputtypes:
+                    self.output_stats[var]['min'] = np.min(self.output_stats[var]['min'], data)
+                if 'max' in self.outputtypes:
+                    self.output_stats[var]['max'] = np.max(self.output_stats[var]['max'], data)
                 
         self.ios += 1
 
@@ -445,10 +455,16 @@ class AeoLiS:
             dims = AeoLiS.get_dims(var)
             if dims is None:
                 continue
-            self.output_stats[var]['sum'] = np.zeros([n[k] for k in dims[1:]])
-            self.output_stats[var]['var'] = np.zeros([n[k] for k in dims[1:]])
-            self.output_stats[var]['min'] = np.zeros([n[k] for k in dims[1:]]) + np.inf
-            self.output_stats[var]['max'] = np.zeros([n[k] for k in dims[1:]]) - np.inf
+            if 'sum' in self.outputtypes:
+                self.output_stats[var]['sum'] = np.zeros([n[k] for k in dims[1:]])
+            if 'var' in self.outputtypes:
+                self.output_stats[var]['var'] = np.zeros([n[k] for k in dims[1:]])
+            if 'min' in self.outputtypes:
+                self.output_stats[var]['min'] = np.zeros([n[k] for k in dims[1:]]) + np.inf
+            if 'max' in self.outputtypes:
+                self.output_stats[var]['max'] = np.zeros([n[k] for k in dims[1:]]) - np.inf
+
+        self.ios = 0
 
                 
     def write_output(self, model):
@@ -475,7 +491,10 @@ class AeoLiS:
         self.iout += 1
 
 
-    def run(self):
+    def run(self, overwrite=True):
+
+        if os.path.exists(self.outputfile) and not overwrite:
+            return
 
         print ' '
         print '         d8888                   888      d8b  .d8888b.   ' 
@@ -493,7 +512,6 @@ class AeoLiS:
         print ' '
             
         with BMIWrapper(engine='aeolis', configfile=self.configfile) as model:
-            model.initialize()
 
             self.init_output(model)
         
@@ -510,7 +528,7 @@ class AeoLiS:
                 t = self.t
 
                 model.update(-1)
-                
+
                 self.update_output(model)
                 
                 self.t = model.get_current_time()
@@ -538,8 +556,6 @@ class AeoLiS:
 
                     tlog = time.time()
 
-            model.finalize()
-
 
     @staticmethod
     def get_dims(var):
@@ -552,10 +568,10 @@ class AeoLiS:
             dims = (u'time', u'y', u'x', u'layers')
         elif var in ['Cu', 'Ct', 'uth', 'supply', 'p']:
             dims = (u'time', u'y', u'x', u'fractions')
-        elif var in ['x', 'z', 'zb', 'moist_map']:
+        elif var in ['x', 'z', 'zb']:
             dims = (u'time', u'y', u'x')
-        elif var in ['rho', 'dist']:
-            dims = (u'time', u'fractions')
+        elif var in ['uw']:
+            dims = (u'time',)
         else:
             dims = None
         return dims
@@ -674,9 +690,13 @@ class AeoLiS_Output:
         '''
         
         parts = []
-        fpath = os.path.split(fpath)[1]
+        fpath = os.path.split(fpath)
+        if len(fpath[1]) > 0:
+            fpath = fpath[1]
+        else:
+            fpath = fpath[0]
         for fpart in re.split('[_-]+', fpath):
-            m = re.match('^([^\d]+)([\d\.]+)(\.nc)?$', fpart)
+            m = re.match('^([^\d]+)([\d\.]+)(\.nc|\/)?$', fpart)
             if m:
                 parts.append((m.groups()[0], float(m.groups()[1])))
         if len(parts) == 0:
@@ -775,20 +795,25 @@ class AeoLiS_Variables:
         else:
             dfs = []
             for fpath in self.parent.iterate_paths():
-                df = self.read_variable(fpath, s)
-                p = zip(*self.parent.parse_path(fpath))
-                if type(df) is pd.Series or type(df) is pd.DataFrame:
+                try:
+                    df = self.read_variable(fpath, s)
+                    p = zip(*self.parent.parse_path(fpath))
+                    
+                    if len(p) < 2:
+                        p.append(None)
+                        
+                    if type(df) is pd.Panel or type(df) is pd.Panel4D:
+                        df = self.to_dataframe(df)
+
                     df.index = pd.MultiIndex.from_tuples([p[1] + (ix,)
                                                           for ix in df.index], names=p[0] + ('',))
-                elif type(df) is pd.Panel or type(df) is pd.Panel4D:
-                    df.items = pd.MultiIndex.from_tuples([p[1] + (ix,)
-                                                          for ix in df.items], names=p[0] + ('',))
-                else:
-                    raise TyepError('Data read resulted in unknown data type')
-                dfs.append(df)
+
+                    dfs.append(df)
+                except:
+                    print 'Skipped %s' % fpath
+                    
             df = pd.concat(dfs)
-            if type(df) is pd.Panel or type(df) is pd.Panel4D:
-                df = df.to_frame(filter_observations=False)
+                
             return self.consolidate(self.consolidate(df).T).T
         
         
@@ -872,7 +897,7 @@ class AeoLiS_Variables:
                 df = pd.Panel4D(data, labels=axs[0], items=axs[1], major_axis=axs[2], minor_axis=axs[3])
             else:
                 raise NotImplemented('No pandas structure with more than four dimensions, reduce dimensionality')
-                    
+
         return df
     
     
@@ -949,8 +974,62 @@ class AeoLiS_Variables:
             pass
         return df
     
+
+    @staticmethod
+    def to_dataframe(obj):
+        '''Convert any higher dimensional pandas object to a MultiIndex DataFrame
+
+        Convert any higher dimensional pandas object to a MultiIndex
+        DataFrame by keeping the index of the first dimension and
+        stacking all others into a MultiIndex to be used as columns.
+
+        Currently supported objects are:
+        * Panel
+        * Panel4D
+        * PanelND
+
+        Parameters
+        ----------
+        obj : pandas object
+            Pandas object to be converted
+
+        Returns
+        -------
+        pandas.DataFrame
+            Converted pandas DataFrame
+        '''
+
+        if hasattr(obj, 'axis_orders'):
+            axs = obj.axis_orders
+        elif type(obj) is pd.Panel4D:
+            axs = ['labels', 'items', 'major_axis', 'minor_axis']
+        elif type(obj) is pd.Panel:
+            axs = ['items', 'major_axis', 'minor_axis']
+        else:
+            raise NotImplemented('Unsupported object type')
+
+        dims = []
+        names = []
+        levels = []
+        for ax in axs:
+            ax = getattr(obj, ax)
+            dims.append(range(len(ax)))
+            levels.append(ax.values)
+            names.append(ax.name)
+
+        ix1 = pd.Index(data=levels[0], name=names[0])
+        ix2 = pd.MultiIndex(levels=levels[1:],
+                            labels=zip(*[r for r in itertools.product(*dims[1:])]),
+                            names=names[1:])
+
+        data = obj.as_matrix().reshape((len(dims[0]),-1))
+        df = pd.DataFrame(data, index=ix1, columns=ix2)
+
+        return df
+
     
     def __filename(self, varname=None, vartype=None, include_ext=True):
+
         '''Constructs filename'''
         
         fname = ''
