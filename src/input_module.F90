@@ -53,7 +53,7 @@ module input_module
      real*8, dimension(:,:), pointer :: xz, yz, xu, yu, xv, yv
      real*8, dimension(:,:), pointer :: zb, uws, uwn
      real*8, dimension(:,:,:), pointer :: uth, moist
-     real*8, dimension(:,:,:), pointer :: Cu, Ct, supply, thlyr
+     real*8, dimension(:,:,:), pointer :: Cu, Ct, supply, thlyr, p
      real*8, dimension(:,:,:), pointer :: d10, d50, d90
      real*8, dimension(:,:,:,:), pointer :: mass
      real*8, dimension(:,:), pointer :: dsz, dnz, dsdnzi, alfaz
@@ -68,7 +68,7 @@ module input_module
      real*8, dimension(:), pointer :: rho, dist
      real*8, dimension(:), pointer :: xz, yz, zb
      real*8, dimension(:,:), pointer :: uth, moist
-     real*8, dimension(:,:), pointer :: Cu, Ct, supply, thlyr
+     real*8, dimension(:,:), pointer :: Cu, Ct, supply, thlyr, p
      real*8, dimension(:,:), pointer :: d10, d50, d90
      real*8, dimension(:,:,:), pointer :: mass
   end type spaceparams_linear

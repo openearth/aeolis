@@ -12,6 +12,7 @@ program aeolis
 use logging
 use constants_module
 use input_module
+use output_module
 use bmi_module
 
 implicit none
@@ -28,7 +29,7 @@ if (initialize(c_configfile) /= 0) &
 
 ! initialize output
 call output_init(par, var)
-call write_output(par, s, var)
+call write_output(par, sl, var)
 
 t = 0
 tstart = get_time()
@@ -57,7 +58,7 @@ do while (t < tend)
 
 end do
 
-call write_dimensions(par)
+!call write_dimensions(par)
 call output_close(var)
 if (finalize() /= 0) &
      write(msgbuf,*) 'Finalization failed'

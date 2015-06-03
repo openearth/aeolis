@@ -19,9 +19,9 @@ contains
     type(spaceparams), intent(inout) :: s
     type(spaceparams_linear), intent(inout) :: sl
     type(variables), dimension(:), intent(inout) :: var
-    integer*4 :: i, j, n
+    integer*4 :: i, j, k, n
     real*8 :: err, alpha
-    real*8, dimension(:,:), allocatable :: Ct2, Ct2p
+    real*8, dimension(:,:,:), allocatable :: Ct2, Ct2p
 
     allocate(Ct2(par%nfractions, par%ny+1, par%nx+1))
     allocate(Ct2p(par%nfractions, par%ny+1, par%nx+1))
@@ -34,7 +34,6 @@ contains
     s%uwn = s%uw * sin(s%alfaz + s%udir)
 
     ! courant check
-    par%dx = 5.d0
     if (trim(par%scheme) .eq. 'euler_forward') then
        if (par%CFL > 0.d0) then
           par%dt = par%CFL / (maxval(abs(s%uws) / s%dsz) + &
@@ -78,7 +77,7 @@ contains
              do k = 1,par%nfractions
 
                 ! compute sediment advection by wind
-                Ct(k,j,i) = s%Ct(k,j,i) &
+                Ct2(k,j,i) = s%Ct(k,j,i) &
                      - s%uws(j,i) * par%dt / s%dsz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) &
                      - s%uwn(j,i) * par%dt / s%dnz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j-1,i)) &
                      + s%supply(k,j,i)
@@ -89,7 +88,7 @@ contains
     elseif (trim(par%scheme) .eq. 'euler_backward') then
        do n = 1,par%max_iter
 
-          Ct_prev = Ct
+          Ct2p = Ct2
 
           do i = 2,par%nx+1
              do j = 2,par%ny+1
@@ -101,9 +100,9 @@ contains
                 do k = 1,par%nfractions
                 
                    ! compute sediment advection by wind
-                   Ct2p(k,j,i) = s%Ct(k,j,i) &
-                     - s%uws(j,i) * par%dt / s%dsz(j,i) * s%dsdnzi(j,i) * (Ct2p(k,j,i) - Ct2p(k,j,i-1)) &
-                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * s%dsdnzi(j,i) * (Ct2p(k,j,i) - Ct2p(k,j-1,i)) &
+                   Ct2(k,j,i) = s%Ct(k,j,i) &
+                     - s%uws(j,i) * par%dt / s%dsz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j,i-1)) &
+                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j-1,i)) &
                      + s%supply(k,j,i)
                    
                 end do
@@ -123,7 +122,7 @@ contains
 
     end if
 
-    s%Ct = Ct
+    s%Ct = Ct2
     s%Ct(:,1,:) = s%Ct(:,par%ny+1,:)
     
     ! add sediment deposit
@@ -134,7 +133,7 @@ contains
                par%grain_dist(i) / max(1e-10, sum(par%grain_dist))
        end where
     end do
-    s%supply(:,:,1:x1-1) = 0.d0
+    s%supply(:,:,1) = 0.d0
     s%supply(:,1,:) = s%supply(:,par%ny+1,:)
 
     ! update bed elevation

@@ -18,7 +18,7 @@ CFL = 0.7
 tstop = 3600
 tout = 360
 accfac = 1
-scheme = implicit
+scheme = euler_backward
 
 # files
 wind_file = wind_constant.txt

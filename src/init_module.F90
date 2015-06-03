@@ -79,14 +79,14 @@ contains
     call alloc_variable(var, 'dist',   (/par%nfractions/))
 
     ! variables
-    call alloc_pointer(var, 'Cu',     (/par%nfractions, par%ny+1, par%nx+1/), s%Cu)
-    call alloc_pointer(var, 'Ct',     (/par%nfractions, par%ny+1, par%nx+1/), s%Ct)
-    call alloc_pointer(var, 'p',      (/par%nfractions, par%ny+1, par%nx+1/), s%p)
-    call alloc_pointer(var, 'uth',    (/par%nfractions, par%ny+1, par%nx+1/), s%uth)
-    call alloc_pointer(var, 'mass',   (/par%nfractions, par%nlayers, par%ny+1, par%nx+1/), s%mass)
-    call alloc_pointer(var, 'supply', (/par%nfractions, par%ny+1, par%nx+1/), s%supply)
-    call alloc_pointer(var, 'moist',  (/par%nlayers, par%ny+1, par%nx+1/), s%moist)
-    call alloc_pointer(var, 'thlyr',  (/par%nlayers, par%ny+1, par%nx+1/), s%thlyr)
+    call alloc_variable(var, 'Cu',     (/par%nfractions, par%ny+1, par%nx+1/))
+    call alloc_variable(var, 'Ct',     (/par%nfractions, par%ny+1, par%nx+1/))
+    call alloc_variable(var, 'p',      (/par%nfractions, par%ny+1, par%nx+1/))
+    call alloc_variable(var, 'uth',    (/par%nfractions, par%ny+1, par%nx+1/))
+    call alloc_variable(var, 'mass',   (/par%nfractions, par%nlayers, par%ny+1, par%nx+1/))
+    call alloc_variable(var, 'supply', (/par%nfractions, par%ny+1, par%nx+1/))
+    call alloc_variable(var, 'moist',  (/par%nlayers, par%ny+1, par%nx+1/))
+    call alloc_variable(var, 'thlyr',  (/par%nlayers, par%ny+1, par%nx+1/))
 
     ! extra output
     call alloc_variable(var, 'uw',     (/0/))
@@ -103,6 +103,7 @@ contains
     call get_pointer(var, 'dist',   (/par%nfractions/), s%dist)
     call get_pointer(var, 'Cu',     (/par%nfractions, par%ny+1, par%nx+1/), s%Cu)
     call get_pointer(var, 'Ct',     (/par%nfractions, par%ny+1, par%nx+1/), s%Ct)
+    call get_pointer(var, 'p',      (/par%nfractions, par%ny+1, par%nx+1/), s%p)
     call get_pointer(var, 'uth',    (/par%nfractions, par%ny+1, par%nx+1/), s%uth)
     call get_pointer(var, 'mass',   (/par%nfractions, par%nlayers, par%ny+1, par%nx+1/), s%mass)
     call get_pointer(var, 'supply', (/par%nfractions, par%ny+1, par%nx+1/), s%supply)
@@ -121,6 +122,7 @@ contains
     call get_pointer(var, 'dist',   (/par%nfractions/), sl%dist)
     call get_pointer(var, 'Cu',     (/par%nfractions, par%nc/), sl%Cu)
     call get_pointer(var, 'Ct',     (/par%nfractions, par%nc/), sl%Ct)
+    call get_pointer(var, 'p',      (/par%nfractions, par%nc/), sl%p)
     call get_pointer(var, 'uth',    (/par%nfractions, par%nc/), sl%uth)
     call get_pointer(var, 'mass',   (/par%nfractions, par%nlayers, par%nc/), sl%mass)
     call get_pointer(var, 'supply', (/par%nfractions, par%nc/), sl%supply)
