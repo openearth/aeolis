@@ -118,7 +118,7 @@ contains
        fid = 99
 
        ! count lines
-       n = -1
+       n = 0
        ierr = 0
        open(fid, file=trim(par%tide_file))
        do while (ierr == 0)
@@ -137,10 +137,11 @@ contains
           read(fid, *, iostat=ierr) zs(i)%t, zs(i)%level
           i = i + 1
        end do
+       i = i - 2
        close(fid)
        
        ! checks
-       if (zs(n)%t < par%tstop) then
+       if (zs(i)%t < par%tstop) then
           write(*,*) "ERROR: tide definition file too short"
           stop 1
        end if

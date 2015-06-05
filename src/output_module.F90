@@ -11,13 +11,13 @@ module output_module
      character(slen) :: name = ''
      integer*4 :: rank = -1
      integer*4 :: n = 0
-     integer*4, dimension(:), pointer :: dims
-     type(variables_data), pointer :: val
-     type(variables_data), pointer :: sum
-     type(variables_data), pointer :: avg
-     type(variables_data), pointer :: var
-     type(variables_data), pointer :: min
-     type(variables_data), pointer :: max
+     integer*4, dimension(:), pointer :: dims => null()
+     type(variables_data), pointer :: val => null()
+     type(variables_data), pointer :: sum => null()
+     type(variables_data), pointer :: avg => null()
+     type(variables_data), pointer :: var => null()
+     type(variables_data), pointer :: min => null()
+     type(variables_data), pointer :: max => null()
   end type variables
 
   type variables_data
@@ -67,18 +67,17 @@ contains
        var(i)%rank = 0
     else
        var(i)%rank = size(dims)
+       allocate(var(i)%dims(var(i)%rank)) ! MEMERR
+       var(i)%dims = dims
     end if
 
-    allocate(var(i)%dims(var(i)%rank))
-    var(i)%dims = dims
-
-    call alloc_variable_data(var(i)%val, dims, var(i)%rank)
+    call alloc_variable_data(var(i)%val, dims, var(i)%rank) ! MEMERR
     call alloc_variable_data(var(i)%sum, dims, var(i)%rank)
     call alloc_variable_data(var(i)%var, dims, var(i)%rank)
     call alloc_variable_data(var(i)%min, dims, var(i)%rank,  1d10)
     call alloc_variable_data(var(i)%max, dims, var(i)%rank, -1d10)
 
-    allocate(var(i)%avg)
+    allocate(var(i)%avg) ! MEMERR
 
   end subroutine alloc_variable
 
@@ -89,7 +88,7 @@ contains
     integer*4, intent(in) :: rank
     real*8, optional, intent(in) :: val
 
-    allocate(var)
+    allocate(var) ! MEMERR
 
     if (present(val)) then
        var%init = val
@@ -117,6 +116,48 @@ contains
     end select
 
   end subroutine alloc_variable_data
+
+  subroutine dealloc_variables(var)
+
+    type(variables), dimension(:), intent(inout) :: var
+    integer*4 :: i
+
+    do i = 1,size(var)
+       if (associated(var(i)%dims)) then
+          deallocate(var(i)%dims)
+       end if
+       
+       call dealloc_variable_data(var(i)%val)
+       call dealloc_variable_data(var(i)%sum)
+       call dealloc_variable_data(var(i)%avg)
+       call dealloc_variable_data(var(i)%var)
+       call dealloc_variable_data(var(i)%min)
+       call dealloc_variable_data(var(i)%max)
+       
+    end do
+
+  end subroutine dealloc_variables
+
+  subroutine dealloc_variable_data(var)
+
+    type(variables_data), pointer, intent(inout) :: var
+
+    nullify(var%rank4)
+    nullify(var%rank3)
+    nullify(var%rank2)
+
+    if (associated(var%rank1)) then
+       deallocate(var%rank1)
+    end if
+    if (associated(var%rank0)) then
+       deallocate(var%rank0)
+    end if
+
+    if (associated(var)) then
+       deallocate(var)
+    end if
+
+  end subroutine dealloc_variable_data
 
   subroutine get_pointer_rank0(var, name, dims, ptr)
 

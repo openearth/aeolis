@@ -26,29 +26,33 @@ contains
     fid = 99
 
     ! allocate arrays
-    allocate(x(par%ny+1, par%nx+1))
-    allocate(y(par%ny+1, par%nx+1))
-    allocate(zb(par%ny+1, par%nx+1))
+    allocate(x(par%nx+1, par%ny+1))
+    allocate(y(par%nx+1, par%ny+1))
+    allocate(zb(par%nx+1, par%ny+1))
+
+    x = 0.d0
+    y = 0.d0
+    zb = 0.d0
 
     ! read data
     ierr = 0
     open(fid, file=trim(par%xgrid_file), status="old", action="read")
     do i = 1,par%ny+1
-       read(fid, *, iostat=ierr) x(i,:)
+       read(fid, *, iostat=ierr) x(:,i)
     end do
     close(fid)
 
     ierr = 0
     open(fid, file=trim(par%ygrid_file), status="old", action="read")
     do i = 1,par%ny+1
-       read(fid, *, iostat=ierr) y(i,:)
+       read(fid, *, iostat=ierr) y(:,i)
     end do
     close(fid)
 
     ierr = 0
     open(fid, file=trim(par%bed_file), status="old", action="read")
     do i = 1,par%ny+1
-       read(fid, *, iostat=ierr) zb(i,:)
+       read(fid, *, iostat=ierr) zb(:,i)
     end do
     close(fid)
 
@@ -409,21 +413,21 @@ contains
 
     phi = par%phi / 180.d0 * pi
 
-    do i = 2,par%nx+1
-       do j = 2,par%ny+1
+    do j = 2,par%nx+1
+       do i = 2,par%ny+1
           ! theta = -atan((s%zb(j,i+1) - s%zb(j,i)) / s%dsz(j,i))
           
           theta = -atan( ( &
-               (s%zb(j,i) - s%zb(j,i-1)) * s%dnz(j,i) * cos(s%alfaz(j,i) + s%udir) + &
-               (s%zb(j,i) - s%zb(j-1,i)) * s%dsz(j,i) * sin(s%alfaz(j,i) + s%udir) ) * s%dsdnzi(j,i) )
+               (s%zb(j,i) - s%zb(j-1,i)) * s%dnz(j,i) * cos(s%alfaz(j,i) + s%udir) + &
+               (s%zb(j,i) - s%zb(j,i-1)) * s%dsz(j,i) * sin(s%alfaz(j,i) + s%udir) ) * s%dsdnzi(j,i) )
           
           do k = 1,par%nfractions
              s%uth(k,j,i) = sqrt((tan(phi) - tan(theta)) / tan(phi) * cos(theta)) * s%uth(k,j,i)
           end do
        end do
     end do
-    s%uth(:,:,1) = s%uth(:,:,par%nx+1)
-    s%uth(:,1,:) = s%uth(:,par%ny+1,:)
+    s%uth(:,1,:) = s%uth(:,par%nx+1,:)
+    s%uth(:,:,1) = s%uth(:,:,par%ny+1)
 
   end subroutine compute_threshold_bedslope
 
@@ -531,5 +535,13 @@ contains
     end do
 
   end subroutine sweep_toplayer
+
+  subroutine dealloc_bedcomposition()
+    if (clrmorlyr(morlyr) /=0 ) call adderror(messages, message)
+    deallocate(morlyr)
+
+    call clearstack(messages)
+    deallocate(messages)
+  end subroutine dealloc_bedcomposition
   
 end module bed_module

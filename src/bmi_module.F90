@@ -94,7 +94,31 @@ contains
     end if
     if (allocated(par%moist)) then
        deallocate(par%moist)
-    end if
+    end if    
+
+    deallocate(s%xu)
+    deallocate(s%yu)
+    deallocate(s%xv)
+    deallocate(s%yv)
+    deallocate(s%dsz)
+    deallocate(s%dnz)
+    deallocate(s%dsdnzi)
+    deallocate(s%alfaz)
+    deallocate(s%dsu)
+    deallocate(s%dnu)
+    deallocate(s%dsdnui)
+    deallocate(s%alfau)
+    deallocate(s%dsv)
+    deallocate(s%dnv)
+    deallocate(s%dsdnvi)
+    deallocate(s%alfav)
+    deallocate(s%dsc)
+    deallocate(s%dnc)
+
+    call dealloc_variables(var)
+    deallocate(var)
+
+    call dealloc_bedcomposition()
 
     nullify(s%uw)
     nullify(s%udir)
@@ -135,8 +159,6 @@ contains
     nullify(s%alfav)
     nullify(s%dsc)
     nullify(s%dnc)
-    
-    deallocate(var)
 
 !    write(0,*) 'Done.'
 

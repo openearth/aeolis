@@ -60,12 +60,13 @@ class AeoLiS:
         g     = 9.81,
         dt    = 0.05,
         dx    = 1.0,
+        dy    = 1.0,
         tstop = 3600.0,
         CFL   = -1.0,
         accfac = 1.0,
 
         method_moist = 'belly_johnson',
-        scheme = 'implicit',
+        scheme = 'euler_backward',
 
         max_iter = 100,
         max_error = 1e-6,
@@ -200,13 +201,13 @@ class AeoLiS:
 
     def init_output(self, model):
 
-        nx, nl, nf = model.get_var_shape('mass')
+        ny, nx, nl, nf = model.get_var_shape('mass')
         
         with netCDF4.Dataset(self.outputfile, 'w') as nc:
 
             ## add dimensions
             nc.createDimension('x', nx)
-            nc.createDimension('y', 1)
+            nc.createDimension('y', ny)
             nc.createDimension('time', 0)
             nc.createDimension('nv', 2)
             nc.createDimension('nv2', 4)
@@ -404,7 +405,7 @@ class AeoLiS:
                 
             # store static data
             nc.variables['x'][:] = np.arange(0, nx, 1) * self.params['dx']
-            nc.variables['y'][0] = 0.
+            nc.variables['y'][:] = np.arange(0, ny, 1) * self.params['dy']
             nc.variables['layers'][:] = np.arange(0, nl, 1) * self.params['layer_thickness']
             nc.variables['fractions'][:] = self.params['grain_size']
             
@@ -448,9 +449,8 @@ class AeoLiS:
     def clear_output(self, model):
 
         n = {}
-        n['x'], n['layers'], n['fractions'] = model.get_var_shape('mass')
-        n['y'] = 1
-        
+        n['y'], n['x'], n['layers'], n['fractions'] = model.get_var_shape('mass')
+
         for var, types in self.output_stats.iteritems():
             dims = AeoLiS.get_dims(var)
             if dims is None:
@@ -473,7 +473,8 @@ class AeoLiS:
         with netCDF4.Dataset(self.outputfile, 'a') as nc:
             nc.variables['time'][i] = self.t
             for var in self.outputvars:
-                nc.variables[var][i,...] = model.get_var(var)
+                data = model.get_var(var)
+                nc.variables[var][i,...] = data
                 if 'sum' in self.outputtypes:
                     nc.variables['%s.sum' % var][i,...] = self.output_stats[var]['sum']
                 if 'avg' in self.outputtypes:
@@ -870,9 +871,6 @@ class AeoLiS_Variables:
         df = None
         with netCDF4.Dataset(fpath, 'r') as nc:
 
-            # read data
-            data = nc.variables[var][s]
-
             # read axes
             dims = AeoLiS.get_dims(var)
             if dims is None:
@@ -887,14 +885,17 @@ class AeoLiS_Variables:
                 if isinstance(ax, np.ndarray):
                     axs.append(pd.Index(ax, name=dim))
 
+            # read data
+            data = nc.variables[var][s]
+
             # construct pandas object
-            if data.ndim == 1:
+            if len(axs) == 1:
                 df = pd.Series(data, index=axs[0])
-            elif data.ndim == 2:
+            elif len(axs) == 2:
                 df = pd.DataFrame(data, index=axs[0], columns=axs[1])
-            elif data.ndim == 3:
+            elif len(axs) == 3:
                 df = pd.Panel(data, items=axs[0], major_axis=axs[1], minor_axis=axs[2])
-            elif data.ndim == 4:
+            elif len(axs) == 4:
                 df = pd.Panel4D(data, labels=axs[0], items=axs[1], major_axis=axs[2], minor_axis=axs[3])
             else:
                 raise NotImplemented('No pandas structure with more than four dimensions, reduce dimensionality')

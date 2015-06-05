@@ -23,8 +23,8 @@ contains
     real*8 :: err, alpha
     real*8, dimension(:,:,:), allocatable :: Ct2, Ct2p
 
-    allocate(Ct2(par%nfractions, par%ny+1, par%nx+1))
-    allocate(Ct2p(par%nfractions, par%ny+1, par%nx+1))
+    allocate(Ct2(par%nfractions, par%nx+1, par%ny+1))
+    allocate(Ct2p(par%nfractions, par%nx+1, par%ny+1))
     Ct2 = 0.d0
     Ct2p = 0.d0
 
@@ -67,8 +67,8 @@ contains
 
     ! determine first dry grid cell
     if (trim(par%scheme) .eq. 'euler_forward') then
-       do i = 2,par%nx+1
-          do j = 2,par%ny+1
+       do i = 2,par%ny+1
+          do j = 2,par%nx+1
 
              ! compute supply based on sediment availability
              call compute_supply(par, s%mass(:,1,j,i), &
@@ -90,8 +90,8 @@ contains
 
           Ct2p = Ct2
 
-          do i = 2,par%nx+1
-             do j = 2,par%ny+1
+          do i = 2,par%ny+1
+             do j = 2,par%nx+1
              
                 ! compute supply based on sediment availability
                 call compute_supply(par, s%mass(:,1,j,i), &
@@ -172,33 +172,6 @@ contains
 
     ! limit advection by available mass
     supply = min(mass, supply)
-
-!     real*8, dimension(size(mass)) :: dist, dist2, supply
-! 
-!     dist = Ct / max(1e-10, Cu)
-! 
-!     if (sum(dist) < 1.d0) then ! erosion
-! 
-!        ! compute sediment distribution in bed
-!        dist2 = max(0.d0, mass) / max(1e-10, sum(mass))
-! 
-!        ! compute new sediment distributuion in the air
-!        dist = dist + dist2 * (1.d0 - sum(dist))
-! 
-!     end if
-! 
-!     ! compute distribution in air
-!     if (sum(dist) == 0.d0) dist = 1.d0
-!     dist = dist / sum(dist)
-!     write(0,*) sum(dist), dist(1:5)
-! 
-!     !    call assert(abs(sum(dist) - 1.d0) < 1e-10)
-! 
-!     ! determine weighed supply
-!     supply = (Cu * dist - Ct) / par%Tp * par%dt
-! 
-!     ! limit advection by available mass
-!     supply = min(mass, supply)
     
   end subroutine compute_supply
   
