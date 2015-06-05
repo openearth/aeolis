@@ -58,7 +58,7 @@ do while (t < tend)
 
 end do
 
-!call write_dimensions(par)
+call write_dimensions(par)
 call output_close(var)
 if (finalize() /= 0) &
      write(msgbuf,*) 'Finalization failed'

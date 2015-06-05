@@ -140,7 +140,7 @@ contains
 
     ! create spatial grid matrixes
     call gridprops(par, s)
-    
+
   end subroutine init
 
   subroutine gridprops(par, s)

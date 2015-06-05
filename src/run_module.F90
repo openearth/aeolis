@@ -19,7 +19,7 @@ contains
     type(spaceparams), intent(inout) :: s
     type(spaceparams_linear), intent(inout) :: sl
     type(variables), dimension(:), intent(inout) :: var
-    integer*4 :: i, j, k, n
+    integer*4 :: i, j, k, n, i1, j1
     real*8 :: err, alpha
     real*8, dimension(:,:,:), allocatable :: Ct2, Ct2p
 
@@ -65,10 +65,12 @@ contains
     s%Cu = max(0.d0, alpha * par%Cb * par%rhoa / par%g * &
          (s%uw - s%uth)**3 / s%uw)
 
-    ! determine first dry grid cell
+    ! compute advection
+    i1 = min(2, par%ny+1)
+    j1 = 2
     if (trim(par%scheme) .eq. 'euler_forward') then
-       do i = 2,par%ny+1
-          do j = 2,par%nx+1
+       do i = i1,par%ny+1
+          do j = j1,par%nx+1
 
              ! compute supply based on sediment availability
              call compute_supply(par, s%mass(:,1,j,i), &
@@ -78,20 +80,23 @@ contains
 
                 ! compute sediment advection by wind
                 Ct2(k,j,i) = s%Ct(k,j,i) &
-                     - s%uws(j,i) * par%dt / s%dsz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) &
-                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j-1,i)) &
+                     - s%uws(j,i) * par%dt / s%dsz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j-1,i)) &
+                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) &
                      + s%supply(k,j,i)
              
              end do
           end do
        end do
     elseif (trim(par%scheme) .eq. 'euler_backward') then
+
+       Ct2 = s%Ct
+       
        do n = 1,par%max_iter
 
           Ct2p = Ct2
 
-          do i = 2,par%ny+1
-             do j = 2,par%nx+1
+          do i = i1,par%ny+1
+             do j = j1,par%nx+1
              
                 ! compute supply based on sediment availability
                 call compute_supply(par, s%mass(:,1,j,i), &
@@ -101,8 +106,8 @@ contains
                 
                    ! compute sediment advection by wind
                    Ct2(k,j,i) = s%Ct(k,j,i) &
-                     - s%uws(j,i) * par%dt / s%dsz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j,i-1)) &
-                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j-1,i)) &
+                     - s%uws(j,i) * par%dt / s%dsz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j-1,i)) &
+                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j,i-1)) &
                      + s%supply(k,j,i)
                    
                 end do
@@ -123,8 +128,7 @@ contains
     end if
 
     s%Ct = Ct2
-    s%Ct(:,1,:) = s%Ct(:,par%ny+1,:)
-    
+        
     ! add sediment deposit
     do i = 1,par%nfractions
        where (sl%zb < sl%zs)
@@ -134,7 +138,12 @@ contains
        end where
     end do
     s%supply(:,:,1) = 0.d0
-    s%supply(:,1,:) = s%supply(:,par%ny+1,:)
+
+    ! handle boundaries
+    if (par%ny > 0) then
+       s%Ct(:,1,:) = s%Ct(:,par%ny+1,:)
+       s%supply(:,1,:) = s%supply(:,par%ny+1,:)
+    end if
 
     ! update bed elevation
     sl%zb = update_bed(par, sl%zb, -sl%supply, sl%rho)

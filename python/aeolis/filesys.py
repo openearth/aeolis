@@ -20,7 +20,7 @@ def load_dimensions(fpath):
     if not os.path.isdir(fpath):
         fpath = os.path.split(fpath)[0]
         
-    nx, dx, nt, dt, nf, nl, nt_out, dt_out = \
+    nx, ny, nt, dt, nf, nl, nt_out, dt_out = \
         read_fortran(os.path.join(fpath, 'dims.out'))
 
     # integers
@@ -33,10 +33,11 @@ def load_dimensions(fpath):
     # axes
     ax_t = np.arange(nt) * dt
     ax_t_out = np.arange(nt_out) * dt_out
-    ax_x = np.arange(nx) * dx
+    ax_x = np.arange(nx)
+    ax_y = np.arange(ny)
     
     return {'nx':nx,
-            'dx':dx,
+            'ny':ny,
             'nt':nt,
             'dt':dt,
             'nf':nf,
@@ -45,7 +46,8 @@ def load_dimensions(fpath):
             'dt_out':dt_out,
             'ax_t':ax_t,
             'ax_t_out':ax_t_out,
-            'ax_x':ax_x}
+            'ax_x':ax_x,
+            'ax_y':ax_y}
 
 
 def get_dims(fname):
