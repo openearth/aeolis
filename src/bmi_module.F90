@@ -66,8 +66,6 @@ contains
     end if
 
     call step(par, s, sl, var)
-
-    par%nt = par%nt + 1
     
   end function update
 

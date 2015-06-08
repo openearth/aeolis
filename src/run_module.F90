@@ -80,8 +80,8 @@ contains
 
                 ! compute sediment advection by wind
                 Ct2(k,j,i) = s%Ct(k,j,i) &
-                     - s%uws(j,i) * par%dt / s%dsz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j-1,i)) &
-                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j,i-1)) &
+                     - s%uws(j,i) * par%dt * s%dnz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j-1,i)) &
+                     - s%uwn(j,i) * par%dt * s%dsz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j,max(1,i-1))) &
                      + s%supply(k,j,i)
              
              end do
@@ -106,8 +106,8 @@ contains
                 
                    ! compute sediment advection by wind
                    Ct2(k,j,i) = s%Ct(k,j,i) &
-                     - s%uws(j,i) * par%dt / s%dsz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j-1,i)) &
-                     - s%uwn(j,i) * par%dt / s%dnz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j,i-1)) &
+                     - s%uws(j,i) * par%dt * s%dnz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j-1,i)) &
+                     - s%uwn(j,i) * par%dt * s%dsz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j,max(1,i-1))) &
                      + s%supply(k,j,i)
                    
                 end do
@@ -128,7 +128,7 @@ contains
     end if
 
     s%Ct = Ct2
-        
+
     ! add sediment deposit
     do i = 1,par%nfractions
        where (sl%zb < sl%zs)
@@ -137,12 +137,12 @@ contains
                par%grain_dist(i) / max(1e-10, sum(par%grain_dist))
        end where
     end do
-    s%supply(:,:,1) = 0.d0
+    s%supply(:,1,:) = 0.d0
 
     ! handle boundaries
     if (par%ny > 0) then
-       s%Ct(:,1,:) = s%Ct(:,par%ny+1,:)
-       s%supply(:,1,:) = s%supply(:,par%ny+1,:)
+       s%Ct(:,:,1) = s%Ct(:,:,par%ny+1)
+       s%supply(:,:,1) = s%supply(:,:,par%ny+1)
     end if
 
     ! update bed elevation
