@@ -404,7 +404,7 @@ contains
 
     type(parameters), intent(in) :: par
     type(spaceparams), intent(inout) :: s
-    integer :: i, j, k
+    integer :: i, j, k, im1
     real*8 :: phi, theta
 
     if (.not. par%th_bedslope) return
@@ -413,22 +413,32 @@ contains
 
     phi = par%phi / 180.d0 * pi
 
-    do j = 2,par%nx+1
-       do i = 2,par%ny+1
+    if (i == 1) then
+       im1 = par%ny
+    else
+       im1 = i - 1
+    end if
+
+    do i = 1,par%ny+1
+       do j = 2,par%nx+1
           ! theta = -atan((s%zb(j,i+1) - s%zb(j,i)) / s%dsz(j,i))
           
           theta = -atan( ( &
                (s%zb(j,i) - s%zb(j-1,i)) * s%dnz(j,i) * cos(s%alfaz(j,i) + s%udir) + &
-               (s%zb(j,i) - s%zb(j,i-1)) * s%dsz(j,i) * sin(s%alfaz(j,i) + s%udir) ) * s%dsdnzi(j,i) )
+               (s%zb(j,i) - s%zb(j,im1)) * s%dsz(j,i) * sin(s%alfaz(j,i) + s%udir) ) * s%dsdnzi(j,i) )
           
           do k = 1,par%nfractions
              s%uth(k,j,i) = sqrt((tan(phi) - tan(theta)) / tan(phi) * cos(theta)) * s%uth(k,j,i)
           end do
        end do
     end do
-    s%uth(:,1,:) = s%uth(:,par%nx+1,:)
-    s%uth(:,:,1) = s%uth(:,:,par%ny+1)
 
+    s%uth(:,1,:) = s%uth(:,2,:)
+
+    if (par%ny > 0) then
+       s%uth(:,:,1) = s%uth(:,:,par%ny+1)
+    end if
+           
   end subroutine compute_threshold_bedslope
 
   subroutine mix_toplayer(par, zb, zs)

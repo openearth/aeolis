@@ -19,7 +19,7 @@ contains
     type(spaceparams), intent(inout) :: s
     type(spaceparams_linear), intent(inout) :: sl
     type(variables), dimension(:), intent(inout) :: var
-    integer*4 :: i, j, k, n, i1, j1
+    integer*4 :: i, j, k, n
     real*8 :: err, alpha
     real*8, dimension(:,:,:), allocatable :: Ct, Ctp1, Ctp2, Fp1, Fp2
 
@@ -75,8 +75,6 @@ contains
          (s%uw - s%uth)**3 / s%uw)
 
     ! compute advection
-    i1 = min(2, par%ny+1)
-    j1 = 2
     if (trim(par%scheme) .eq. 'euler_forward') then
 
        call euler(par, s, s%Ct, Ct)
@@ -151,13 +149,18 @@ contains
     
     type(parameters), intent(inout) :: par
     type(spaceparams), intent(inout) :: s
-    integer*4 :: i, j, k, i1
+    integer*4 :: i, j, k, im1
     real*8, dimension(:,:,:), intent(in) :: Ctin
     real*8, dimension(:,:,:), intent(out) :: Ctout
 
-    i1 = min(2, par%ny+1)
+    do i = 1,par%ny+1
 
-    do i = i1,par%ny+1
+       if (i == 1) then
+          im1 = par%ny
+       else
+          im1 = i - 1
+       end if
+                 
        do j = 2,par%nx+1
 
           ! compute supply based on sediment availability
@@ -169,7 +172,7 @@ contains
              ! compute sediment advection by wind
              Ctout(k,j,i) = s%Ct(k,j,i) &
                   - s%uws(j,i) * par%dt * s%dnz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j-1,i)) &
-                  - s%uwn(j,i) * par%dt * s%dsz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j,max(1,i-1))) &
+                  - s%uwn(j,i) * par%dt * s%dsz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j,im1)) &
                   + s%supply(k,j,i)
              
           end do
