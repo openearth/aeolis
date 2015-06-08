@@ -21,12 +21,21 @@ contains
     type(variables), dimension(:), intent(inout) :: var
     integer*4 :: i, j, k, n, i1, j1
     real*8 :: err, alpha
-    real*8, dimension(:,:,:), allocatable :: Ct2, Ct2p
+    real*8, dimension(:,:,:), allocatable :: Ct, Ctp1, Ctp2, Fp1, Fp2
 
-    allocate(Ct2(par%nfractions, par%nx+1, par%ny+1))
-    allocate(Ct2p(par%nfractions, par%nx+1, par%ny+1))
-    Ct2 = 0.d0
-    Ct2p = 0.d0
+    allocate(Ct(par%nfractions, par%nx+1, par%ny+1))
+    Ct = 0.d0
+    
+    if (trim(par%scheme) .eq. 'euler_backward') then
+       allocate(Ctp1(par%nfractions, par%nx+1, par%ny+1))
+       allocate(Ctp2(par%nfractions, par%nx+1, par%ny+1))
+       allocate(Fp1(par%nfractions, par%nx+1, par%ny+1))
+       allocate(Fp2(par%nfractions, par%nx+1, par%ny+1))
+       Ctp1 = 0.d0
+       Ctp2 = 0.d0
+       Fp1 = 0.d0
+       Fp2 = 0.d0
+    end if
 
     ! interpolate wind
     call interpolate_wind(par%uw, par%t, s%uw, s%udir)
@@ -69,53 +78,34 @@ contains
     i1 = min(2, par%ny+1)
     j1 = 2
     if (trim(par%scheme) .eq. 'euler_forward') then
-       do i = i1,par%ny+1
-          do j = j1,par%nx+1
 
-             ! compute supply based on sediment availability
-             call compute_supply(par, s%mass(:,1,j,i), &
-                  par%accfac * s%Cu(:,j,i), s%Ct(:,j,i), s%supply(:,j,i), s%p(:,j,i))
-          
-             do k = 1,par%nfractions
-
-                ! compute sediment advection by wind
-                Ct2(k,j,i) = s%Ct(k,j,i) &
-                     - s%uws(j,i) * par%dt * s%dnz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j-1,i)) &
-                     - s%uwn(j,i) * par%dt * s%dsz(j,i) * s%dsdnzi(j,i) * (s%Ct(k,j,i) - s%Ct(k,j,max(1,i-1))) &
-                     + s%supply(k,j,i)
-             
-             end do
-          end do
-       end do
+       call euler(par, s, s%Ct, Ct)
+       
     elseif (trim(par%scheme) .eq. 'euler_backward') then
 
-       Ct2 = s%Ct
-       
+       ! initial values
+       call euler(par, s, s%Ct, Ct)
+       Ctp1 = s%Ct
+       Fp1 = Ctp1 - Ct
+
        do n = 1,par%max_iter
 
-          Ct2p = Ct2
+          Ctp2 = Ctp1
+          Ctp1 = Ct
 
-          do i = i1,par%ny+1
-             do j = j1,par%nx+1
-             
-                ! compute supply based on sediment availability
-                call compute_supply(par, s%mass(:,1,j,i), &
-                     par%accfac * s%Cu(:,j,i), Ct2(:,j,i), s%supply(:,j,i), s%p(:,j,i))
-             
-                do k = 1,par%nfractions
-                
-                   ! compute sediment advection by wind
-                   Ct2(k,j,i) = s%Ct(k,j,i) &
-                     - s%uws(j,i) * par%dt * s%dnz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j-1,i)) &
-                     - s%uwn(j,i) * par%dt * s%dsz(j,i) * s%dsdnzi(j,i) * (Ct2(k,j,i) - Ct2(k,j,max(1,i-1))) &
-                     + s%supply(k,j,i)
-                   
-                end do
-             end do
-          end do
+          call euler(par, s, Ctp1, Ct)
+          Fp2 = Fp1
+          Fp1 = Ctp1 - Ct
+
+          ! secant approximation
+          where (Fp1 - Fp2 .eq. 0.d0)
+             Ct = Ctp1
+          elsewhere
+             Ct = Ctp1 - Fp1 * (Ctp1 - Ctp2) / (Fp1 - Fp2)
+          end where
 
           ! exit iteration if change is negligible
-          err = sum(abs(Ct2 - Ct2p))
+          err = sum(abs(Ct - Ctp1)) / sum(Ct)
           if (err .le. par%max_error) exit
 
        end do
@@ -127,7 +117,7 @@ contains
 
     end if
 
-    s%Ct = Ct2
+    s%Ct = Ct
 
     ! add sediment deposit
     do i = 1,par%nfractions
@@ -156,7 +146,38 @@ contains
     par%nt = par%nt + 1
     
   end subroutine step
-  
+
+  subroutine euler(par, s, Ctin, Ctout)
+    
+    type(parameters), intent(inout) :: par
+    type(spaceparams), intent(inout) :: s
+    integer*4 :: i, j, k, i1
+    real*8, dimension(:,:,:), intent(in) :: Ctin
+    real*8, dimension(:,:,:), intent(out) :: Ctout
+
+    i1 = min(2, par%ny+1)
+
+    do i = i1,par%ny+1
+       do j = 2,par%nx+1
+
+          ! compute supply based on sediment availability
+          call compute_supply(par, s%mass(:,1,j,i), &
+               par%accfac * s%Cu(:,j,i), Ctin(:,j,i), s%supply(:,j,i), s%p(:,j,i))
+          
+          do k = 1,par%nfractions
+
+             ! compute sediment advection by wind
+             Ctout(k,j,i) = s%Ct(k,j,i) &
+                  - s%uws(j,i) * par%dt * s%dnz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j-1,i)) &
+                  - s%uwn(j,i) * par%dt * s%dsz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j,max(1,i-1))) &
+                  + s%supply(k,j,i)
+             
+          end do
+       end do
+    end do
+    
+  end subroutine euler
+     
   subroutine compute_supply(par, mass, Cu, Ct, supply, p)
 
     type(parameters), intent(in) :: par
