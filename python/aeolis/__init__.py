@@ -572,9 +572,9 @@ class AeoLiS:
             dims = (u'time', u'y', u'x', u'layers')
         elif var in ['Cu', 'Ct', 'uth', 'supply', 'p']:
             dims = (u'time', u'y', u'x', u'fractions')
-        elif var in ['x', 'z', 'zb']:
+        elif var in ['x', 'z', 'zb', 'zs', 'uw', 'udir']:
             dims = (u'time', u'y', u'x')
-        elif var in ['uw']:
+        elif var in []:
             dims = (u'time',)
         else:
             dims = None
