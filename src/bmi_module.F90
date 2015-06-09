@@ -66,6 +66,7 @@ contains
     end if
 
     call step(par, s, sl, var)
+    call set_var_reset(var)
     
   end function update
 
@@ -278,9 +279,14 @@ contains
     var_name = char_array_to_string(c_var_name)
 
     rank = get_rank(var, var_name)
-    allocate(shp(rank))
-    shp = get_shape(var, var_name)
-    
+    if (rank == 0) then
+       allocate(shp(0))
+       shp = 0.d0
+    else
+       allocate(shp(rank))
+       shp = get_shape(var, var_name)
+    end if
+
     call set_c_pointer(var, var_name, xptr, rank, shp)
 
   end subroutine set_var
@@ -391,7 +397,7 @@ contains
 
   subroutine set_c_pointer(var, name, val, rank, shp)
 
-    type(variables), dimension(:), intent(in) :: var
+    type(variables), dimension(:), intent(inout) :: var
     character(*), intent(in) :: name
     type(c_ptr), intent(in) :: val
     integer*4, intent(in) :: rank
@@ -402,7 +408,7 @@ contains
        if (trim(var(i)%name) == trim(name)) then
           select case (rank)
           case(0)
-             call c_f_pointer(val, var(i)%val%rank0, shp)
+             call c_f_pointer(val, var(i)%val%rank0)
           case(1)
              call c_f_pointer(val, var(i)%val%rank1, shp)
           case(2)
@@ -410,6 +416,7 @@ contains
           case(3)
              call c_f_pointer(val, var(i)%val%rank3, shp)
           end select
+          var(i)%isset = .true.
           exit
        end if
     end do

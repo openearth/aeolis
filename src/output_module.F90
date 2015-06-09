@@ -18,6 +18,7 @@ module output_module
      type(variables_data), pointer :: var => null()
      type(variables_data), pointer :: min => null()
      type(variables_data), pointer :: max => null()
+     logical :: isset = .false.
   end type variables
 
   type variables_data
@@ -531,25 +532,45 @@ contains
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
           rank = var(i)%rank
-          allocate(dims(rank))
-          dims = var(i)%dims
-!          select case (rank)
-!             case(0)
-!                shp = shape(var(i)%val%rank0)
-!             case(1)
-!                shp = shape(var(i)%val%rank1)
-!             case(2)
-!                shp = shape(var(i)%val%rank2)
-!             case(3)
-!                shp = shape(var(i)%val%rank3)
-!             case(4)
-!                shp = shape(var(i)%val%rank4)
-!             end select
+          if (rank == 0) then
+             allocate(dims(0))
+             dims = 0.d0
+          else
+             allocate(dims(rank))
+             dims = var(i)%dims
+          end if
           exit
        end if
     end do
 
   end function get_shape
+
+  subroutine set_var_reset(var)
+
+    type(variables), dimension(:), intent(inout) :: var
+    integer*4 :: i
+
+    do i = 1,size(var)
+       var(i)%isset = .false.
+    end do
+    
+  end subroutine set_var_reset
+  
+  function is_set(var, name) result(ret)
+
+    type(variables), dimension(:), intent(inout) :: var
+    character(*) :: name
+    logical :: ret
+    integer*4 :: i
+  
+    do i = 1,size(var)
+       if (trim(var(i)%name) == trim(name)) then
+          ret = var(i)%isset
+          exit
+       end if
+    end do
+    
+  end function is_set
 
   function is_output(var, name) result (ret)
 
