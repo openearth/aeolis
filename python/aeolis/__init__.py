@@ -492,7 +492,7 @@ class AeoLiS:
         self.iout += 1
 
 
-    def run(self, overwrite=True):
+    def run(self, callback=None, overwrite=True):
 
         if os.path.exists(self.outputfile) and not overwrite:
             return
@@ -528,6 +528,9 @@ class AeoLiS:
             while self.t <= self.tstop+1:
                 t = self.t
 
+                if callback is not None:
+                    callback(model, t)
+                    
                 model.update(-1)
 
                 self.update_output(model)
