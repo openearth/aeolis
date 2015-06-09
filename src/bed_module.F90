@@ -424,8 +424,8 @@ contains
           ! theta = -atan((s%zb(j,i+1) - s%zb(j,i)) / s%dsz(j,i))
           
           theta = -atan( ( &
-               (s%zb(j,i) - s%zb(j-1,i)) * s%dnz(j,i) * cos(s%alfaz(j,i) + s%udir) + &
-               (s%zb(j,i) - s%zb(j,im1)) * s%dsz(j,i) * sin(s%alfaz(j,i) + s%udir) ) * s%dsdnzi(j,i) )
+               (s%zb(j,i) - s%zb(j-1,i)) * s%dnz(j,i) * cos(s%alfaz(j,i) + s%udir(j,i)) + &
+               (s%zb(j,i) - s%zb(j,im1)) * s%dsz(j,i) * sin(s%alfaz(j,i) + s%udir(j,i)) ) * s%dsdnzi(j,i) )
           
           do k = 1,par%nfractions
              s%uth(k,j,i) = sqrt((tan(phi) - tan(theta)) / tan(phi) * cos(theta)) * s%uth(k,j,i)
@@ -444,8 +444,7 @@ contains
   subroutine mix_toplayer(par, zb, zs)
 
     type(parameters), intent(in) :: par
-    real*8, dimension(:), intent(in) :: zb
-    real*8, intent(in) :: zs
+    real*8, dimension(:), intent(in) :: zb, zs
     integer :: i, k, l, nmix
     real*8 :: th
 
@@ -466,7 +465,7 @@ contains
     do i = 1,par%nc
 
        ! mix only if flooded
-       if (zb(i) <= zs) then
+       if (zb(i) <= zs(i)) then
              
           ! determine mixing depth in terms of number of layers
           nmix = 0
@@ -474,7 +473,7 @@ contains
           do k = 1,size(thlyr(:,i))
              nmix = nmix + 1
              th = th + thlyr(k,i)
-             if (th >= min(par%Hs, (zs - zb(i)) * par%gamma) * par%facDOD) exit
+             if (th >= min(par%Hs, (zs(i) - zb(i)) * par%gamma) * par%facDOD) exit
           end do
 
           if (nmix == 0) continue

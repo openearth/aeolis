@@ -38,7 +38,7 @@ contains
     end if
 
     ! interpolate wind
-    call interpolate_wind(par%uw, par%t, s%uw, s%udir)
+    if (.not. is_set(var, 'uw')) call interpolate_wind(par%uw, par%t, sl%uw, sl%udir)
     s%uws = s%uw * cos(s%alfaz + s%udir)
     s%uwn = s%uw * sin(s%alfaz + s%udir)
 
@@ -51,9 +51,9 @@ contains
     end if
 
     ! interpolate time series
-    call interpolate_moist(par%moist, par%t, sl%zb, sl%moist)
-    call interpolate_meteo(par%meteo, par%t, s%meteo)
-    call interpolate_tide(par%zs, par%t, sl%zs)
+    if (.not. is_set(var, 'moist')) call interpolate_moist(par%moist, par%t, sl%zb, sl%moist)
+    if (.not. is_set(var, 'meteo')) call interpolate_meteo(par%meteo, par%t, s%meteo)
+    if (.not. is_set(var, 'zs')) call interpolate_tide(par%zs, par%t, sl%zs)
 
     ! update moisture contents
     call update_moisture(par, sl%zb, sl%zs, s%meteo, sl%uw, sl%moist)
@@ -71,8 +71,10 @@ contains
 
     ! compute transport capacity by wind, including thresholds
     alpha = (0.174 / log10(par%z0/par%k))**3
-    s%Cu = max(0.d0, alpha * par%Cb * par%rhoa / par%g * &
-         (s%uw - s%uth)**3 / s%uw)
+    do k = 1,par%nfractions
+       s%Cu(k,:,:) = max(0.d0, alpha * par%Cb * par%rhoa / par%g * &
+            (s%uw - s%uth(k,:,:))**3 / s%uw)
+    end do
 
     ! compute advection
     if (trim(par%scheme) .eq. 'euler_forward') then

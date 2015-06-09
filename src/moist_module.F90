@@ -163,7 +163,7 @@ contains
 
     type(tide), dimension(:), intent(in) :: zs
     real*8, intent(in) :: t
-    real*8, intent(out) :: level
+    real*8, dimension(:), intent(out) :: level
 
     level = linear_interp(zs%t, zs%level, t)
 
@@ -284,13 +284,12 @@ contains
 
   end subroutine compute_threshold_moisture
 
-  subroutine update_moisture(par, zb, zs, meteo, u, moist)
+  subroutine update_moisture(par, zb, zs, meteo, uw, moist)
 
     type(parameters), intent(in) :: par
     type(meteorology), intent(in) :: meteo
-    real*8, dimension(:), intent(in) :: zb
+    real*8, dimension(:), intent(in) :: zb, zs, uw
     real*8, dimension(:,:), intent(inout) :: moist
-    real*8, intent(in) :: u, zs
     real*8 :: radiation, m, delta, gamma, evaporation
     integer :: i, j
 
@@ -300,15 +299,16 @@ contains
     delta = saturation_pressure(meteo%air_temperature) * (1 - meteo%relative_humidity) ! [kPa]
     gamma = (meteo%air_specific_heat * meteo%atmospheric_pressure) / &
          (.622 * meteo%latent_heat) ! [kPa/K]
-    evaporation = max(0.d0, (m * radiation + gamma * 6.43 * (1 + 0.536 * u) * delta) / &
-         (meteo%latent_heat * (m + gamma)))
-    evaporation = evaporation / 24 / 3600 / 1000 ! conversion from mm/day to m/s
     
     ! infiltration using Darcy
     do i = 1,par%nc
-       if (zs >= zb(i)) then
+       if (zs(i) >= zb(i)) then
           moist(:,i) = par%porosity
        else
+          evaporation = max(0.d0, (m * radiation + gamma * 6.43 * (1 + 0.536 * uw(i)) * delta) / &
+               (meteo%latent_heat * (m + gamma)))
+          evaporation = evaporation / 24 / 3600 / 1000 ! conversion from mm/day to m/s
+
           moist(:,i) = moist(:,i) * exp(-par%F * par%dt)
           if (par%evaporation) then
              moist(:,i) = max(0.d0, moist(:,i) - evaporation * par%dt / par%layer_thickness)
