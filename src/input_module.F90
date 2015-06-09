@@ -318,11 +318,6 @@ contains
        stop 1
     end if
 
-    if (trim(par%wind_file) == '') then
-       write(0, '(a)') " No wind defined"
-       stop 1
-    end if
-
     ! check if valid scheme is selected
     select case (trim(par%scheme))
     case ('euler_backward', 'euler_forward', 'maccormack')
