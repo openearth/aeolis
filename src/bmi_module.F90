@@ -404,17 +404,26 @@ contains
     integer*4, dimension(:), intent(in) :: shp
     integer*4 :: i
 
+    real(c_double), pointer :: x_0d_double_ptr
+    real(c_double), pointer :: x_1d_double_ptr(:)
+    real(c_double), pointer :: x_2d_double_ptr(:,:)
+    real(c_double), pointer :: x_3d_double_ptr(:,:,:)
+    
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
           select case (rank)
           case(0)
-             call c_f_pointer(val, var(i)%val%rank0)
+             call c_f_pointer(val, x_0d_double_ptr, shp)
+             var(i)%val%rank0 = x_0d_double_ptr
           case(1)
-             call c_f_pointer(val, var(i)%val%rank1, shp)
+             call c_f_pointer(val, x_1d_double_ptr, shp)
+             var(i)%val%rank1 = x_1d_double_ptr
           case(2)
-             call c_f_pointer(val, var(i)%val%rank2, shp)
+             call c_f_pointer(val, x_2d_double_ptr, shp)
+             var(i)%val%rank2 = x_2d_double_ptr
           case(3)
-             call c_f_pointer(val, var(i)%val%rank3, shp)
+             call c_f_pointer(val, x_3d_double_ptr, shp)
+             var(i)%val%rank3 = x_3d_double_ptr
           end select
           var(i)%isset = .true.
           exit
