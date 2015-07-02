@@ -29,7 +29,7 @@ if (initialize(c_configfile) /= 0) &
 
 ! initialize output
 call output_init(par, var)
-call write_output(par, sl, var)
+!call write_output(par, sl, var)
 
 t = 0
 tstart = get_time()

@@ -45,22 +45,22 @@ contains
     deallocate(zb_tmp)
 
     call generate_bedcomposition(par)
-    open(unit=fid, file=trim(par%output_dir) // "bed.in", &
-         action="write", status="replace", form="unformatted")
-    write(fid) s%xz
-    write(fid) s%yz
-    write(fid) s%zb
-    close(fid)
+!    open(unit=fid, file=trim(par%output_dir) // "bed.in", &
+!         action="write", status="replace", form="unformatted")
+!    write(fid) s%xz
+!    write(fid) s%yz
+!    write(fid) s%zb
+!    close(fid)
 
     ! wind
     write(0,*) 'Generating wind time series...'
     call generate_wind(par, par%uw)
-    open(unit=fid, file=trim(par%output_dir) // "wind.in", &
-         action="write", status="replace", form="unformatted")
-    write(fid) par%uw%t
-    write(fid) par%uw%u
-    write(fid) par%uw%dir
-    close(fid)
+!    open(unit=fid, file=trim(par%output_dir) // "wind.in", &
+!         action="write", status="replace", form="unformatted")
+!    write(fid) par%uw%t
+!    write(fid) par%uw%u
+!    write(fid) par%uw%dir
+!    close(fid)
 
     ! time
     par%ntout = int(par%tstop / par%tout) + 1
@@ -142,6 +142,8 @@ contains
 
     ! create spatial grid matrixes
     call gridprops(par, s)
+
+    write(0,*) 'Starting simulation...'
 
   end subroutine init
 
