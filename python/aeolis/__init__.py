@@ -98,7 +98,7 @@ class AeoLiS:
     )
 
     def __init__(self, fpath, outputtimes=None, outputvars=['Ct', 'u', 'zb'], outputtypes=[],
-                 configfile='aeolis.txt', outputfile='aeolis.nc', **kwargs):
+                 configfile='aeolis.txt', outputfile='aeolis.nc', restart_from=None, **kwargs):
         self.fpath = fpath
     
         self.set_outputtimes(outputtimes)
@@ -107,6 +107,9 @@ class AeoLiS:
 
         self.set_configfile(configfile)
         self.set_outputfile(outputfile)
+
+        if os.path.exists(self.configfile):
+            self.load_params()
 
         self.set_params(**kwargs)
         
@@ -122,7 +125,7 @@ class AeoLiS:
                 if self.__isiterable(v):
                     s += '  %10s  %15s = %s\n' % ('', k, v[0])
                     for vi in v[1:]:
-                        s += '  %10s  %15s = %s\n' % ('', '', vi)
+                        s += '  %10s  %15s   %s\n' % ('', '', vi)
                 else:
                     s += '  %10s  %15s = %s\n' % ('', k, v)
         return s
@@ -157,12 +160,39 @@ class AeoLiS:
         for k, v in kwargs.iteritems():
             self.ncattrs[k] = v
 
-            
+
+    def load_params(self):
+
+        print 'Loading input from %s' % self.configfile
+        
+        with open(self.configfile, 'r') as fp:
+            for line in fp:
+                k, v = re.split('\s*=\s*', line.strip())
+                v = re.split('\s+', v)
+
+                for i in range(len(v)):
+                    if v[i] in ('F', 'T'):
+                        v[i] = (v[i] == 'T')
+                    elif re.match('[-0-9]+$', v[i]):
+                        v[i] = int(v[i])
+                    elif re.match('[-0-9\.]+$', v[i]):
+                        v[i] = float(v[i])
+
+                if len(v) == 1 and k not in ['outputtypes', 'outputvars']:
+                    v = v[0]
+                    
+                self.params[k] = v
+
+        self.outputtypes = self.params['outputtypes']
+        self.outputvars = self.params['outputvars']
+        self.outputtimes = self.params['tout']
+
+                
     def write_params(self, standalone=False):
 
         print 'Writing input to %s' % self.configfile
 
-        params = self.params
+        params = self.params.copy()
         
         # set tout to large to prevent slow computations
         if not params.has_key('tout'):
@@ -408,6 +438,13 @@ class AeoLiS:
             nc.variables['y'][:] = np.arange(0, ny, 1) * self.params['dy']
             nc.variables['layers'][:] = np.arange(0, nl, 1) * self.params['layer_thickness']
             nc.variables['fractions'][:] = self.params['grain_size']
+
+            nc.variables['lat'][:] = 0.
+            nc.variables['lon'][:] = 0.
+            nc.variables['x_bounds'][:,:] = 0.
+            nc.variables['y_bounds'][:,:] = 0.
+            nc.variables['lat_bounds'][:,:] = 0.
+            nc.variables['lon_bounds'][:,:] = 0.
             
             # store model settings
             grp = nc.createGroup('settings')
@@ -434,7 +471,7 @@ class AeoLiS:
         if len(self.outputtypes) > 0:
             for var in self.outputvars:
                 data = model.get_var(var)
-                if 'sum' in self.outputtypes:
+                if 'sum' in self.outputtypes or 'avg' in self.outputtypes:
                     self.output_stats[var]['sum'] += data
                 if 'var' in self.outputtypes:
                     self.output_stats[var]['var'] += data**2
@@ -455,7 +492,7 @@ class AeoLiS:
             dims = AeoLiS.get_dims(var)
             if dims is None:
                 continue
-            if 'sum' in self.outputtypes:
+            if 'sum' in self.outputtypes or 'avg' in self.outputtypes:
                 self.output_stats[var]['sum'] = np.zeros([n[k] for k in dims[1:]])
             if 'var' in self.outputtypes:
                 self.output_stats[var]['var'] = np.zeros([n[k] for k in dims[1:]])
@@ -487,6 +524,9 @@ class AeoLiS:
                     nc.variables['%s.min' % var][i,...] = self.output_stats[var]['min']
                 if 'max' in self.outputtypes:
                     nc.variables['%s.max' % var][i,...] = self.output_stats[var]['max']
+
+            nc.variables['time_bounds'][i,0] = 0 if i == 0 else nc.variables['time'][i]
+            nc.variables['time_bounds'][i,1] = self.t
 
         self.clear_output(model)
         self.iout += 1
@@ -539,7 +579,7 @@ class AeoLiS:
                 self.it += 1
                         
                 if self.outputtimes is not None:
-                    if np.mod(self.t, self.outputtimes) < self.t - t:
+                    if np.mod(t, self.outputtimes) < self.t - t:
                         self.write_output(model)
 
                 if (np.mod(self.t, self.tstop/10.) < self.t - t or \
@@ -551,16 +591,45 @@ class AeoLiS:
                     dt3 = dt2 * (1-p)
 
                     fmt = '[%5.1f%%] %s / %s / %s (avg. dt=%5.3f)'
-                    
-                    print fmt % (p*100.,
-                                 time.strftime('%H:%M:%S', time.gmtime(dt1)),
-                                 time.strftime('%H:%M:%S', time.gmtime(dt2)),
-                                 time.strftime('%H:%M:%S', time.gmtime(dt3)),
-                                 self.t / self.it)
 
-                    tlog = time.time()
+                    if p <= 1:
+                        print fmt % (p*100.,
+                                     time.strftime('%H:%M:%S', time.gmtime(dt1)),
+                                     time.strftime('%H:%M:%S', time.gmtime(dt2)),
+                                     time.strftime('%H:%M:%S', time.gmtime(dt3)),
+                                     self.t / self.it)
+                        
+                        tlog = time.time()
+
+        print 'Done.'
 
 
+    def convert(self):
+
+        if not os.path.exists(self.params['output_dir']):
+            print 'ERROR: output directory not found'
+            return
+        
+        with BMIWrapper(engine='aeolis', configfile=self.configfile) as model:
+
+            self.init_output(model)
+
+            for fname in glob.glob(os.path.join(self.params['output_dir'], '*.out')):
+
+                var = os.path.splitext(os.path.split(fname)[1])[0]
+                data = filesys.read_fortran(fname)
+
+                with netCDF4.Dataset(self.outputfile, 'a') as nc:
+                    if var in nc.variables.keys():
+                        print 'Converting %s...' % var
+
+                        shp = nc.variables[var].shape[1:]
+                        for i in range(data.shape[0]):
+                            nc.variables['time'][i] = i * self.outputtimes
+                            nc.variables['time_bounds'][i,:] = np.asarray([i, i+1]) * self.outputtimes
+                            nc.variables[var][i,...] = data[i,...].reshape(shp)
+
+        
     @staticmethod
     def get_dims(var):
 
