@@ -199,9 +199,9 @@ contains
 
     jl = 0
     ju = n+1
+    l1 = xx(n) .gt. xx(1)
     do while(ju-jl .gt. 1)
        jm = (ju+jl)/2
-       l1 = xx(n) .gt. xx(1)
        l2 = x .gt. xx(jm)
        if ((l1 .and. l2) .or. (.not. (l1 .or. l2))) then
           jl = jm
@@ -216,11 +216,27 @@ contains
 
   end function binary_search
 
+  function dist_normal(x, mean, stdev) result (p)
+
+    real*8 :: mean, stdev
+    real*8, dimension(:) :: x
+    real*8, dimension(:), allocatable :: p
+
+    allocate(p(size(x)))
+
+    if (stdev < 0.d0) then
+       write(*,*) "WARNING: standard deviation must be positive"
+    else
+       p = exp((x - mean) / stdev)
+    end if
+
+  end function dist_normal
+    
   function rand_normal(mean, stdev) result(c)
     
     real*8 :: mean, stdev, r, theta, c, x(2)
     
-    if(stdev < 0.0d0) then
+    if (stdev < 0.d0) then
        write(*,*) "WARNING: standard deviation must be positive"
     else
        call random_number(x)
