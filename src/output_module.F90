@@ -302,28 +302,11 @@ contains
              var(i)%var%rank0 = var(i)%var%rank0 + var(i)%val%rank0**2
              var(i)%min%rank0 = min(var(i)%min%rank0, var(i)%val%rank0)
              var(i)%max%rank0 = max(var(i)%max%rank0, var(i)%val%rank0)
-!          case (1)
           case default
              var(i)%sum%rank1 = var(i)%sum%rank1 + var(i)%val%rank1
              var(i)%var%rank1 = var(i)%var%rank1 + var(i)%val%rank1**2
              var(i)%min%rank1 = min(var(i)%min%rank1, var(i)%val%rank1)
              var(i)%max%rank1 = max(var(i)%max%rank1, var(i)%val%rank1)
-!          case (2)
-!             var(i)%sum%rank2 = var(i)%sum%rank2 + var(i)%val%rank2
-!             var(i)%var%rank2 = var(i)%var%rank2 + var(i)%val%rank2**2
-!             var(i)%min%rank2 = min(var(i)%min%rank2, var(i)%val%rank2)
-!             var(i)%max%rank2 = max(var(i)%max%rank2, var(i)%val%rank2)
-!          case (3)
-!             var(i)%sum%rank3 = var(i)%sum%rank3 + var(i)%val%rank3
-!             var(i)%var%rank3 = var(i)%var%rank3 + var(i)%val%rank3**2
-!             var(i)%min%rank3 = min(var(i)%min%rank3, var(i)%val%rank3)
-!             var(i)%max%rank3 = max(var(i)%max%rank3, var(i)%val%rank3)
-!          case (4)
-!             var(i)%sum%rank4 = var(i)%sum%rank4 + var(i)%val%rank4
-!             var(i)%var%rank4 = var(i)%var%rank4 + var(i)%val%rank4**2
-!             var(i)%min%rank4 = min(var(i)%min%rank4, var(i)%val%rank4)
-!             var(i)%max%rank4 = max(var(i)%max%rank4, var(i)%val%rank4)
-          end select
        end if
     end do
     
@@ -350,7 +333,7 @@ contains
                write(var(i)%min%fid) var(i)%min%rank0
           if (var(i)%max%fid > 0) &
                write(var(i)%max%fid) var(i)%max%rank0
-       case (1)
+       case default
           if (var(i)%val%fid > 0) &
                write(var(i)%val%fid) var(i)%val%rank1
           if (var(i)%sum%fid > 0) &
@@ -364,48 +347,6 @@ contains
                write(var(i)%min%fid) var(i)%min%rank1
           if (var(i)%max%fid > 0) &
                write(var(i)%max%fid) var(i)%max%rank1
-       case (2)
-          if (var(i)%val%fid > 0) &
-               write(var(i)%val%fid) var(i)%val%rank2
-          if (var(i)%sum%fid > 0) &
-               write(var(i)%sum%fid) var(i)%sum%rank2
-          if (var(i)%avg%fid > 0) &
-               write(var(i)%avg%fid) var(i)%sum%rank2 / var(i)%n
-          if (var(i)%var%fid > 0) &
-               write(var(i)%var%fid) &
-               (var(i)%var%rank2 - var(i)%sum%rank2**2 / var(i)%n) / (var(i)%n - 1)
-          if (var(i)%min%fid > 0) &
-               write(var(i)%min%fid) var(i)%min%rank2
-          if (var(i)%max%fid > 0) &
-               write(var(i)%max%fid) var(i)%max%rank2
-       case (3)
-          if (var(i)%val%fid > 0) &
-               write(var(i)%val%fid) var(i)%val%rank3
-          if (var(i)%sum%fid > 0) &
-               write(var(i)%sum%fid) var(i)%sum%rank3
-          if (var(i)%avg%fid > 0) &
-               write(var(i)%avg%fid) var(i)%sum%rank3 / var(i)%n
-          if (var(i)%var%fid > 0) &
-               write(var(i)%var%fid) &
-               (var(i)%var%rank3 - var(i)%sum%rank3**2 / var(i)%n) / (var(i)%n - 1)
-          if (var(i)%min%fid > 0) &
-               write(var(i)%min%fid) var(i)%min%rank3
-          if (var(i)%max%fid > 0) &
-               write(var(i)%max%fid) var(i)%max%rank3
-       case (4)
-          if (var(i)%val%fid > 0) &
-               write(var(i)%val%fid) var(i)%val%rank4
-          if (var(i)%sum%fid > 0) &
-               write(var(i)%sum%fid) var(i)%sum%rank4
-          if (var(i)%avg%fid > 0) &
-               write(var(i)%avg%fid) var(i)%sum%rank4 / var(i)%n
-          if (var(i)%var%fid > 0) &
-               write(var(i)%var%fid) &
-               (var(i)%var%rank4 - var(i)%sum%rank4**2 / var(i)%n) / (var(i)%n - 1)
-          if (var(i)%min%fid > 0) &
-               write(var(i)%min%fid) var(i)%min%rank4
-          if (var(i)%max%fid > 0) &
-               write(var(i)%max%fid) var(i)%max%rank4
        end select
     end do
     
@@ -418,10 +359,14 @@ contains
 
     do i = 1,size(var)
        var(i)%n = 0
-       call output_clear_data(var(i)%sum, var(i)%rank)
-       call output_clear_data(var(i)%var, var(i)%rank)
-       call output_clear_data(var(i)%min, var(i)%rank)
-       call output_clear_data(var(i)%max, var(i)%rank)
+       if (var(i)%sum%fid > 0 .or. var(i)%avg%fid > 0) &
+            call output_clear_data(var(i)%sum, var(i)%rank)
+       if (var(i)%var%fid > 0) &
+            call output_clear_data(var(i)%var, var(i)%rank)
+       if (var(i)%min%fid > 0) &
+            call output_clear_data(var(i)%min, var(i)%rank)
+       if (var(i)%max%fid > 0) &
+            call output_clear_data(var(i)%max, var(i)%rank)
     end do
 
   end subroutine output_clear
@@ -431,21 +376,12 @@ contains
     type(variables_data), intent(inout) :: var
     integer*4, intent(in) :: rank
     
-    if (var%fid > 0) then
-       select case (rank)
-       case (0)
-          var%rank0 = var%init
-!       case (1)
-       case default
-          var%rank1 = var%init
-!       case (2)
-!          var%rank2 = var%init
-!       case (3)
-!          var%rank3 = var%init
-!       case (4)
-!          var%rank4 = var%init
-       end select
-    end if
+    select case (rank)
+    case (0)
+       var%rank0 = var%init
+    case default
+       var%rank1 = var%init
+    end select
 
   end subroutine output_clear_data
 
