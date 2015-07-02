@@ -45,6 +45,11 @@ contains
     s%uws = s%uw * cos(s%alfaz + s%udir)
     s%uwn = s%uw * sin(s%alfaz + s%udir)
 
+    if (par%ny > 0) then
+       s%uw = s%uws
+       s%uwn = 0.d0
+    end if
+
     ! courant check
     if (trim(par%scheme) .eq. 'euler_forward') then
        if (par%CFL > 0.d0) then

@@ -307,6 +307,7 @@ contains
              var(i)%var%rank1 = var(i)%var%rank1 + var(i)%val%rank1**2
              var(i)%min%rank1 = min(var(i)%min%rank1, var(i)%val%rank1)
              var(i)%max%rank1 = max(var(i)%max%rank1, var(i)%val%rank1)
+          end select
        end if
     end do
     
