@@ -404,7 +404,7 @@ contains
 
     type(parameters), intent(in) :: par
     type(spaceparams), intent(inout) :: s
-    integer :: i, j, k, im1
+    integer :: i, j, k, i1, im1
     real*8 :: phi, theta
 
     if (.not. par%th_bedslope) return
@@ -413,13 +413,20 @@ contains
 
     phi = par%phi / 180.d0 * pi
 
-    if (i == 1) then
-       im1 = par%ny
+    if (par%ny == 0) then
+       i1 = 1
     else
-       im1 = i - 1
+       i1 = 2
     end if
+    
+    do i = i1,par%ny+1
 
-    do i = 1,par%ny+1
+       if (par%ny == 0) then
+          im1 = 1
+       else
+          im1 = i - 1
+       end if
+
        do j = 2,par%nx+1
           ! theta = -atan((s%zb(j,i+1) - s%zb(j,i)) / s%dsz(j,i))
           

@@ -136,6 +136,7 @@ module input_module
      real*8    :: Cw = 0.d0               ! [-] sediment concentration in water column
      real*8    :: w = 0.d0                ! [m/s] fall velocity of sediment in water column
      real*8    :: bi = 0.d0               ! [-] bed interaction factor
+     real*8    :: L = 0.d0                ! [-] length scale in sigmoid mapping
      real*8, dimension(:), allocatable :: grain_size ! [m] median grain size for each fraction
      real*8, dimension(:), allocatable :: grain_dist ! [-] occurence of each fraction in bed
 
@@ -222,7 +223,7 @@ contains
     par%mixtoplayer   = read_key_logical(fname, 'mixtoplayer', .true.)
     par%sweeptoplayer = read_key_logical(fname, 'sweeptoplayer', .true.)
     par%th_grainsize  = read_key_logical(fname, 'th_grainsize', .true.)
-    par%th_bedslope   = read_key_logical(fname, 'th_bedslope', .true.)
+    par%th_bedslope   = read_key_logical(fname, 'th_bedslope', .false.)
     par%th_moisture   = read_key_logical(fname, 'th_moisture', .true.)
     par%th_humidity   = read_key_logical(fname, 'th_humidity', .true.)
     par%bedupdate     = read_key_logical(fname, 'bedupdate', .true.)
@@ -253,7 +254,7 @@ contains
     par%output_dir   = read_key_str(fname, 'output_dir', '')
     par%scheme       = read_key_str(fname, 'scheme', 'euler_backward')
 
-    if (trim(par%scheme) .eq. 'euler_backward') then
+    if (trim(par%scheme) .ne. 'euler_forward') then
        par%max_iter  = read_key_int(fname, 'max_iter',  100)
        par%max_error = read_key_dbl(fname, 'max_error', 1d-6)
     else
@@ -278,6 +279,7 @@ contains
     par%Cw              = read_key_dbl(fname, 'Cw',              0.d0)
     par%w               = read_key_dbl(fname, 'w',               3.0d-2)
     par%bi              = read_key_dbl(fname, 'bi',              1.d0)
+    par%L               = read_key_dbl(fname, 'L',               1.d0)
 
     if (allocated(par%grain_size)) then
        deallocate(par%grain_size)
@@ -320,13 +322,18 @@ contains
 
     ! check if valid scheme is selected
     select case (trim(par%scheme))
-    case ('euler_backward', 'euler_forward', 'maccormack')
+    case ('euler_backward', 'euler_forward', 'crank_nicolson')
        ! all ok
     case default
        write(0, '(a,a)') " Unsupported scheme: ",trim(par%scheme)
        stop 1
     end select
 
+    ! check dimensionality
+    if (par%ny == 1) then
+       write(0, '(a)') "Warning: using ny=1, are you sure not to use ny=0?"
+    end if
+    
     ! sort grain size distribution
     call sort(par%grain_size, par%grain_dist)
 
@@ -344,6 +351,11 @@ contains
           write(0, '(a,a)') " Created output directory ", trim(par%output_dir)
           call system("mkdir " // trim(par%output_dir))
        end if
+    end if
+
+    ! disable gusts for implicit schemes
+    if (par%scheme .ne. 'euler_forward') then
+       par%gusts = .false.
     end if
 
   end subroutine check_params

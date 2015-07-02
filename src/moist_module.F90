@@ -118,7 +118,7 @@ contains
        fid = 99
 
        ! count lines
-       n = 0
+       n = -1
        ierr = 0
        open(fid, file=trim(par%tide_file))
        do while (ierr == 0)
@@ -137,11 +137,10 @@ contains
           read(fid, *, iostat=ierr) zs(i)%t, zs(i)%level
           i = i + 1
        end do
-       i = i - 2
        close(fid)
        
        ! checks
-       if (zs(i)%t < par%tstop) then
+       if (maxval(zs%t) < par%tstop) then
           write(*,*) "ERROR: tide definition file too short"
           stop 1
        end if
@@ -159,13 +158,15 @@ contains
     
   end subroutine generate_tide
 
-  subroutine interpolate_tide(zs, t, level)
+  subroutine interpolate_tide(zs, t, field)
 
     type(tide), dimension(:), intent(in) :: zs
     real*8, intent(in) :: t
-    real*8, dimension(:), intent(out) :: level
+    real*8, dimension(:), intent(out) :: field
+    real*8 :: level
 
     level = linear_interp(zs%t, zs%level, t)
+    field(:) = level
 
   end subroutine interpolate_tide
   
@@ -294,23 +295,25 @@ contains
     integer :: i, j
 
     ! evaporation using Penman
-    radiation = meteo%solar_radiation / 1e6 / par%dt * 3600 * 24 ! conversion from J/m2 to MJ/m2/day
-    m = vaporation_pressure_slope(meteo%air_temperature) ! [kPa/K]
-    delta = saturation_pressure(meteo%air_temperature) * (1 - meteo%relative_humidity) ! [kPa]
-    gamma = (meteo%air_specific_heat * meteo%atmospheric_pressure) / &
-         (.622 * meteo%latent_heat) ! [kPa/K]
+    if (par%evaporation) then
+       radiation = meteo%solar_radiation / 1e6 / par%dt * 3600 * 24 ! conversion from J/m2 to MJ/m2/day
+       m = vaporation_pressure_slope(meteo%air_temperature) ! [kPa/K]
+       delta = saturation_pressure(meteo%air_temperature) * (1 - meteo%relative_humidity) ! [kPa]
+       gamma = (meteo%air_specific_heat * meteo%atmospheric_pressure) / &
+            (.622 * meteo%latent_heat) ! [kPa/K]
+    end if
     
     ! infiltration using Darcy
     do i = 1,par%nc
        if (zs(i) >= zb(i)) then
           moist(:,i) = par%porosity
        else
-          evaporation = max(0.d0, (m * radiation + gamma * 6.43 * (1 + 0.536 * uw(i)) * delta) / &
-               (meteo%latent_heat * (m + gamma)))
-          evaporation = evaporation / 24 / 3600 / 1000 ! conversion from mm/day to m/s
-
           moist(:,i) = moist(:,i) * exp(-par%F * par%dt)
           if (par%evaporation) then
+             evaporation = max(0.d0, (m * radiation + gamma * 6.43 * (1 + 0.536 * uw(i)) * delta) / &
+                  (meteo%latent_heat * (m + gamma)))
+             evaporation = evaporation / 24 / 3600 / 1000 ! conversion from mm/day to m/s
+
              moist(:,i) = max(0.d0, moist(:,i) - evaporation * par%dt / par%layer_thickness)
           end if
        end if

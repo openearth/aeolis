@@ -21,16 +21,19 @@ contains
     type(variables), dimension(:), intent(inout) :: var
     integer*4 :: i, j, k, n
     real*8 :: err, alpha
-    real*8, dimension(:,:,:), allocatable :: Ct, Ctp1, Ctp2, Fp1, Fp2
+    real*8, dimension(:,:,:), allocatable :: Ct, Cte, Ctp1, Ctp2, Fp1, Fp2
 
     allocate(Ct(par%nfractions, par%nx+1, par%ny+1))
     Ct = 0.d0
     
-    if (trim(par%scheme) .eq. 'euler_backward') then
+    if (trim(par%scheme) .ne. 'euler_forward') then
+       allocate(Cte(par%nfractions, par%nx+1, par%ny+1))
        allocate(Ctp1(par%nfractions, par%nx+1, par%ny+1))
        allocate(Ctp2(par%nfractions, par%nx+1, par%ny+1))
        allocate(Fp1(par%nfractions, par%nx+1, par%ny+1))
        allocate(Fp2(par%nfractions, par%nx+1, par%ny+1))
+
+       Cte = 0.d0
        Ctp1 = 0.d0
        Ctp2 = 0.d0
        Fp1 = 0.d0
@@ -38,7 +41,7 @@ contains
     end if
 
     ! interpolate wind
-    if (.not. is_set(var, 'uw')) call interpolate_wind(par%uw, par%t, sl%uw, sl%udir)
+    if (.not. is_set(var, 'uw')) call interpolate_wind(par, par%uw, par%t, sl%uw, sl%udir)
     s%uws = s%uw * cos(s%alfaz + s%udir)
     s%uwn = s%uw * sin(s%alfaz + s%udir)
 
@@ -73,18 +76,20 @@ contains
     alpha = (0.174 / log10(par%z0/par%k))**3
     do k = 1,par%nfractions
        s%Cu(k,:,:) = max(0.d0, alpha * par%Cb * par%rhoa / par%g * &
-            (s%uw - s%uth(k,:,:))**3 / s%uw)
+            (abs(s%uw) - s%uth(k,:,:))**3 / abs(s%uw))
     end do
 
     ! compute advection
     if (trim(par%scheme) .eq. 'euler_forward') then
 
        call euler(par, s, s%Ct, Ct)
+       s%Ct = Ct
        
-    elseif (trim(par%scheme) .eq. 'euler_backward') then
+    else
 
        ! initial values
-       call euler(par, s, s%Ct, Ct)
+       call euler(par, s, s%Ct, Cte)
+       Ct = Cte
        Ctp1 = s%Ct
        Fp1 = Ctp1 - Ct
 
@@ -94,6 +99,7 @@ contains
           Ctp1 = Ct
 
           call euler(par, s, Ctp1, Ct)
+
           Fp2 = Fp1
           Fp1 = Ctp1 - Ct
 
@@ -103,9 +109,10 @@ contains
           elsewhere
              Ct = Ctp1 - Fp1 * (Ctp1 - Ctp2) / (Fp1 - Fp2)
           end where
+          Ct = max(0.d0, Ct)
 
           ! exit iteration if change is negligible
-          err = sum(abs(Ct - Ctp1)) / sum(Ct)
+          err = sum(abs(Ct - Ctp1)) !/ sum(Ct)
           if (err .le. par%max_error) exit
 
        end do
@@ -115,9 +122,13 @@ contains
                "WARNING: iteration not converged (i: ", par%nt, "; error: ", err, ")"
        end if
 
-    end if
+       if (trim(par%scheme) .eq. 'euler_backward') then
+          s%Ct = Ct
+       elseif (trim(par%scheme) .eq. 'crank_nicolson') then
+          s%Ct = 0.5d0 * (Ct + Cte)
+       end if
 
-    s%Ct = Ct
+    end if
 
     ! add sediment deposit
     do i = 1,par%nfractions
@@ -151,18 +162,13 @@ contains
     
     type(parameters), intent(inout) :: par
     type(spaceparams), intent(inout) :: s
-    integer*4 :: i, j, k, im1
+    integer*4 :: i, j, k
     real*8, dimension(:,:,:), intent(in) :: Ctin
     real*8, dimension(:,:,:), intent(out) :: Ctout
 
-    do i = 1,par%ny+1
+    if (par%ny == 0) then ! 1D
 
-       if (i == 1) then
-          im1 = par%ny
-       else
-          im1 = i - 1
-       end if
-                 
+       i = 1
        do j = 2,par%nx+1
 
           ! compute supply based on sediment availability
@@ -174,12 +180,33 @@ contains
              ! compute sediment advection by wind
              Ctout(k,j,i) = s%Ct(k,j,i) &
                   - s%uws(j,i) * par%dt * s%dnz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j-1,i)) &
-                  - s%uwn(j,i) * par%dt * s%dsz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j,im1)) &
                   + s%supply(k,j,i)
              
           end do
        end do
-    end do
+
+    else ! 2D
+       
+       do i = 2,par%ny+1
+          do j = 2,par%nx+1
+
+             ! compute supply based on sediment availability
+             call compute_supply(par, s%mass(:,1,j,i), &
+                  par%accfac * s%Cu(:,j,i), Ctin(:,j,i), s%supply(:,j,i), s%p(:,j,i))
+          
+             do k = 1,par%nfractions
+
+                ! compute sediment advection by wind
+                Ctout(k,j,i) = s%Ct(k,j,i) &
+                     - s%uws(j,i) * par%dt * s%dnz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j-1,i)) &
+                     - s%uwn(j,i) * par%dt * s%dsz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j,i-1)) &
+                     + s%supply(k,j,i)
+             
+             end do
+          end do
+       end do
+
+    end if
     
   end subroutine euler
      
@@ -191,10 +218,10 @@ contains
     real*8, dimension(size(mass)) :: p_air, p_bed
 
     ! compute distribution in air
-    p_air = Ct / max(1e-10, Cu)
+    p_air = max(0.d0, Ct / max(1e-10, Cu))
 
     ! compute sediment distribution in bed
-    p_bed = max(0.d0, mass) / max(1e-10, sum(mass))
+    p_bed = max(0.d0, mass / max(1e-10, sum(mass)))
 
     ! compute new sediment distributuion in the air
     p = (1 - par%bi) * p_air + p_bed * (1.d0 - min(1.d0, (1 - par%bi) * sum(p_air)))

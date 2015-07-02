@@ -63,7 +63,7 @@ contains
        wind(2:n)%t = cumsum(wind(1:n-1)%duration)
 
        ! simulate wind gusts
-       if (par%gusts .and. par%scheme == 'explicit') then
+       if (par%gusts) then
           call simulate_gusts(wind, gusty_wind)
        else
           allocate(gusty_wind(size(wind)))
@@ -86,14 +86,22 @@ contains
 
   end subroutine generate_wind
 
-  subroutine interpolate_wind(wind, t, uw, udir)
+  subroutine interpolate_wind(par, wind, t, uw, udir)
 
+    type(parameters), intent(in) :: par
     type(windspeed), dimension(:), intent(in) :: wind
     real*8, intent(in) :: t
     real*8, dimension(:), intent(out) :: uw, udir
+    integer*4 :: i
 
-    uw = linear_interp(wind%t, wind%u, t)
-    udir = linear_interp(wind%t, wind%dir, t)
+    if (par%gusts) then
+       uw = linear_interp(wind%t, wind%u, t)
+       udir = linear_interp(wind%t, wind%dir, t)
+    else
+       i = max(1, binary_search(wind%t, t))
+       uw = wind(i)%u
+       udir = wind(i)%dir
+    end if
     
   end subroutine interpolate_wind
 
