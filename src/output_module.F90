@@ -449,7 +449,8 @@ contains
     character(*) :: name
     integer*4 :: rank
     integer*4 :: i
-    
+
+    rank = 0
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
           rank = var(i)%rank
@@ -469,16 +470,18 @@ contains
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
           rank = var(i)%rank
-          if (rank == 0) then
-             allocate(dims(0))
-             dims = 0.d0
-          else
+          if (rank > 0) then
              allocate(dims(rank))
              dims = var(i)%dims
           end if
           exit
        end if
     end do
+
+    if (.not. allocated(dims)) then
+       allocate(dims(0))
+       dims = 0.d0
+    end if
 
   end function get_shape
 

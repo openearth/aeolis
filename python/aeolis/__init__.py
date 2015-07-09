@@ -470,7 +470,7 @@ class AeoLiS:
 
         if len(self.outputtypes) > 0:
             for var in self.outputvars:
-                data = model.get_var(var)
+                data = model.get_var(var).copy()
                 if 'sum' in self.outputtypes or 'avg' in self.outputtypes:
                     self.output_stats[var]['sum'] += data
                 if 'var' in self.outputtypes:

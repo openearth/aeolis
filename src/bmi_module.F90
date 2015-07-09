@@ -21,7 +21,12 @@ module bmi_module
      module procedure get_c_pointer_rank3
      module procedure get_c_pointer_rank4
   end interface get_c_pointer
-    
+
+  interface set_c_pointer
+     module procedure set_c_pointer_rank0
+     module procedure set_c_pointer_rank1
+  end interface set_c_pointer
+
 contains
 
   integer(c_int) function initialize(c_configfile) result(ierr) bind(C, name="initialize")
@@ -227,42 +232,44 @@ contains
     var_name = char_array_to_string(c_var_name)
 
     rank = get_rank(var, var_name)
-    allocate(shp(rank))
-    shp = get_shape(var, var_name)
-
-    select case(rank)
-    case(0)
-       call get_c_pointer(var, var_name, x_0d_double_ptr)
+    if (rank == 0) then
+       call get_c_pointer(par, var_name, x_0d_double_ptr)
        xptr = c_loc(x_0d_double_ptr)
-    case(1)
-       if (allocated(x_1d_double_ptr)) then
-          deallocate(x_1d_double_ptr)
-       end if
-       allocate(x_1d_double_ptr(shp(1)))
-       call get_c_pointer(var, var_name, x_1d_double_ptr)
-       xptr = c_loc(x_1d_double_ptr)
-     case(2)
-       if (allocated(x_2d_double_ptr)) then
-          deallocate(x_2d_double_ptr)
-       end if
-       allocate(x_2d_double_ptr(shp(1), shp(2)))
-       call get_c_pointer(var, var_name, x_2d_double_ptr)
-       xptr = c_loc(x_2d_double_ptr)
-     case(3)
-       if (allocated(x_3d_double_ptr)) then
-          deallocate(x_3d_double_ptr)
-       end if
-       allocate(x_3d_double_ptr(shp(1), shp(2), shp(3)))
-       call get_c_pointer(var, var_name, x_3d_double_ptr)
-       xptr = c_loc(x_3d_double_ptr)
-     case(4)
-       if (allocated(x_4d_double_ptr)) then
-          deallocate(x_4d_double_ptr)
-       end if
-       allocate(x_4d_double_ptr(shp(1), shp(2), shp(3), shp(4)))
-       call get_c_pointer(var, var_name, x_4d_double_ptr)
-       xptr = c_loc(x_4d_double_ptr)
-     end select
+    else
+       allocate(shp(rank))
+       shp = get_shape(var, var_name)
+
+       select case(rank)
+       case(1)
+          if (allocated(x_1d_double_ptr)) then
+             deallocate(x_1d_double_ptr)
+          end if
+          allocate(x_1d_double_ptr(shp(1)))
+          call get_c_pointer(var, var_name, x_1d_double_ptr)
+          xptr = c_loc(x_1d_double_ptr)
+       case(2)
+          if (allocated(x_2d_double_ptr)) then
+             deallocate(x_2d_double_ptr)
+          end if
+          allocate(x_2d_double_ptr(shp(1), shp(2)))
+          call get_c_pointer(var, var_name, x_2d_double_ptr)
+          xptr = c_loc(x_2d_double_ptr)
+       case(3)
+          if (allocated(x_3d_double_ptr)) then
+             deallocate(x_3d_double_ptr)
+          end if
+          allocate(x_3d_double_ptr(shp(1), shp(2), shp(3)))
+          call get_c_pointer(var, var_name, x_3d_double_ptr)
+          xptr = c_loc(x_3d_double_ptr)
+       case(4)
+          if (allocated(x_4d_double_ptr)) then
+             deallocate(x_4d_double_ptr)
+          end if
+          allocate(x_4d_double_ptr(shp(1), shp(2), shp(3), shp(4)))
+          call get_c_pointer(var, var_name, x_4d_double_ptr)
+          xptr = c_loc(x_4d_double_ptr)
+       end select
+    end if
 
   end subroutine get_var
 
@@ -280,14 +287,12 @@ contains
 
     rank = get_rank(var, var_name)
     if (rank == 0) then
-       allocate(shp(0))
-       shp = 0.d0
+       call set_c_pointer(par, var_name, xptr)
     else
        allocate(shp(rank))
        shp = get_shape(var, var_name)
+       call set_c_pointer(var, var_name, xptr, rank, shp)
     end if
-
-    call set_c_pointer(var, var_name, xptr, rank, shp)
 
   end subroutine set_var
   
@@ -315,19 +320,17 @@ contains
 
   end subroutine get_end_time
 
-  subroutine get_c_pointer_rank0(var, name, val)
+  subroutine get_c_pointer_rank0(par, name, val)
 
-    type(variables), dimension(:), intent(in) :: var
+    type(parameters), intent(in) :: par
     character(*), intent(in) :: name
     real(c_double), intent(out) :: val
-    integer*4 :: i
 
-    do i = 1,size(var)
-       if (trim(var(i)%name) == trim(name)) then
-          val = var(i)%val%rank0
-          exit
-       end if
-    end do
+    if (trim(name) == 'dt') then
+       val = par%dt
+    elseif (trim(name) == 'accfac') then
+       val = par%accfac
+    end if
     
   end subroutine get_c_pointer_rank0
 
@@ -395,7 +398,25 @@ contains
     
   end subroutine get_c_pointer_rank4
 
-  subroutine set_c_pointer(var, name, val, rank, shp)
+  subroutine set_c_pointer_rank0(par, name, val)
+    
+    type(parameters), intent(inout) :: par
+    character(*), intent(in) :: name
+    type(c_ptr), intent(in) :: val
+    
+    real(c_double), pointer :: x_1d_double_ptr(:)
+
+    call c_f_pointer(val, x_1d_double_ptr, (/ 1 /))
+    
+    if (trim(name) == 'dt') then
+       par%dt = x_1d_double_ptr(1)
+    elseif (trim(name) == 'accfac') then
+       par%accfac = x_1d_double_ptr(1)
+    end if
+
+  end subroutine set_c_pointer_rank0
+  
+  subroutine set_c_pointer_rank1(var, name, val, rank, shp)
 
     type(variables), dimension(:), intent(inout) :: var
     character(*), intent(in) :: name
@@ -404,7 +425,6 @@ contains
     integer*4, dimension(:), intent(in) :: shp
     integer*4 :: i
 
-    real(c_double), pointer :: x_0d_double_ptr
     real(c_double), pointer :: x_1d_double_ptr(:)
     real(c_double), pointer :: x_2d_double_ptr(:,:)
     real(c_double), pointer :: x_3d_double_ptr(:,:,:)
@@ -413,8 +433,7 @@ contains
        if (trim(var(i)%name) == trim(name)) then
           select case (rank)
           case(0)
-             call c_f_pointer(val, x_0d_double_ptr, shp)
-             var(i)%val%rank0 = x_0d_double_ptr
+             exit
           case(1)
              call c_f_pointer(val, x_1d_double_ptr, shp)
              var(i)%val%rank1 = x_1d_double_ptr
@@ -430,6 +449,6 @@ contains
        end if
     end do
     
-  end subroutine set_c_pointer
+  end subroutine set_c_pointer_rank1
 
 end module bmi_module
