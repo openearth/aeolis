@@ -342,29 +342,6 @@ contains
     end do
 
   end subroutine output_close
-
-  subroutine write_output(par, sl, var)
-
-    type(parameters), intent(inout) :: par
-    type(spaceparams_linear), intent(inout) :: sl
-    type(variables), dimension(:), intent(inout) :: var
-
-    ! write output
-    if (par%t .le. par%dt  .or. par%tout < par%dt .or. &
-         mod(par%t, par%tout) < par%dt) then
-
-       ! update derived variables
-       if (is_output(var, 'mass')) sl%mass = get_layer_mass(par)
-       if (is_output(var, 'd10')) sl%d10 = get_layer_percentile(par, 0.1d0)
-       if (is_output(var, 'd50')) sl%d50 = get_layer_percentile(par, 0.5d0)
-       if (is_output(var, 'd90')) sl%d90 = get_layer_percentile(par, 0.9d0)
-       
-       call output_write(var)
-       call output_clear(var)
-
-    end if
-    
-  end subroutine write_output
   
   subroutine write_dimensions(par)
 

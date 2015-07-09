@@ -44,7 +44,9 @@ do while (t < tend)
    ! write output
    if (par%t .le. par%dt  .or. par%tout < par%dt .or. &
         mod(par%t, par%tout) < par%dt .or. par%tout - par%t < par%dt) then
-      call write_output(par, sl, var)
+
+      call output_write(var)
+      call output_clear(var)
    end if
 
    ! update time
