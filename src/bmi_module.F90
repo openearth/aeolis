@@ -229,6 +229,9 @@ contains
     integer*4, dimension(:), allocatable :: shp
     integer*4 :: rank
 
+    character(10), dimension(:), allocatable :: var_name_parts
+    character(slen) :: name, type
+
     var_name = char_array_to_string(c_var_name)
 
     rank = get_rank(var, var_name)
@@ -239,34 +242,43 @@ contains
        allocate(shp(rank))
        shp = get_shape(var, var_name)
 
+       var_name_parts = split(var_name, '.')
+       if (size(var_name_parts) == 0) then
+          name = trim(var_name_parts(1))
+          type = ''
+       else
+          name = trim(var_name_parts(1))
+          type = trim(var_name_parts(2))
+       end if
+
        select case(rank)
        case(1)
           if (allocated(x_1d_double_ptr)) then
              deallocate(x_1d_double_ptr)
           end if
           allocate(x_1d_double_ptr(shp(1)))
-          call get_c_pointer(var, var_name, x_1d_double_ptr)
+          call get_c_pointer(var, name, type, x_1d_double_ptr)
           xptr = c_loc(x_1d_double_ptr)
        case(2)
           if (allocated(x_2d_double_ptr)) then
              deallocate(x_2d_double_ptr)
           end if
           allocate(x_2d_double_ptr(shp(1), shp(2)))
-          call get_c_pointer(var, var_name, x_2d_double_ptr)
+          call get_c_pointer(var, name, type, x_2d_double_ptr)
           xptr = c_loc(x_2d_double_ptr)
        case(3)
           if (allocated(x_3d_double_ptr)) then
              deallocate(x_3d_double_ptr)
           end if
           allocate(x_3d_double_ptr(shp(1), shp(2), shp(3)))
-          call get_c_pointer(var, var_name, x_3d_double_ptr)
+          call get_c_pointer(var, name, type, x_3d_double_ptr)
           xptr = c_loc(x_3d_double_ptr)
        case(4)
           if (allocated(x_4d_double_ptr)) then
              deallocate(x_4d_double_ptr)
           end if
           allocate(x_4d_double_ptr(shp(1), shp(2), shp(3), shp(4)))
-          call get_c_pointer(var, var_name, x_4d_double_ptr)
+          call get_c_pointer(var, name, type, x_4d_double_ptr)
           xptr = c_loc(x_4d_double_ptr)
        end select
     end if
@@ -334,64 +346,116 @@ contains
     
   end subroutine get_c_pointer_rank0
 
-  subroutine get_c_pointer_rank1(var, name, val)
+  subroutine get_c_pointer_rank1(var, name, type, val)
 
     type(variables), dimension(:), intent(in) :: var
-    character(*), intent(in) :: name
+    character(*), intent(in) :: name, type
     real(c_double), intent(out) :: val(:)
     integer*4 :: i
-
+    
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
-          val = var(i)%val%rank1
+          select case (type)
+          case ('sum')
+             val = var(i)%sum%rank1
+          case ('avg')
+             val = var(i)%sum%rank1 / var(i)%n
+          case ('var')
+             val = (var(i)%var%rank1 - var(i)%sum%rank1**2 / var(i)%n) / (var(i)%n - 1)
+          case ('min')
+             val = var(i)%min%rank1
+          case ('max')
+             val = var(i)%max%rank1
+          case default
+             val = var(i)%val%rank1
+          end select
           exit
        end if
     end do
     
   end subroutine get_c_pointer_rank1
 
-  subroutine get_c_pointer_rank2(var, name, val)
+  subroutine get_c_pointer_rank2(var, name, type, val)
 
     type(variables), dimension(:), intent(in) :: var
-    character(*), intent(in) :: name
+    character(*), intent(in) :: name, type
     real(c_double), intent(out) :: val(:,:)
     integer*4 :: i
 
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
-          val = var(i)%val%rank2
+          select case (type)
+          case ('sum')
+             val = var(i)%sum%rank2
+          case ('avg')
+             val = var(i)%sum%rank2 / var(i)%n
+          case ('var')
+             val = (var(i)%var%rank2 - var(i)%sum%rank2**2 / var(i)%n) / (var(i)%n - 1)
+          case ('min')
+             val = var(i)%min%rank2
+          case ('max')
+             val = var(i)%max%rank2
+          case default
+             val = var(i)%val%rank2
+          end select
           exit
        end if
     end do
     
   end subroutine get_c_pointer_rank2
 
-  subroutine get_c_pointer_rank3(var, name, val)
+  subroutine get_c_pointer_rank3(var, name, type, val)
 
     type(variables), dimension(:), intent(in) :: var
-    character(*), intent(in) :: name
+    character(*), intent(in) :: name, type
     real(c_double), intent(out) :: val(:,:,:)
     integer*4 :: i
 
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
-          val = var(i)%val%rank3
+          select case (type)
+          case ('sum')
+             val = var(i)%sum%rank3
+          case ('avg')
+             val = var(i)%sum%rank3 / var(i)%n
+          case ('var')
+             val = (var(i)%var%rank3 - var(i)%sum%rank3**2 / var(i)%n) / (var(i)%n - 1)
+          case ('min')
+             val = var(i)%min%rank3
+          case ('max')
+             val = var(i)%max%rank3
+          case default
+             val = var(i)%val%rank3
+          end select
           exit
        end if
     end do
     
   end subroutine get_c_pointer_rank3
 
-  subroutine get_c_pointer_rank4(var, name, val)
+  subroutine get_c_pointer_rank4(var, name, type, val)
 
     type(variables), dimension(:), intent(in) :: var
-    character(*), intent(in) :: name
+    character(*), intent(in) :: name, type
     real(c_double), intent(out) :: val(:,:,:,:)
     integer*4 :: i
 
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
-          val = var(i)%val%rank4
+          select case (type)
+          case ('sum')
+             val = var(i)%sum%rank4
+          case ('avg')
+             val = var(i)%sum%rank4 / var(i)%n
+          case ('var')
+             val = (var(i)%var%rank4 - var(i)%sum%rank4**2 / var(i)%n) / (var(i)%n - 1)
+          case ('min')
+             val = var(i)%min%rank4
+          case ('max')
+             val = var(i)%max%rank4
+          case default
+             val = var(i)%val%rank4
+          end select
           exit
        end if
     end do

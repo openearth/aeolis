@@ -216,7 +216,7 @@ contains
     end do
 
   end subroutine get_pointer_rank4
-  
+
   subroutine output_init(par, var)
 
     type(parameters), intent(in) :: par

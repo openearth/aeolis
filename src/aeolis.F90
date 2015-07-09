@@ -31,11 +31,11 @@ if (initialize(c_configfile) /= 0) &
 call output_init(par, var)
 !call write_output(par, sl, var)
 
-t = 0
+par%t = 0
 tstart = get_time()
 tlog = tstart
 call get_end_time(tend)
-do while (t < tend)
+do while (par%t < tend)
 
    ! step in time
    if (update(-1.d0) /= 0) &
@@ -43,14 +43,14 @@ do while (t < tend)
 
    ! write output
    if (par%t .le. par%dt  .or. par%tout < par%dt .or. &
-        mod(par%t, par%tout) < par%dt .or. par%tout - par%t < par%dt) then
+        mod(par%t, par%tout) < par%dt) then
 
       call output_write(var)
       call output_clear(var)
    end if
 
    ! update time
-   call get_current_time(t)
+   call get_current_time(par%t)
 
    ! log progress
    if ( mod(par%t, par%tstop/10.0) < par%dt .or. get_time()-tlog > 60) then
