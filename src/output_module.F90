@@ -22,7 +22,6 @@ module output_module
   end type variables
 
   type variables_data
-     real*8, pointer :: rank0 => null()
      real*8, dimension(:), pointer :: rank1 => null()
      real*8, dimension(:,:), pointer :: rank2 => null()
      real*8, dimension(:,:,:), pointer :: rank3 => null()
@@ -32,7 +31,6 @@ module output_module
   end type variables_data
 
   interface get_pointer
-     module procedure get_pointer_rank0
      module procedure get_pointer_rank1
      module procedure get_pointer_rank2
      module procedure get_pointer_rank3
@@ -97,14 +95,8 @@ contains
        var%init = 0.d0
     end if
 
-    select case (rank)
-    case (0)
-       allocate(var%rank0)
-       var%rank0 = var%init
-    case default
-       allocate(var%rank1(product(dims)))
-       var%rank1 = var%init
-    end select
+    allocate(var%rank1(product(dims)))
+    var%rank1 = var%init
 
     ! create remapping pointer
     select case (rank)
@@ -150,32 +142,12 @@ contains
     if (associated(var%rank1)) then
        deallocate(var%rank1)
     end if
-    if (associated(var%rank0)) then
-       deallocate(var%rank0)
-    end if
 
     if (associated(var)) then
        deallocate(var)
     end if
 
   end subroutine dealloc_variable_data
-
-  subroutine get_pointer_rank0(var, name, dims, ptr)
-
-    type(variables), dimension(:), allocatable, intent(inout) :: var
-    character(*), intent(in) :: name
-    integer*4, dimension(:), intent(in) :: dims
-    real*8, pointer, intent(inout) :: ptr
-    integer*4 :: i
-
-    do i = 1,size(var)
-       if (trim(var(i)%name) == trim(name)) then
-          ptr => var(i)%val%rank0
-          exit
-       end if
-    end do
-    
-  end subroutine get_pointer_rank0
 
   subroutine get_pointer_rank1(var, name, dims, ptr)
 
@@ -296,18 +268,10 @@ contains
     do i = 1,size(var)
        if (var(i)%val%fid > 0) then
           var(i)%n = var(i)%n + 1
-          select case (var(i)%rank)
-          case (0)
-             var(i)%sum%rank0 = var(i)%sum%rank0 + var(i)%val%rank0
-             var(i)%var%rank0 = var(i)%var%rank0 + var(i)%val%rank0**2
-             var(i)%min%rank0 = min(var(i)%min%rank0, var(i)%val%rank0)
-             var(i)%max%rank0 = max(var(i)%max%rank0, var(i)%val%rank0)
-          case default
-             var(i)%sum%rank1 = var(i)%sum%rank1 + var(i)%val%rank1
-             var(i)%var%rank1 = var(i)%var%rank1 + var(i)%val%rank1**2
-             var(i)%min%rank1 = min(var(i)%min%rank1, var(i)%val%rank1)
-             var(i)%max%rank1 = max(var(i)%max%rank1, var(i)%val%rank1)
-          end select
+          var(i)%sum%rank1 = var(i)%sum%rank1 + var(i)%val%rank1
+          var(i)%var%rank1 = var(i)%var%rank1 + var(i)%val%rank1**2
+          var(i)%min%rank1 = min(var(i)%min%rank1, var(i)%val%rank1)
+          var(i)%max%rank1 = max(var(i)%max%rank1, var(i)%val%rank1)
        end if
     end do
     
@@ -319,36 +283,19 @@ contains
     integer*4 :: i
 
     do i = 1,size(var)
-       select case (var(i)%rank)
-       case (0)
-          if (var(i)%val%fid > 0) &
-               write(var(i)%val%fid) var(i)%val%rank0
-          if (var(i)%sum%fid > 0) &
-               write(var(i)%sum%fid) var(i)%sum%rank0
-          if (var(i)%avg%fid > 0) &
-               write(var(i)%avg%fid) var(i)%sum%rank0 / var(i)%n
-          if (var(i)%var%fid > 0) &
-               write(var(i)%var%fid) &
-               (var(i)%var%rank0 - var(i)%sum%rank0**2 / var(i)%n) / (var(i)%n - 1)
-          if (var(i)%min%fid > 0) &
-               write(var(i)%min%fid) var(i)%min%rank0
-          if (var(i)%max%fid > 0) &
-               write(var(i)%max%fid) var(i)%max%rank0
-       case default
-          if (var(i)%val%fid > 0) &
-               write(var(i)%val%fid) var(i)%val%rank1
-          if (var(i)%sum%fid > 0) &
-               write(var(i)%sum%fid) var(i)%sum%rank1
-          if (var(i)%avg%fid > 0) &
-               write(var(i)%avg%fid) var(i)%sum%rank1 / var(i)%n
-          if (var(i)%var%fid > 0) &
-               write(var(i)%var%fid) &
-               (var(i)%var%rank1 - var(i)%sum%rank1**2 / var(i)%n) / (var(i)%n - 1)
-          if (var(i)%min%fid > 0) &
-               write(var(i)%min%fid) var(i)%min%rank1
-          if (var(i)%max%fid > 0) &
-               write(var(i)%max%fid) var(i)%max%rank1
-       end select
+       if (var(i)%val%fid > 0) &
+            write(var(i)%val%fid) var(i)%val%rank1
+       if (var(i)%sum%fid > 0) &
+            write(var(i)%sum%fid) var(i)%sum%rank1
+       if (var(i)%avg%fid > 0) &
+            write(var(i)%avg%fid) var(i)%sum%rank1 / var(i)%n
+       if (var(i)%var%fid > 0) &
+            write(var(i)%var%fid) &
+            (var(i)%var%rank1 - var(i)%sum%rank1**2 / var(i)%n) / (var(i)%n - 1)
+       if (var(i)%min%fid > 0) &
+            write(var(i)%min%fid) var(i)%min%rank1
+       if (var(i)%max%fid > 0) &
+            write(var(i)%max%fid) var(i)%max%rank1
     end do
     
   end subroutine output_write
@@ -377,12 +324,7 @@ contains
     type(variables_data), intent(inout) :: var
     integer*4, intent(in) :: rank
     
-    select case (rank)
-    case (0)
-       var%rank0 = var%init
-    case default
-       var%rank1 = var%init
-    end select
+    var%rank1 = var%init
 
   end subroutine output_clear_data
 
