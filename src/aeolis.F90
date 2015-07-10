@@ -9,7 +9,6 @@ program aeolis
   ! Options:
   !     -v Shows the version of this AeoLiS executable
 
-use logging
 use constants_module
 use input_module
 use output_module
@@ -20,12 +19,12 @@ implicit none
 character(slen) :: configfile
 character(kind=c_char) :: c_configfile(slen)
 real*8 :: t, tstart, tend, tlog
+integer*4 :: ierr
 
 configfile = read_cmd()
 c_configfile = string_to_char_array(configfile)
 
-if (initialize(c_configfile) /= 0) &
-     write(msgbuf,*) 'Initialization failed'
+ierr = initialize(c_configfile)
 
 par%t = 0
 tstart = get_time()
@@ -34,8 +33,7 @@ call get_end_time(tend)
 do while (par%t < tend)
 
    ! step in time
-   if (update(-1.d0) /= 0) &
-        write(msgbuf,*) 'Updating to timestep ', t, ' failed'
+   ierr = update(-1.d0)
 
    ! write output
    if (par%t .le. par%dt  .or. par%tout < par%dt .or. &
@@ -58,7 +56,6 @@ end do
 
 call write_dimensions(par)
 
-if (finalize() /= 0) &
-     write(msgbuf,*) 'Finalization failed'
+ierr = finalize()
 
 end program

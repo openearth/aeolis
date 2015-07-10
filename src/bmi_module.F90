@@ -43,10 +43,6 @@ contains
     ! convert c string to fortran string
     configfile = char_array_to_string(c_configfile)
     
-    ierr = 0
-    write(msgbuf,*) 'Initializing with ', configfile
-    call log(LEVEL_INFO, trim(msgbuf))
-
     ! read parameters file
     par = read_params(configfile)
 
@@ -64,10 +60,6 @@ contains
 
     real(c_double), value, intent(in) :: dt
 
-    ierr = 0
-    write(msgbuf,*) 'Updating with dt: ', dt
-    call log(LEVEL_DEBUG, trim(msgbuf))
-
     if (dt > 0.d0) then
        par%dt = dt
     end if
@@ -80,9 +72,6 @@ contains
 
   integer(c_int) function finalize() result(ierr) bind(C, name="finalize")
     !DEC$ ATTRIBUTES DLLEXPORT::finalize
-
-    ierr = 0
-    call log(LEVEL_INFO, 'Finalize')
 
     call output_close(var)
     
