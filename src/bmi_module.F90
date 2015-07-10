@@ -2,7 +2,6 @@ module bmi_module
 
   use iso_c_binding
   use iso_c_utils
-  use logging
   use init_module
   use moist_module
   use run_module

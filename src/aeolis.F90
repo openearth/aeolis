@@ -9,6 +9,7 @@ program aeolis
   ! Options:
   !     -v Shows the version of this AeoLiS executable
 
+use logging
 use constants_module
 use input_module
 use output_module

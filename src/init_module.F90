@@ -19,10 +19,10 @@ contains
     real*8, dimension(:,:), allocatable :: x_tmp, y_tmp, zb_tmp
     integer*4, parameter :: fid=20
 
-    write(0,*) 'Initialization started...'
+    write(*,*) 'Initialization started...'
     
     ! bed
-    write(0,*) 'Generating bed profile and composition...'
+    write(*,*) 'Generating bed profile and composition...'
     call generate_bed(par, x_tmp, y_tmp, zb_tmp)
 
     call alloc_variable(var, 'x',  (/par%nx+1, par%ny+1/))
@@ -45,32 +45,20 @@ contains
     deallocate(zb_tmp)
 
     call generate_bedcomposition(par)
-!    open(unit=fid, file=trim(par%output_dir) // "bed.in", &
-!         action="write", status="replace", form="unformatted")
-!    write(fid) s%xz
-!    write(fid) s%yz
-!    write(fid) s%zb
-!    close(fid)
 
     ! wind
-    write(0,*) 'Generating wind time series...'
+    write(*,*) 'Generating wind time series...'
     call generate_wind(par, par%uw)
-!    open(unit=fid, file=trim(par%output_dir) // "wind.in", &
-!         action="write", status="replace", form="unformatted")
-!    write(fid) par%uw%t
-!    write(fid) par%uw%u
-!    write(fid) par%uw%dir
-!    close(fid)
 
     ! time
     par%ntout = int(par%tstop / par%tout) + 1
 
     ! moist
-    write(0,*) 'Generating moisture time series...'
+    write(*,*) 'Generating moisture time series...'
     call generate_moist(par, par%moist)
 
     ! tide and meteo
-    write(0,*) 'Generating tide and meteo time series...'
+    write(*,*) 'Generating tide and meteo time series...'
     call generate_tide(par, par%zs)
     call generate_meteo(par, par%meteo)
 
@@ -143,7 +131,7 @@ contains
     ! create spatial grid matrixes
     call gridprops(par, s)
 
-    write(0,*) 'Starting simulation...'
+    write(*,*) 'Starting simulation...'
 
   end subroutine init
 

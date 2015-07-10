@@ -311,12 +311,12 @@ contains
 
     ! check required fields
     if (trim(par%xgrid_file) == '') then
-       write(0, '(a)') " No grid defined"
+       write(*, '(a)') " No grid defined"
        stop 1
     end if
 
     if (trim(par%bed_file) == '') then
-       write(0, '(a)') " No bathymetry defined"
+       write(*, '(a)') " No bathymetry defined"
        stop 1
     end if
 
@@ -325,13 +325,13 @@ contains
     case ('euler_backward', 'euler_forward', 'crank_nicolson')
        ! all ok
     case default
-       write(0, '(a,a)') " Unsupported scheme: ",trim(par%scheme)
+       write(*, '(a,a)') " Unsupported scheme: ",trim(par%scheme)
        stop 1
     end select
 
     ! check dimensionality
     if (par%ny == 1) then
-       write(0, '(a)') "Warning: using ny=1, are you sure not to use ny=0?"
+       write(*, '(a)') "Warning: using ny=1, are you sure not to use ny=0?"
     end if
     
     ! sort grain size distribution
@@ -348,7 +348,7 @@ contains
        par%output_dir = trim(par%output_dir) // "/"
        inquire(file=par%output_dir, exist=ex)
        if (.not. ex) then
-          write(0, '(a,a)') " Created output directory ", trim(par%output_dir)
+          write(*, '(a,a)') " Created output directory ", trim(par%output_dir)
           call system("mkdir " // trim(par%output_dir))
        end if
     end if
@@ -372,7 +372,7 @@ contains
        value = default
     end if
 
-    write(0, '(a12,a,a)') key, ' = ', trim(value)
+    write(*, '(a12,a,a)') key, ' = ', trim(value)
 
   end function read_key_str
 
@@ -393,10 +393,10 @@ contains
 
     value_arr = split(value)
 
-    write(0, '(a12,a,a)') key, ' = ', trim(value_arr(1))
+    write(*, '(a12,a,a)') key, ' = ', trim(value_arr(1))
     
     do i = 2,size(value_arr)
-       write(0, '(a15,a)') ' ', trim(value_arr(i))
+       write(*, '(a15,a)') ' ', trim(value_arr(i))
     end do
         
   end function read_key_strvec
@@ -416,7 +416,7 @@ contains
        value_dbl = default
     end if
 
-    write(0, '(a12,a,f15.4)') key, ' = ', value_dbl
+    write(*, '(a12,a,f15.4)') key, ' = ', value_dbl
     
   end function read_key_dbl
   
@@ -437,10 +437,10 @@ contains
        value_dbl = default
     end if
 
-    write(0, '(a12,a,f15.4)') key, ' = ', value_dbl(1)
+    write(*, '(a12,a,f15.4)') key, ' = ', value_dbl(1)
 
     do i = 2,n
-       write(0, '(a15,f15.4)') ' ', value_dbl(i)
+       write(*, '(a15,f15.4)') ' ', value_dbl(i)
     end do
 
   end function read_key_dblvec
@@ -460,7 +460,7 @@ contains
        value_int = default
     end if
 
-    write(0, '(a12,a,i15)') key, ' = ', value_int
+    write(*, '(a12,a,i15)') key, ' = ', value_int
     
   end function read_key_int
 
@@ -479,7 +479,7 @@ contains
        value_logical = default
     end if
 
-    write(0, '(a12,a,l1)') key, ' = ', value_logical
+    write(*, '(a12,a,l1)') key, ' = ', value_logical
     
   end function read_key_logical
 
