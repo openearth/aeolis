@@ -86,7 +86,7 @@ contains
           arr(i) = trim(str(pos0:))
           exit
        end if
-       arr(i) = trim(str(pos0:(pos0+pos-1)))
+       arr(i) = trim(str(pos0:(pos0+pos-2)))
        pos0 = pos0 + pos
     end do
 
@@ -129,6 +129,23 @@ contains
     end do
     
   end subroutine split_path
+
+  subroutine split_var(var_name, name, type)
+
+    character(*), intent(in) :: var_name
+    character(10), dimension(:), allocatable :: var_name_parts
+    character(slen), intent(out) :: name, type
+
+    var_name_parts = split(var_name, '.')
+    if (size(var_name_parts) == 1) then
+       name = trim(var_name_parts(1))
+       type = ''
+    else
+       name = trim(var_name_parts(1))
+       type = trim(var_name_parts(2))
+    end if
+
+  end subroutine split_var
   
   function find_minimum(x) result (loc)
 

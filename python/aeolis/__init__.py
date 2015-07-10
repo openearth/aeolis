@@ -34,7 +34,7 @@ class AeoLiS:
     iout = 0
     tstop = None
     output = None
-    output_stats = None
+#    output_stats = None
     ios = 0
 
     ncattrs = dict()
@@ -197,12 +197,13 @@ class AeoLiS:
         # set tout to large to prevent slow computations
         if not params.has_key('tout'):
             params['tout'] = params['tstop']
-
-        if standalone:
-            params['output_dir'] = self.outputfile.replace('.nc','')
+        if not params.has_key('outputvars'):
             params['outputvars'] = self.outputvars
+        if not params.has_key('outputtypes'):
             params['outputtypes'] = self.outputtypes
-        
+        if not params.has_key('output_dir'):
+            params['output_dir'] = self.outputfile.replace('.nc','')
+            
         with open(self.configfile, 'w') as fp:
             for k, v in sorted(params.iteritems()):
                 if isinstance(v, bool):
@@ -454,54 +455,54 @@ class AeoLiS:
                 else:
                     grp.setncattr(k, v)
 
-        # initialize output stats
-        self.output_stats = {}
-        for var in self.outputvars:
-            self.output_stats[var] = {}
-            for typ in self.outputtypes:
-                self.output_stats[var][typ] = None
-        self.clear_output(model)
+#        # initialize output stats
+#        self.output_stats = {}
+#        for var in self.outputvars:
+#            self.output_stats[var] = {}
+#            for typ in self.outputtypes:
+#                self.output_stats[var][typ] = None
+#        self.clear_output(model)
                 
         # initialize output property
         self.output = AeoLiS_Output(self.outputfile)
 
             
-    def update_output(self, model):
-
-        if len(self.outputtypes) > 0:
-            for var in self.outputvars:
-                data = model.get_var(var).copy()
-                if 'sum' in self.outputtypes or 'avg' in self.outputtypes:
-                    self.output_stats[var]['sum'] += data
-                if 'var' in self.outputtypes:
-                    self.output_stats[var]['var'] += data**2
-                if 'min' in self.outputtypes:
-                    self.output_stats[var]['min'] = np.min(self.output_stats[var]['min'], data)
-                if 'max' in self.outputtypes:
-                    self.output_stats[var]['max'] = np.max(self.output_stats[var]['max'], data)
-                
-        self.ios += 1
-
-                
-    def clear_output(self, model):
-
-        n = {}
-        n['y'], n['x'], n['layers'], n['fractions'] = model.get_var_shape('mass')
-
-        for var, types in self.output_stats.iteritems():
-            dims = AeoLiS.get_dims(var)
-            if dims is None:
-                continue
-            if 'sum' in self.outputtypes or 'avg' in self.outputtypes:
-                self.output_stats[var]['sum'] = np.zeros([n[k] for k in dims[1:]])
-            if 'var' in self.outputtypes:
-                self.output_stats[var]['var'] = np.zeros([n[k] for k in dims[1:]])
-            if 'min' in self.outputtypes:
-                self.output_stats[var]['min'] = np.zeros([n[k] for k in dims[1:]]) + np.inf
-            if 'max' in self.outputtypes:
-                self.output_stats[var]['max'] = np.zeros([n[k] for k in dims[1:]]) - np.inf
-
-        self.ios = 0
+#    def update_output(self, model):
+#
+#        if len(self.outputtypes) > 0:
+#            for var in self.outputvars:
+#                data = model.get_var(var).copy()
+#                if 'sum' in self.outputtypes or 'avg' in self.outputtypes:
+#                    self.output_stats[var]['sum'] += data
+#                if 'var' in self.outputtypes:
+#                    self.output_stats[var]['var'] += data**2
+#                if 'min' in self.outputtypes:
+#                    self.output_stats[var]['min'] = np.min(self.output_stats[var]['min'], data)
+#                if 'max' in self.outputtypes:
+#                    self.output_stats[var]['max'] = np.max(self.output_stats[var]['max'], data)
+#                
+#        self.ios += 1
+#
+#                
+#    def clear_output(self, model):
+#
+#        n = {}
+#        n['y'], n['x'], n['layers'], n['fractions'] = model.get_var_shape('mass')
+#
+#        for var, types in self.output_stats.iteritems():
+#            dims = AeoLiS.get_dims(var)
+#            if dims is None:
+#                continue
+#            if 'sum' in self.outputtypes or 'avg' in self.outputtypes:
+#                self.output_stats[var]['sum'] = np.zeros([n[k] for k in dims[1:]])
+#            if 'var' in self.outputtypes:
+#                self.output_stats[var]['var'] = np.zeros([n[k] for k in dims[1:]])
+#            if 'min' in self.outputtypes:
+#                self.output_stats[var]['min'] = np.zeros([n[k] for k in dims[1:]]) + np.inf
+#            if 'max' in self.outputtypes:
+#                self.output_stats[var]['max'] = np.zeros([n[k] for k in dims[1:]]) - np.inf
+#
+#        self.ios = 0
 
                 
     def write_output(self, model):
@@ -510,25 +511,22 @@ class AeoLiS:
         with netCDF4.Dataset(self.outputfile, 'a') as nc:
             nc.variables['time'][i] = self.t
             for var in self.outputvars:
-                data = model.get_var(var)
-                nc.variables[var][i,...] = data
+                nc.variables[var][i,...] = model.get_var(var).copy()
                 if 'sum' in self.outputtypes:
-                    nc.variables['%s.sum' % var][i,...] = self.output_stats[var]['sum']
+                    nc.variables['%s.sum' % var][i,...] = model.get_var('%s.sum' % var).copy()
                 if 'avg' in self.outputtypes:
-                    nc.variables['%s.avg' % var][i,...] = self.output_stats[var]['sum'] / self.ios
+                    nc.variables['%s.avg' % var][i,...] = model.get_var('%s.avg' % var).copy()
                 if 'var' in self.outputtypes:
-                    nc.variables['%s.var' % var][i,...] = (self.output_stats[var]['var'] - \
-                                                           self.output_stats[var]['sum']**2 / \
-                                                           self.ios) / (self.ios - 1)
+                    nc.variables['%s.var' % var][i,...] = model.get_var('%s.var' % var).copy()
                 if 'min' in self.outputtypes:
-                    nc.variables['%s.min' % var][i,...] = self.output_stats[var]['min']
+                    nc.variables['%s.min' % var][i,...] = model.get_var('%s.min' % var).copy()
                 if 'max' in self.outputtypes:
-                    nc.variables['%s.max' % var][i,...] = self.output_stats[var]['max']
+                    nc.variables['%s.max' % var][i,...] = model.get_var('%s.max' % var).copy()
 
             nc.variables['time_bounds'][i,0] = 0 if i == 0 else nc.variables['time'][i]
             nc.variables['time_bounds'][i,1] = self.t
 
-        self.clear_output(model)
+#        self.clear_output(model)
         self.iout += 1
 
 
@@ -555,7 +553,7 @@ class AeoLiS:
         with BMIWrapper(engine='aeolis', configfile=self.configfile) as model:
 
             self.init_output(model)
-        
+
             t = 0
             self.t = 0
             self.it = 0
@@ -573,7 +571,7 @@ class AeoLiS:
                     
                 model.update(-1)
 
-                self.update_output(model)
+#                self.update_output(model)
                 
                 self.t = model.get_current_time()
                 self.it += 1

@@ -27,10 +27,6 @@ c_configfile = string_to_char_array(configfile)
 if (initialize(c_configfile) /= 0) &
      write(msgbuf,*) 'Initialization failed'
 
-! initialize output
-call output_init(par, var)
-!call write_output(par, sl, var)
-
 par%t = 0
 tstart = get_time()
 tlog = tstart
@@ -61,7 +57,7 @@ do while (par%t < tend)
 end do
 
 call write_dimensions(par)
-call output_close(var)
+
 if (finalize() /= 0) &
      write(msgbuf,*) 'Finalization failed'
 

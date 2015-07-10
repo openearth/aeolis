@@ -6,6 +6,7 @@ module bmi_module
   use init_module
   use moist_module
   use run_module
+  use utils_module
 
   implicit none
 
@@ -53,7 +54,8 @@ contains
     call init(par, var, s, sl)
     par%t = 0
 
-!    write(0,*) 'Model run started...'
+    ! initialize output
+    call output_init(par, var)
 
   end function initialize
 
@@ -71,6 +73,7 @@ contains
     end if
 
     call step(par, s, sl, var)
+    call output_update(var)
     call set_var_reset(var)
     
   end function update
@@ -81,6 +84,8 @@ contains
     ierr = 0
     call log(LEVEL_INFO, 'Finalize')
 
+    call output_close(var)
+    
     if (allocated(par%grain_size)) then
        deallocate(par%grain_size)
     end if
@@ -189,10 +194,13 @@ contains
 
     character(kind=c_char), intent(in) :: c_var_name(*)
     integer(c_int), intent(out) :: rank
+    character(slen) :: name, type
     character(len=strlen(c_var_name)) :: var_name
 
     var_name = char_array_to_string(c_var_name)
-    rank = get_rank(var, var_name)
+    call split_var(var_name, name, type)
+    
+    rank = get_rank(var, name)
 
   end subroutine get_var_rank
 
@@ -202,12 +210,14 @@ contains
     character(kind=c_char), intent(in) :: c_var_name(*)
     integer(c_int), intent(inout) :: var_shape(MAXDIMS)
     character(len=strlen(c_var_name)) :: var_name
+    character(slen) :: name, type
     integer :: rank
 
     var_name = char_array_to_string(c_var_name)
-    var_shape = get_shape(var, var_name)
+    call split_var(var_name, name, type)
 
-    rank = get_rank(var, var_name)
+    var_shape = get_shape(var, name)
+    rank = get_rank(var, name)
     call arrflip(var_shape, rank)
     
   end subroutine get_var_shape
@@ -233,23 +243,15 @@ contains
     character(slen) :: name, type
 
     var_name = char_array_to_string(c_var_name)
+    call split_var(var_name, name, type)
 
-    rank = get_rank(var, var_name)
+    rank = get_rank(var, name)
     if (rank == 0) then
-       call get_c_pointer(par, var_name, x_0d_double_ptr)
+       call get_c_pointer(par, name, x_0d_double_ptr)
        xptr = c_loc(x_0d_double_ptr)
     else
        allocate(shp(rank))
-       shp = get_shape(var, var_name)
-
-       var_name_parts = split(var_name, '.')
-       if (size(var_name_parts) == 0) then
-          name = trim(var_name_parts(1))
-          type = ''
-       else
-          name = trim(var_name_parts(1))
-          type = trim(var_name_parts(2))
-       end if
+       shp = get_shape(var, name)
 
        select case(rank)
        case(1)
@@ -355,7 +357,7 @@ contains
     
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
-          select case (type)
+          select case (trim(type))
           case ('sum')
              val = var(i)%sum%rank1
           case ('avg')
@@ -384,7 +386,7 @@ contains
 
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
-          select case (type)
+          select case (trim(type))
           case ('sum')
              val = var(i)%sum%rank2
           case ('avg')
@@ -413,7 +415,7 @@ contains
 
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
-          select case (type)
+          select case (trim(type))
           case ('sum')
              val = var(i)%sum%rank3
           case ('avg')
@@ -442,7 +444,7 @@ contains
 
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
-          select case (type)
+          select case (trim(type))
           case ('sum')
              val = var(i)%sum%rank4
           case ('avg')

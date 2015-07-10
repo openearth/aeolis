@@ -155,9 +155,6 @@ contains
     sl%zb = update_bed(par, sl%zb, -sl%supply, sl%rho)
     call sweep_toplayer(par)
 
-    ! incremental output
-    call output_update(var)
-
     par%t = par%t + par%dt
     par%nt = par%nt + 1
     
