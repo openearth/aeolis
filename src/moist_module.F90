@@ -305,7 +305,7 @@ contains
     
     ! infiltration using Darcy
     do i = 1,par%nc
-       if (zs(i) >= zb(i)) then
+       if (zs(i) > zb(i)) then
           moist(:,i) = par%porosity
        else
           moist(:,i) = moist(:,i) * exp(-par%F * par%dt)
