@@ -17,55 +17,50 @@ module bed_module
 
 contains
 
-  subroutine generate_bed(par, x, z)
+  subroutine generate_bed(par, x, y, zb)
 
     type(parameters), intent(inout) :: par
-    integer*4 :: fid, ierr, n, i
-    real*8, dimension(:), allocatable, intent(out) :: x, z
-    real*8, dimension(:), allocatable :: x_c, z_c
+    integer*4 :: fid, ierr, i
+    real*8, dimension(:,:), allocatable, intent(out) :: x, y, zb
 
     fid = 99
 
-    ! count lines
-    n = -1
-    ierr = 0
-    open(fid, file=trim(par%bed_file))
-    do while (ierr == 0)
-       read(fid, *, iostat=ierr)
-       n = n + 1
-    end do
-    rewind(fid)
-
     ! allocate arrays
-    allocate(x_c(n))
-    allocate(z_c(n))
+    allocate(x(par%nx+1, par%ny+1))
+    allocate(y(par%nx+1, par%ny+1))
+    allocate(zb(par%nx+1, par%ny+1))
+
+    x = 0.d0
+    y = 0.d0
+    zb = 0.d0
 
     ! read data
-    i = 1
     ierr = 0
-    do while (ierr == 0)
-       read(fid, *, iostat=ierr) x_c(i), z_c(i)
-       i = i + 1
+    open(fid, file=trim(par%xgrid_file), status="old", action="read")
+    do i = 1,par%ny+1
+       read(fid, *, iostat=ierr) x(:,i)
     end do
     close(fid)
 
-    ! allocate arrays
-    par%nx = nint(maxval(x_c) / par%dx)
-    allocate(x(par%nx+1))
-    allocate(z(par%nx+1))
-
-    ! interpolate bed
-    x = (/(i*par%dx, i=0, par%nx)/)
-    do i=1, par%nx+1
-       z(i) = linear_interp(x_c, z_c, x(i))
+    ierr = 0
+    open(fid, file=trim(par%ygrid_file), status="old", action="read")
+    do i = 1,par%ny+1
+       read(fid, *, iostat=ierr) y(:,i)
     end do
-    
+    close(fid)
+
+    ierr = 0
+    open(fid, file=trim(par%bed_file), status="old", action="read")
+    do i = 1,par%ny+1
+       read(fid, *, iostat=ierr) zb(:,i)
+    end do
+    close(fid)
+
   end subroutine generate_bed
 
-  subroutine generate_bedcomposition(par, x, z)
+  subroutine generate_bedcomposition(par)
 
     type(parameters), intent(inout) :: par
-    real*8, dimension(:), intent(in) :: x, z
 
     integer :: iostat
     logical, pointer :: exchlyr
@@ -162,7 +157,7 @@ contains
     if (istat /= 0) call adderror(messages, message)
 
     nmlb    = 1                
-    nmub    = size(x)                
+    nmub    = par%nc
     tstart  = 0.0              
     tend    = par%tstop
     dt      = par%dt
@@ -243,9 +238,9 @@ contains
 
     ! set layer mass
     msed = 0.0_fp
-    do j = 1,nlyr
-       do i = 1,par%nfractions
-          msed(i,j,:) = thlyr(j,:) * cdryb(i) * par%grain_dist(i) / &
+    do i = 1,nlyr
+       do j = 1,par%nfractions
+          msed(j,i,:) = thlyr(i,:) * cdryb(j) * par%grain_dist(j) / &
                max(1e-10, sum(par%grain_dist))
        end do
     end do
@@ -257,32 +252,33 @@ contains
 
   end subroutine generate_bedcomposition
 
-  function update_bed(par, z, mass, rho) result (z_new)
+  function update_bed(par, zb, mass, rho) result (z_new)
 
     type(parameters), intent(in) :: par
-    real*8, dimension(:), intent(in) :: z
+    real*8, dimension(:), intent(in) :: zb
     real*8, dimension(:,:), intent(in) :: mass
     real*8, dimension(:), intent(in) :: rho
     real*8, dimension(:), allocatable :: z_new, dz
 
-    allocate(z_new(size(z)))
-    allocate(dz(size(z)))
+    allocate(z_new(par%nc))
+    allocate(dz(par%nc))
 
     if ( updmorlyr(morlyr, mass, 0.d0 * mass, rho, par%dt, 1.d0, dz, messages) /= 0 ) then
        call adderror(messages, message)
     end if
 
     if (par%bedupdate) then
-       z_new = z + dz
+       z_new = zb + dz
     else
-       z_new = z
+       z_new = zb
     end if
     
   end function update_bed
 
-  function get_layer_mass() result (mass)
+  function get_layer_mass(par) result (mass)
 
     integer :: istat
+    type(parameters) :: par
     real*8 , dimension(:,:,:), pointer :: mass
 
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', mass)
@@ -290,9 +286,10 @@ contains
 
   end function get_layer_mass
 
-  function get_layer_thickness() result (thlyr)
+  function get_layer_thickness(par) result (thlyr)
 
     integer :: istat
+    type(parameters) :: par
     real*8 , dimension(:,:), pointer :: thlyr
 
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_thickness', thlyr)
@@ -303,7 +300,7 @@ contains
   function get_layer_percentile(par, p) result (perc)
 
     type(parameters), intent(in) :: par
-    integer :: istat, i, j, k
+    integer :: istat, i, k, l
     real*8 :: sedtot
     real*8, intent(in) :: p
     real*8, dimension(:), allocatable :: frac
@@ -312,63 +309,63 @@ contains
     real*8, dimension(:,:,:), pointer :: msed
 
     allocate(frac(par%nfractions))
-    allocate(perc(par%nlayers, par%nx+1))
-    allocate(msed_cs(par%nfractions, par%nlayers, par%nx+1))
+    allocate(perc(par%nlayers, par%nc))
+    allocate(msed_cs(par%nfractions, par%nlayers, par%nc))
 
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
     if (istat/=0) call adderror(messages, message)
 
-    do i = 1,par%nx+1
-       do j = 1,par%nlayers
+    do i = 1,par%nc
+       do k = 1,par%nlayers
           sedtot = 0.0_fp
-          do k = 1,par%nfractions
-             sedtot = sedtot + msed(k,j,i)
-             msed_cs(k,j,i) = sedtot
-          enddo
-          perc(j,i) = 10**linear_interp(msed_cs(:,j,i)/sedtot, log10(par%grain_size), p)
-       enddo
-    enddo
+          do l = 1,par%nfractions
+             sedtot = sedtot + msed(l,k,i)
+             msed_cs(l,k,i) = sedtot
+          end do
+          perc(k,i) = 10**linear_interp(msed_cs(:,k,i)/sedtot, log10(par%grain_size), p)
+       end do
+    end do
 
   end function get_layer_percentile
 
   function get_layer_massfraction(par) result (fractions)
 
     type(parameters), intent(in) :: par
-    integer :: istat, i, j, k
+    integer :: istat, i, k, l
     real*8 :: sedtot
     real*8, dimension(:,:,:), allocatable :: fractions
     real*8, dimension(:,:,:), pointer :: msed
 
-    allocate(fractions(par%nfractions, par%nlayers, par%nx+1))
+    allocate(fractions(par%nfractions, par%nlayers, par%nc))
 
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
     if (istat/=0) call adderror(messages, message)
 
-    do i = 1,par%nx+1
-       do j = 1,par%nlayers
+    do i = 1,par%nc
+       do k = 1,par%nlayers
           sedtot = 0.0_fp
-          do k = 1,par%nfractions
-             sedtot = sedtot + msed(k,j,i)
-          enddo
-          do k = 1,par%nfractions
-             fractions(k,j,i) = msed(k,j,i)/sedtot
-          enddo
-       enddo
-    enddo
+          do l = 1,par%nfractions
+             sedtot = sedtot + msed(l,k,i)
+          end do
+          do l = 1,par%nfractions
+             fractions(l,k,i) = msed(l,k,i)/sedtot
+          end do
+       end do
+    end do
 
   end function get_layer_massfraction
 
   function get_layer_volumefraction(par) result (fractions)
 
     type(parameters), intent(in) :: par
-    integer :: istat, i, j, k
+    integer :: istat, i, k, l
     real*8, dimension(:,:,:), allocatable :: fractions
     real*8, dimension(:,:,:), pointer :: msed
     real*8, dimension(:,:), pointer :: svfrac
     real*8, dimension(:,:), pointer :: thlyr
     real*8, dimension(:), pointer :: dens
 
-    allocate(fractions(par%nfractions, par%nlayers, par%nx+1))
+    allocate(fractions(par%nfractions, par%nlayers, par%nc))
 
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_thickness', thlyr)
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
@@ -376,13 +373,13 @@ contains
     istat = bedcomp_getpointer_realfp(morlyr, 'solid_volume_fraction', svfrac)
     if (istat/=0) call adderror(messages, message)
 
-    do i = 1,par%nx+1
-       do j = 1,par%nlayers
-          do k = 1,par%nfractions+2
-             fractions(k,j,i) = msed(k,j,i)/(dens(k)*svfrac(j,i)*thlyr(j,i))
-          enddo
-       enddo
-    enddo
+    do i = 1,par%nc
+       do k = 1,par%nlayers
+          do l = 1,par%nfractions+2
+             fractions(l,k,i) = msed(l,k,i)/(dens(k)*svfrac(k,i)*thlyr(k,i))
+          end do
+       end do
+    end do
 
   end function get_layer_volumefraction
 
@@ -403,12 +400,11 @@ contains
 
   end subroutine compute_threshold_grainsize
 
-  subroutine compute_threshold_bedslope(par, x, z, u_th)
+  subroutine compute_threshold_bedslope(par, s)
 
     type(parameters), intent(in) :: par
-    real*8, dimension(:), intent(in) :: x, z
-    real*8, dimension(:,:), intent(inout) :: u_th
-    integer :: i
+    type(spaceparams), intent(inout) :: s
+    integer :: i, j, k, i1, im1
     real*8 :: phi, theta
 
     if (.not. par%th_bedslope) return
@@ -417,21 +413,46 @@ contains
 
     phi = par%phi / 180.d0 * pi
 
-    do i=1,par%nx
-       theta = -atan((z(i+1) - z(i)) / (x(i+1) - x(i)))
-       u_th(:,i) = sqrt((tan(phi) - tan(theta)) / tan(phi) * cos(theta)) * u_th(:,i)
+    if (par%ny == 0) then
+       i1 = 1
+    else
+       i1 = 2
+    end if
+    
+    do i = i1,par%ny+1
+
+       if (par%ny == 0) then
+          im1 = 1
+       else
+          im1 = i - 1
+       end if
+
+       do j = 2,par%nx+1
+          ! theta = -atan((s%zb(j,i+1) - s%zb(j,i)) / s%dsz(j,i))
+          
+          theta = -atan( ( &
+               (s%zb(j,i) - s%zb(j-1,i)) * s%dnz(j,i) * cos(s%alfaz(j,i) + s%udir(j,i)) + &
+               (s%zb(j,i) - s%zb(j,im1)) * s%dsz(j,i) * sin(s%alfaz(j,i) + s%udir(j,i)) ) * s%dsdnzi(j,i) )
+          
+          do k = 1,par%nfractions
+             s%uth(k,j,i) = sqrt((tan(phi) - tan(theta)) / tan(phi) * cos(theta)) * s%uth(k,j,i)
+          end do
+       end do
     end do
 
-    u_th(:,par%nx+1) = u_th(:,par%nx)
+    s%uth(:,1,:) = s%uth(:,2,:)
 
+    if (par%ny > 0) then
+       s%uth(:,:,1) = s%uth(:,:,par%ny+1)
+    end if
+           
   end subroutine compute_threshold_bedslope
 
-  subroutine mix_toplayer(par, z, tide)
+  subroutine mix_toplayer(par, zb, zs)
 
     type(parameters), intent(in) :: par
-    real*8, dimension(:), intent(in) :: z
-    real*8, intent(in) :: tide
-    integer :: i, j, k, nmix
+    real*8, dimension(:), intent(in) :: zb, zs
+    integer :: i, k, l, nmix
     real*8 :: th
 
     integer :: istat
@@ -446,38 +467,38 @@ contains
     istat = bedcomp_getpointer_realfp(morlyr, 'layer_thickness' , thlyr)
     if (istat/=0) call adderror(messages, message)
 
-    allocate(dist(par%nfractions, par%nx+1))
+    allocate(dist(par%nfractions, par%nc))
 
-    do k = 1,par%nx+1
+    do i = 1,par%nc
 
-       ! fix only if flooded
-       if (z(k) <= tide) then
-
+       ! mix only if flooded
+       if (zb(i) <= zs(i)) then
+             
           ! determine mixing depth in terms of number of layers
           nmix = 0
           th = 0.d0
-          do i = 1,size(thlyr(:,k))
+          do k = 1,size(thlyr(:,i))
              nmix = nmix + 1
-             th = th + thlyr(i,k)
-             if (th >= min(par%Hs, (tide - z(k)) * par%gamma) * par%facDOD) exit
+             th = th + thlyr(k,i)
+             if (th >= min(par%Hs, (zs(i) - zb(i)) * par%gamma) * par%facDOD) exit
           end do
 
           if (nmix == 0) continue
 
           ! determine average sediment distribution over mixing depth
-          do i = 1,par%nfractions
-             dist(i,k) = sum(msed(i,1:nmix,k))
+          do k = 1,par%nfractions
+             dist(k,i) = sum(msed(k,1:nmix,i))
           end do
-          dist(:,k) = dist(:,k) / max(1e-10, sum(dist(:,k)))
+          dist(:,i) = dist(:,i) / max(1e-10, sum(dist(:,i)))
 
           ! mix layer mass
-          do j = 1,nmix
-             do i = 1,par%nfractions
-                msed(i,j,k) = thlyr(j,k) * par%rhom * dist(i,k)
+          do k = 1,nmix
+             do l = 1,par%nfractions
+                msed(l,k,i) = thlyr(k,i) * par%rhom * dist(l,i)
              end do
           end do
        end if
-       
+          
     end do
         
   end subroutine mix_toplayer
@@ -503,25 +524,25 @@ contains
     allocate(dist(n))
     allocate(mass(n))
 
-    do k = 1,par%nx+1
+    do i = 1,par%nc
 
        ! determine sediment distribution in top layer
-       dist = msed(:,1,k) / max(1e-10, sum(msed(:,1,k)))
+       dist = msed(:,1,i) / max(1e-10, sum(msed(:,1,i)))
        
-       do i = 1,n
-          if (dist(i) < par%minfrac) then ! if fraction is below threshold
+       do k = 1,n
+          if (dist(k) < par%minfrac) then ! if fraction is below threshold
 
              ! compute exchange of sediment between top two layers
              mass = 0.d0
-             mass(i) = -msed(i,1,k)
-             mass(i+1:n) = msed(i,1,k) * sum(msed(i+1:n,2:m,k), dim=2) / &
-                  max(1e-10, sum(msed(i+1:n,2:m,k)))
+             mass(k) = -msed(k,1,i)
+             mass(k+1:n) = msed(k,1,i) * sum(msed(k+1:n,2:m,i), dim=2) / &
+                  max(1e-10, sum(msed(k+1:n,2:m,i)))
 
              if (abs(sum(mass)) < 1e-10) then
 
                 ! swap sediment
-                msed(:,1,k) = msed(:,1,k) + mass
-                msed(:,2,k) = msed(:,2,k) - mass
+                msed(:,1,i) = msed(:,1,i) + mass
+                msed(:,2,i) = msed(:,2,i) - mass
 
              end if
              
@@ -530,5 +551,13 @@ contains
     end do
 
   end subroutine sweep_toplayer
+
+  subroutine dealloc_bedcomposition()
+    if (clrmorlyr(morlyr) /=0 ) call adderror(messages, message)
+    deallocate(morlyr)
+
+    call clearstack(messages)
+    deallocate(messages)
+  end subroutine dealloc_bedcomposition
   
 end module bed_module

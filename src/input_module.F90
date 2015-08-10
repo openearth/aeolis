@@ -10,18 +10,19 @@ module input_module
   type windstat
      real*8 :: t = 0.d0
      real*8 :: duration = 0.d0
-     real*8 :: direction = 0.d0
      real*8 :: u_mean = 0.d0
      real*8 :: u_std = 0.d0
      real*8 :: gust_mean = 0.d0
      real*8 :: gust_std = 0.d0
+     real*8 :: dir_mean = 0.d0
+     real*8 :: dir_std = 0.d0
   end type windstat
 
   type windspeed
      real*8 :: t = 0.d0
      real*8 :: duration = 0.d0
-     real*8 :: direction = 0.d0
      real*8 :: u = 0.d0
+     real*8 :: dir = 0.d0
   end type windspeed
 
   type tide
@@ -45,6 +46,34 @@ module input_module
      real*8 :: atmospheric_pressure = 101.325 ! [kPa]
      real*8 :: latent_heat = 2.45 ! [MJ/kg]
   end type meteorology
+  
+  type spaceparams
+     real*8, dimension(:), pointer :: rho, dist
+     real*8, dimension(:,:), pointer :: uw, udir, uws, uwn
+     real*8, dimension(:,:), pointer :: zb, zs
+     real*8, dimension(:,:), pointer :: xz, yz, xu, yu, xv, yv
+     real*8, dimension(:,:,:), pointer :: uth, moist
+     real*8, dimension(:,:,:), pointer :: Cu, Ct, supply, thlyr, p
+     real*8, dimension(:,:,:), pointer :: d10, d50, d90
+     real*8, dimension(:,:,:,:), pointer :: mass
+     
+     real*8, dimension(:,:), pointer :: dsz, dnz, dsdnzi, alfaz
+     real*8, dimension(:,:), pointer :: dsu, dnu, dsdnui, alfau
+     real*8, dimension(:,:), pointer :: dsv, dnv, dsdnvi, alfav
+     real*8, dimension(:,:), pointer :: dsc, dnc
+     type(meteorology) :: meteo
+  end type spaceparams
+
+  type spaceparams_linear
+     real*8, dimension(:), pointer :: rho, dist
+     real*8, dimension(:), pointer :: uw, udir, uws, uwn
+     real*8, dimension(:), pointer :: zb, zs
+     real*8, dimension(:), pointer :: xz, yz, xu, yu, xv, yv
+     real*8, dimension(:,:), pointer :: uth, moist
+     real*8, dimension(:,:), pointer :: Cu, Ct, supply, thlyr, p
+     real*8, dimension(:,:), pointer :: d10, d50, d90
+     real*8, dimension(:,:,:), pointer :: mass
+  end type spaceparams_linear
 
   type parameters
      logical   :: mixtoplayer   = .true.
@@ -57,7 +86,6 @@ module input_module
      logical   :: evaporation   = .true.
      logical   :: gusts         = .true.
      
-     real*8    :: VS    = 0.d0            ! [-] ratio sediment transport velocity to wind velocity
      real*8    :: Tp    = 0.d0            ! [s] adaptation time scale in transport formulation
      real*8    :: u_th  = 0.d0            ! [m/s] constant velocity threshold in transport formulation
      real*8    :: z0    = 0.d0            ! [m] height of wind measurement
@@ -65,10 +93,11 @@ module input_module
      real*8    :: Cb    = 0.d0            ! [-] empirical constant in transport formulation
      real*8    :: phi   = 0.d0            ! [-] angle of repose of sediment
      real*8    :: g     = 0.d0            ! [m/s^2] gravitational acceleration
-     integer*4 :: nx    = 0               ! [-] number of grid cells
+     integer*4 :: nx    = 0               ! [-] number of grid cells in x direction
+     integer*4 :: ny    = 0               ! [-] number of grid cells in y direction
+     integer*4 :: nc    = 0               ! [-] number of grid cells
      integer*4 :: nt    = 0               ! [-] number of time steps
      real*8    :: dt    = 0.d0            ! [s] duration of time step
-     real*8    :: dx    = 0.d0            ! [m] size of grid cell
      real*8    :: t     = 0.d0            ! [m] current time in simulation
      real*8    :: tstop = 0.d0            ! [s] duration of simulation
      real*8    :: tout  = 0.d0            ! [s] time interval for writing model output to disk
@@ -77,6 +106,8 @@ module input_module
      real*8    :: accfac = 0.d0           ! [-] acceleration factor applied to transport capacity
 
      character(slen) :: wind_file = ''    ! wind velocity time series definition file
+     character(slen) :: xgrid_file = ''   ! x grid definition file
+     character(slen) :: ygrid_file = ''   ! y grid definition file
      character(slen) :: bed_file = ''     ! bed profile definition file
      character(slen) :: tide_file = ''    ! tidal time series definition file
      character(slen) :: meteo_file = ''   ! meteo time series definition file
@@ -105,6 +136,8 @@ module input_module
      real*8    :: Cw = 0.d0               ! [-] sediment concentration in water column
      real*8    :: w = 0.d0                ! [m/s] fall velocity of sediment in water column
      real*8    :: bi = 0.d0               ! [-] bed interaction factor
+     real*8    :: L = 0.d0                ! [-] length scale in sigmoid mapping
+
      real*8, dimension(:), allocatable :: grain_size ! [m] median grain size for each fraction
      real*8, dimension(:), allocatable :: grain_dist ! [-] occurence of each fraction in bed
 
@@ -191,14 +224,13 @@ contains
     par%mixtoplayer   = read_key_logical(fname, 'mixtoplayer', .true.)
     par%sweeptoplayer = read_key_logical(fname, 'sweeptoplayer', .true.)
     par%th_grainsize  = read_key_logical(fname, 'th_grainsize', .true.)
-    par%th_bedslope   = read_key_logical(fname, 'th_bedslope', .true.)
+    par%th_bedslope   = read_key_logical(fname, 'th_bedslope', .false.)
     par%th_moisture   = read_key_logical(fname, 'th_moisture', .true.)
     par%th_humidity   = read_key_logical(fname, 'th_humidity', .true.)
     par%bedupdate     = read_key_logical(fname, 'bedupdate', .true.)
     par%evaporation   = read_key_logical(fname, 'evaporation', .true.)
     par%gusts         = read_key_logical(fname, 'gusts', .true.)
     
-    par%VS     = read_key_dbl(fname, 'VS',    1.d0)
     par%Tp     = read_key_dbl(fname, 'Tp',    1.0d0)
     par%u_th   = read_key_dbl(fname, 'u_th',  0.4d0)
     par%z0     = read_key_dbl(fname, 'z0',    1.d0)
@@ -207,11 +239,14 @@ contains
     par%g      = read_key_dbl(fname, 'g',     9.81d0)
     par%phi    = read_key_dbl(fname, 'phi',   40.d0)
     par%dt     = read_key_dbl(fname, 'dt',    0.05d0)
-    par%dx     = read_key_dbl(fname, 'dx',    1.d0)
+    par%nx     = read_key_dbl(fname, 'nx',    1.d0)
+    par%ny     = read_key_dbl(fname, 'ny',    1.d0)
     par%tstop  = read_key_dbl(fname, 'tstop', 3600.d0)
     par%tout   = read_key_dbl(fname, 'tout',  1.d0)
     par%accfac = read_key_dbl(fname, 'accfac',  1.d0)
     par%wind_file    = read_key_str(fname, 'wind_file', '')
+    par%xgrid_file   = read_key_str(fname, 'xgrid_file', '')
+    par%ygrid_file   = read_key_str(fname, 'ygrid_file', '')
     par%bed_file     = read_key_str(fname, 'bed_file', '')
     par%tide_file    = read_key_str(fname, 'tide_file', '')
     par%meteo_file   = read_key_str(fname, 'meteo_file', '')
@@ -220,7 +255,7 @@ contains
     par%output_dir   = read_key_str(fname, 'output_dir', '')
     par%scheme       = read_key_str(fname, 'scheme', 'euler_backward')
 
-    if (trim(par%scheme) .eq. 'euler_backward') then
+    if (trim(par%scheme) .ne. 'euler_forward') then
        par%max_iter  = read_key_int(fname, 'max_iter',  100)
        par%max_error = read_key_dbl(fname, 'max_error', 1d-6)
     else
@@ -245,6 +280,7 @@ contains
     par%Cw              = read_key_dbl(fname, 'Cw',              0.d0)
     par%w               = read_key_dbl(fname, 'w',               3.0d-2)
     par%bi              = read_key_dbl(fname, 'bi',              1.d0)
+    par%L               = read_key_dbl(fname, 'L',               1.d0)
 
     if (allocated(par%grain_size)) then
        deallocate(par%grain_size)
@@ -275,39 +311,52 @@ contains
     logical :: ex
 
     ! check required fields
-    if (trim(par%bed_file) == '') then
-       write(0, '(a)') " No bathymetry defined"
+    if (trim(par%xgrid_file) == '') then
+       write(*, '(a)') " No grid defined"
        stop 1
     end if
 
-    if (trim(par%wind_file) == '') then
-       write(0, '(a)') " No wind defined"
+    if (trim(par%bed_file) == '') then
+       write(*, '(a)') " No bathymetry defined"
        stop 1
     end if
 
     ! check if valid scheme is selected
     select case (trim(par%scheme))
-    case ('euler_backward', 'euler_forward', 'maccormack')
+    case ('euler_backward', 'euler_forward', 'crank_nicolson')
        ! all ok
     case default
-       write(0, '(a,a)') " Unsupported scheme: ",trim(par%scheme)
+       write(*, '(a,a)') " Unsupported scheme: ",trim(par%scheme)
        stop 1
     end select
 
+    ! check dimensionality
+    if (par%ny == 1) then
+       write(*, '(a)') "Warning: using ny=1, are you sure not to use ny=0?"
+    end if
+    
     ! sort grain size distribution
     call sort(par%grain_size, par%grain_dist)
 
     ! make time step fit with output time step
     par%dt = par%tout / ceiling(par%tout / par%dt)
 
+    ! store total number of grid cells
+    par%nc = (par%nx+1) * (par%ny+1)
+
     ! create output directory
     if (trim(par%output_dir) .ne. '') then
        par%output_dir = trim(par%output_dir) // "/"
        inquire(file=par%output_dir, exist=ex)
        if (.not. ex) then
-          write(0, '(a,a)') " Created output directory ", trim(par%output_dir)
+          write(*, '(a,a)') " Created output directory ", trim(par%output_dir)
           call system("mkdir " // trim(par%output_dir))
        end if
+    end if
+
+    ! disable gusts for implicit schemes
+    if (par%scheme .ne. 'euler_forward') then
+       par%gusts = .false.
     end if
 
   end subroutine check_params
@@ -324,7 +373,7 @@ contains
        value = default
     end if
 
-    write(0, '(a12,a,a)') key, ' = ', trim(value)
+    write(*, '(a12,a,a)') key, ' = ', trim(value)
 
   end function read_key_str
 
@@ -345,10 +394,10 @@ contains
 
     value_arr = split(value)
 
-    write(0, '(a12,a,a)') key, ' = ', trim(value_arr(1))
+    write(*, '(a12,a,a)') key, ' = ', trim(value_arr(1))
     
     do i = 2,size(value_arr)
-       write(0, '(a15,a)') ' ', trim(value_arr(i))
+       write(*, '(a15,a)') ' ', trim(value_arr(i))
     end do
         
   end function read_key_strvec
@@ -368,7 +417,7 @@ contains
        value_dbl = default
     end if
 
-    write(0, '(a12,a,f15.4)') key, ' = ', value_dbl
+    write(*, '(a12,a,f15.4)') key, ' = ', value_dbl
     
   end function read_key_dbl
   
@@ -389,10 +438,10 @@ contains
        value_dbl = default
     end if
 
-    write(0, '(a12,a,f15.4)') key, ' = ', value_dbl(1)
+    write(*, '(a12,a,f15.4)') key, ' = ', value_dbl(1)
 
     do i = 2,n
-       write(0, '(a15,f15.4)') ' ', value_dbl(i)
+       write(*, '(a15,f15.4)') ' ', value_dbl(i)
     end do
 
   end function read_key_dblvec
@@ -412,7 +461,7 @@ contains
        value_int = default
     end if
 
-    write(0, '(a12,a,i15)') key, ' = ', value_int
+    write(*, '(a12,a,i15)') key, ' = ', value_int
     
   end function read_key_int
 
@@ -431,7 +480,7 @@ contains
        value_logical = default
     end if
 
-    write(0, '(a12,a,l1)') key, ' = ', value_logical
+    write(*, '(a12,a,l1)') key, ' = ', value_logical
     
   end function read_key_logical
 

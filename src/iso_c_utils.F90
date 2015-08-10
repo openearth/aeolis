@@ -5,7 +5,7 @@ module iso_c_utils
 
   ! always use max stringlen for c arrays otherwise you have to specify lengths by hand
   integer(c_int), parameter :: MAXSTRINGLEN = 1024
-  integer(c_int), parameter :: MAXDIMS = 3
+  integer(c_int), parameter :: MAXDIMS = 4
 
 contains
   ! Utility functions, move these to interop module

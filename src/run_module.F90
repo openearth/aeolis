@@ -13,189 +13,205 @@ module run_module
 
 contains
 
-  subroutine step(par, s, var)
+  subroutine step(par, s, sl, var)
     
     type(parameters), intent(inout) :: par
     type(spaceparams), intent(inout) :: s
+    type(spaceparams_linear), intent(inout) :: sl
     type(variables), dimension(:), intent(inout) :: var
-    integer*4 :: i, j, n
+    integer*4 :: i, j, k, n
     real*8 :: err, alpha
-    real*8, dimension(:,:), allocatable :: Ct2, Ct2p
+    real*8, dimension(:,:,:), allocatable :: Ct, Cte, Ctp1, Ctp2, Fp1, Fp2
 
-    allocate(Ct2(par%nfractions, par%nx+1))
-    allocate(Ct2p(par%nfractions, par%nx+1))
-    Ct2 = 0.d0
-    Ct2p = 0.d0
+    allocate(Ct(par%nfractions, par%nx+1, par%ny+1))
+    Ct = 0.d0
+    
+    if (trim(par%scheme) .ne. 'euler_forward') then
+       allocate(Cte(par%nfractions, par%nx+1, par%ny+1))
+       allocate(Ctp1(par%nfractions, par%nx+1, par%ny+1))
+       allocate(Ctp2(par%nfractions, par%nx+1, par%ny+1))
+       allocate(Fp1(par%nfractions, par%nx+1, par%ny+1))
+       allocate(Fp2(par%nfractions, par%nx+1, par%ny+1))
+
+       Cte = 0.d0
+       Ctp1 = 0.d0
+       Ctp2 = 0.d0
+       Fp1 = 0.d0
+       Fp2 = 0.d0
+    end if
 
     ! interpolate wind
-    call interpolate_wind(par%uw, par%t, s%uw)
+    if (.not. is_set(var, 'uw')) call interpolate_wind(par, par%uw, par%t, sl%uw, sl%udir)
+    s%uws = s%uw * cos(s%alfaz + s%udir)
+    s%uwn = s%uw * sin(s%alfaz + s%udir)
+
+    if (par%ny > 0) then
+       s%uw = s%uws
+       s%uwn = 0.d0
+    end if
 
     ! courant check
     if (trim(par%scheme) .eq. 'euler_forward') then
        if (par%CFL > 0.d0) then
-          par%dt = par%CFL * par%dx / s%uw
-          !write(0, '(a, f4.2)') "  adapted time step: ", par%dt
+          par%dt = par%CFL / (maxval(abs(s%uws) / s%dsz) + &
+                              maxval(abs(s%uwn) / s%dnz))
        end if
     end if
 
     ! interpolate time series
-    call interpolate_moist(par%moist, par%t, s%zb, s%moist)
-    call interpolate_meteo(par%meteo, par%t, s%meteo)
-    call interpolate_tide(par%zs, par%t, s%zs)
+    if (.not. is_set(var, 'moist')) call interpolate_moist(par%moist, par%t, sl%zb, sl%moist)
+    if (.not. is_set(var, 'meteo')) call interpolate_meteo(par%meteo, par%t, s%meteo)
+    if (.not. is_set(var, 'zs')) call interpolate_tide(par%zs, par%t, sl%zs)
 
     ! update moisture contents
-    call update_moisture(par, s%zb, s%zs, s%meteo, s%uw, s%moist)
-    call mix_toplayer(par, s%zb, s%zs)
+    call update_moisture(par, sl%zb, sl%zs, s%meteo, sl%uw, sl%moist)
+    call mix_toplayer(par, sl%zb, sl%zs)
        
     ! update threshold
-    s%uth = par%u_th
-    call compute_threshold_grainsize(par, s%uth)
-    call compute_threshold_bedslope(par, s%x, s%zb, s%uth)
-    call compute_threshold_moisture(par, s%moist(1,:), s%uth)
+    sl%uth = par%u_th
+    call compute_threshold_grainsize(par, sl%uth)
+    call compute_threshold_bedslope(par, s)
+    call compute_threshold_moisture(par, sl%moist(1,:), sl%uth)
 
     ! get available mass
-    s%mass = get_layer_mass()
-    s%thlyr = get_layer_thickness()
+    sl%mass = get_layer_mass(par)
+    sl%thlyr = get_layer_thickness(par)
 
     ! compute transport capacity by wind, including thresholds
     alpha = (0.174 / log10(par%z0/par%k))**3
-    s%Cu = max(0.d0, alpha * par%Cb * par%rhoa / par%g * &
-         (s%uw - s%uth)**3 / (s%uw * par%VS))
+    do k = 1,par%nfractions
+       s%Cu(k,:,:) = max(0.d0, alpha * par%Cb * par%rhoa / par%g * &
+            (abs(s%uw) - s%uth(k,:,:))**3 / abs(s%uw))
+    end do
 
-    ! determine first dry grid cell
+    ! compute advection
     if (trim(par%scheme) .eq. 'euler_forward') then
-       do j=2,par%nx+1
 
-          ! compute supply based on sediment availability
-          call compute_supply(par, s%mass(:,1,j), &
-               par%accfac * s%Cu(:,j), s%Ct(:,j), s%supply(:,j), s%p(:,j))
+       call euler(par, s, s%Ct, Ct)
+       s%Ct = Ct
+       
+    else
 
-          do i=1,par%nfractions
-             
-             ! compute sediment advection by wind
-             Ct2(i,j) = max(0.d0, &
-                  s%Ct(i,j) &
-                  - par%VS * s%uw * par%dt / par%dx *(s%Ct(i,j) - s%Ct(i,j-1)) &
-                  + s%supply(i,j))
-             
-          end do
-       end do
-    elseif (trim(par%scheme) .eq. 'maccormack') then
-       do j=1,par%nx
-             
-          ! compute supply based on sediment availability (predictor)
-          call compute_supply(par, s%mass(:,1,j), &
-               par%accfac * s%Cu(:,j), s%Ct(:,j), s%supply(:,j), s%p(:,j))
+       ! initial values
+       call euler(par, s, s%Ct, Cte)
+       Ct = Cte
+       Ctp1 = s%Ct
+       Fp1 = Ctp1 - Ct
 
-          do i=1,par%nfractions
-             
-             ! compute sediment advection by wind (predictor)
-             Ct2p(i,j) = max(0.d0, &
-                  s%Ct(i,j) &
-                  - par%VS * s%uw * par%dt / par%dx * (s%Ct(i,j+1) - s%Ct(i,j)) &
-                  + s%supply(i,j))
-             
-          end do
-       end do
+       do n = 1,par%max_iter
 
-       do j=2,par%nx+1
+          Ctp2 = Ctp1
+          Ctp1 = Ct
 
-          ! compute supply based on sediment availability (corrector)
-          call compute_supply(par, s%mass(:,1,j), &
-               par%accfac * s%Cu(:,j), Ct2p(:,j), s%supply(:,j), s%p(:,j))
+          call euler(par, s, Ctp1, Ct)
 
-          do i=1,par%nfractions
-                
-             ! compute sediment advection by wind (corrector)
-             Ct2(i,j) = max(0.d0, &
-                  (s%Ct(i,j) + Ct2p(i,j)) / 2.d0 &
-                  - par%VS * s%uw * par%dt / par%dx / 2.d0 * (s%Ct(i,j) - s%Ct(i,j-1)) &
-                  + s%supply(i,j))
+          Fp2 = Fp1
+          Fp1 = Ctp1 - Ct
 
-          end do
-       end do
-    elseif (trim(par%scheme) .eq. 'euler_backward') then
-       do n=1,par%max_iter
-
-          Ct2p = Ct2
-          
-          do j=2,par%nx+1
-             
-             ! compute supply based on sediment availability
-             call compute_supply(par, s%mass(:,1,j), &
-                  par%accfac * s%Cu(:,j), Ct2(:,j), s%supply(:,j), s%p(:,j))
-             
-             do i=1,par%nfractions
-                
-                ! compute sediment advection by wind
-                Ct2p(i,j) = max(0.d0, &
-                     s%Ct(i,j) &
-                     - par%VS * s%uw * par%dt / par%dx * (Ct2p(i,j) - Ct2p(i,j-1)) &
-                     + s%supply(i,j))
-
-             end do
-          end do
+          ! secant approximation
+          where (Fp1 - Fp2 .eq. 0.d0)
+             Ct = Ctp1
+          elsewhere
+             Ct = Ctp1 - Fp1 * (Ctp1 - Ctp2) / (Fp1 - Fp2)
+          end where
+          Ct = max(0.d0, Ct)
 
           ! exit iteration if change is negligible
-          err = sum(abs(Ct2 - Ct2p))
+          err = sum(abs(Ct - Ctp1)) !/ sum(Ct)
           if (err .le. par%max_error) exit
-          
+
        end do
 
        if (err .gt. par%max_error) then
           write(0, '(a,i6,a,f10.4,a,e10.2,a)') &
                "WARNING: iteration not converged (i: ", par%nt, "; error: ", err, ")"
        end if
-       
-    end if
 
-    s%Ct = Ct2
+       if (trim(par%scheme) .eq. 'euler_backward') then
+          s%Ct = Ct
+       elseif (trim(par%scheme) .eq. 'crank_nicolson') then
+          s%Ct = 0.5d0 * (Ct + Cte)
+       end if
+
+    end if
 
     ! add sediment deposit
     do i = 1,par%nfractions
-       where (s%zb < s%zs)
-          s%supply(i,:) = s%supply(i,:) - par%Cw * &
-               min(par%w * par%dt, s%zs - s%zb) * &
+       where (sl%zb < sl%zs)
+          sl%supply(i,:) = sl%supply(i,:) - par%Cw * &
+               min(par%w * par%dt, sl%zs - sl%zb) * &
                par%grain_dist(i) / max(1e-10, sum(par%grain_dist))
        end where
     end do
-    s%supply(:,1) = 0.d0
+    s%supply(:,1,:) = 0.d0
+
+    ! handle boundaries
+    if (par%ny > 0) then
+       s%Ct(:,:,1) = s%Ct(:,:,par%ny+1)
+       s%supply(:,:,1) = s%supply(:,:,par%ny+1)
+    end if
 
     ! update bed elevation
-    s%zb = update_bed(par, s%zb, -s%supply, s%rho)
+    sl%zb = update_bed(par, sl%zb, -sl%supply, sl%rho)
     call sweep_toplayer(par)
-
-    ! incremental output
-    call output_update(var)
 
     par%t = par%t + par%dt
     par%nt = par%nt + 1
     
   end subroutine step
 
-  subroutine write_output(par, s, var)
-
+  subroutine euler(par, s, Ctin, Ctout)
+    
     type(parameters), intent(inout) :: par
     type(spaceparams), intent(inout) :: s
-    type(variables), dimension(:), intent(inout) :: var
+    integer*4 :: i, j, k
+    real*8, dimension(:,:,:), intent(in) :: Ctin
+    real*8, dimension(:,:,:), intent(out) :: Ctout
 
-    ! write output
-    if (par%t .le. par%dt  .or. par%tout < par%dt .or. &
-         mod(par%t, par%tout) < par%dt) then
+    if (par%ny == 0) then ! 1D
 
-       ! update derived variables
-       if (is_output(var, 'mass')) s%mass = get_layer_mass()
-       if (is_output(var, 'd10')) s%d10 = get_layer_percentile(par, 0.1d0)
-       if (is_output(var, 'd50')) s%d50 = get_layer_percentile(par, 0.5d0)
-       if (is_output(var, 'd90')) s%d90 = get_layer_percentile(par, 0.9d0)
+       i = 1
+       do j = 2,par%nx+1
+
+          ! compute supply based on sediment availability
+          call compute_supply(par, s%mass(:,1,j,i), &
+               par%accfac * s%Cu(:,j,i), Ctin(:,j,i), s%supply(:,j,i), s%p(:,j,i))
+          
+          do k = 1,par%nfractions
+
+             ! compute sediment advection by wind
+             Ctout(k,j,i) = s%Ct(k,j,i) &
+                  - s%uws(j,i) * par%dt * s%dnz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j-1,i)) &
+                  + s%supply(k,j,i)
+             
+          end do
+       end do
+
+    else ! 2D
        
-       call output_write(var)
-       call output_clear(var)
-       
+       do i = 2,par%ny+1
+          do j = 2,par%nx+1
+
+             ! compute supply based on sediment availability
+             call compute_supply(par, s%mass(:,1,j,i), &
+                  par%accfac * s%Cu(:,j,i), Ctin(:,j,i), s%supply(:,j,i), s%p(:,j,i))
+          
+             do k = 1,par%nfractions
+
+                ! compute sediment advection by wind
+                Ctout(k,j,i) = s%Ct(k,j,i) &
+                     - s%uws(j,i) * par%dt * s%dnz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j-1,i)) &
+                     - s%uwn(j,i) * par%dt * s%dsz(j,i) * s%dsdnzi(j,i) * (Ctin(k,j,i) - Ctin(k,j,i-1)) &
+                     + s%supply(k,j,i)
+             
+             end do
+          end do
+       end do
+
     end if
-
-  end subroutine write_output
-  
+    
+  end subroutine euler
+     
   subroutine compute_supply(par, mass, Cu, Ct, supply, p)
 
     type(parameters), intent(in) :: par
@@ -204,10 +220,10 @@ contains
     real*8, dimension(size(mass)) :: p_air, p_bed
 
     ! compute distribution in air
-    p_air = Ct / max(1e-10, Cu)
+    p_air = max(0.d0, Ct / max(1e-10, Cu))
 
     ! compute sediment distribution in bed
-    p_bed = max(0.d0, mass) / max(1e-10, sum(mass))
+    p_bed = max(0.d0, mass / max(1e-10, sum(mass)))
 
     ! compute new sediment distributuion in the air
     p = (1 - par%bi) * p_air + p_bed * (1.d0 - min(1.d0, (1 - par%bi) * sum(p_air)))
@@ -220,33 +236,6 @@ contains
 
     ! limit advection by available mass
     supply = min(mass, supply)
-
-!     real*8, dimension(size(mass)) :: dist, dist2, supply
-! 
-!     dist = Ct / max(1e-10, Cu)
-! 
-!     if (sum(dist) < 1.d0) then ! erosion
-! 
-!        ! compute sediment distribution in bed
-!        dist2 = max(0.d0, mass) / max(1e-10, sum(mass))
-! 
-!        ! compute new sediment distributuion in the air
-!        dist = dist + dist2 * (1.d0 - sum(dist))
-! 
-!     end if
-! 
-!     ! compute distribution in air
-!     if (sum(dist) == 0.d0) dist = 1.d0
-!     dist = dist / sum(dist)
-!     write(0,*) sum(dist), dist(1:5)
-! 
-!     !    call assert(abs(sum(dist) - 1.d0) < 1e-10)
-! 
-!     ! determine weighed supply
-!     supply = (Cu * dist - Ct) / par%Tp * par%dt
-! 
-!     ! limit advection by available mass
-!     supply = min(mass, supply)
     
   end subroutine compute_supply
   

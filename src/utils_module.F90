@@ -86,7 +86,7 @@ contains
           arr(i) = trim(str(pos0:))
           exit
        end if
-       arr(i) = trim(str(pos0:(pos0+pos-1)))
+       arr(i) = trim(str(pos0:(pos0+pos-2)))
        pos0 = pos0 + pos
     end do
 
@@ -129,6 +129,23 @@ contains
     end do
     
   end subroutine split_path
+
+  subroutine split_var(var_name, name, type)
+
+    character(*), intent(in) :: var_name
+    character(10), dimension(:), allocatable :: var_name_parts
+    character(slen), intent(out) :: name, type
+
+    var_name_parts = split(var_name, '.')
+    if (size(var_name_parts) == 1) then
+       name = trim(var_name_parts(1))
+       type = ''
+    else
+       name = trim(var_name_parts(1))
+       type = trim(var_name_parts(2))
+    end if
+
+  end subroutine split_var
   
   function find_minimum(x) result (loc)
 
@@ -199,9 +216,9 @@ contains
 
     jl = 0
     ju = n+1
+    l1 = xx(n) .gt. xx(1)
     do while(ju-jl .gt. 1)
        jm = (ju+jl)/2
-       l1 = xx(n) .gt. xx(1)
        l2 = x .gt. xx(jm)
        if ((l1 .and. l2) .or. (.not. (l1 .or. l2))) then
           jl = jm
@@ -216,11 +233,27 @@ contains
 
   end function binary_search
 
+  function dist_normal(x, mean, stdev) result (p)
+
+    real*8 :: mean, stdev
+    real*8, dimension(:) :: x
+    real*8, dimension(:), allocatable :: p
+
+    allocate(p(size(x)))
+
+    if (stdev < 0.d0) then
+       write(*,*) "WARNING: standard deviation must be positive"
+    else
+       p = exp((x - mean) / stdev)
+    end if
+
+  end function dist_normal
+    
   function rand_normal(mean, stdev) result(c)
     
     real*8 :: mean, stdev, r, theta, c, x(2)
     
-    if(stdev < 0.0d0) then
+    if (stdev < 0.d0) then
        write(*,*) "WARNING: standard deviation must be positive"
     else
        call random_number(x)
@@ -232,17 +265,18 @@ contains
 
   function first_exceedance(x, threshold) result (ith)
 
-    real*8, dimension(:) :: x
+    real*8, dimension(:,:) :: x
     real*8 :: threshold
-    integer*4 :: i, n, ith
+    integer*4 :: i, j, ith
 
     ith = 1
-    n = size(x)
-    do i=1,n
-       if (x(i) >= threshold) then
-          ith = i
-          exit
-       end if
+    do i = 1,size(x,1)
+       do j = 1,size(x,2)
+          if (x(i,j) >= threshold) then
+             ith = i
+             return
+          end if
+       end do
     end do
 
   end function first_exceedance

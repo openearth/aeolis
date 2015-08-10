@@ -140,7 +140,7 @@ contains
        close(fid)
        
        ! checks
-       if (zs(n)%t < par%tstop) then
+       if (maxval(zs%t) < par%tstop) then
           write(*,*) "ERROR: tide definition file too short"
           stop 1
        end if
@@ -158,13 +158,15 @@ contains
     
   end subroutine generate_tide
 
-  subroutine interpolate_tide(zs, t, level)
+  subroutine interpolate_tide(zs, t, field)
 
     type(tide), dimension(:), intent(in) :: zs
     real*8, intent(in) :: t
-    real*8, intent(out) :: level
+    real*8, dimension(:), intent(out) :: field
+    real*8 :: level
 
     level = linear_interp(zs%t, zs%level, t)
+    field(:) = level
 
   end subroutine interpolate_tide
   
@@ -210,7 +212,7 @@ contains
 
        ! determine time axis
        meteo(2:n)%t = cumsum(meteo(1:n-1)%duration)
-       
+
        ! checks
        if (meteo(n)%t < par%tstop) then
           write(*,*) "ERROR: meteo definition file too short"
@@ -220,11 +222,11 @@ contains
     else
 
        allocate(meteo(2))
-       meteo(1)%t = 0.d0
-       meteo(2)%t = par%tstop
-       meteo(1)%duration = par%tstop
-       meteo(2)%duration = 0.d0
-
+       meteo(1)%t = par%tstop
+       meteo%solar_radiation = 0.d0
+       meteo%air_temperature = 0.d0
+       meteo%relative_humidity = 0.d0
+       
     end if
 
   end subroutine generate_meteo
@@ -248,10 +250,10 @@ contains
 
     type(parameters), intent(in) :: par
     real*8, dimension(:), intent(in) :: moist
-    real*8, dimension(par%nx+1) :: mg
+    real*8, dimension(par%nc) :: mg
     real*8, dimension(:,:), intent(inout) :: u_th
-    real*8, dimension(par%nfractions, par%nx+1) :: u_th_m
-    integer :: i, n
+    real*8, dimension(par%nfractions, par%nc) :: u_th_m
+    integer :: i, j, n
 
     if (.not. par%th_moisture) return
 
@@ -283,35 +285,35 @@ contains
 
   end subroutine compute_threshold_moisture
 
-  subroutine update_moisture(par, zb, zs, meteo, u, moist)
+  subroutine update_moisture(par, zb, zs, meteo, uw, moist)
 
     type(parameters), intent(in) :: par
     type(meteorology), intent(in) :: meteo
-    real*8, dimension(:), intent(in) :: zb
+    real*8, dimension(:), intent(in) :: zb, zs, uw
     real*8, dimension(:,:), intent(inout) :: moist
-    real*8, intent(in) :: u, zs
     real*8 :: radiation, m, delta, gamma, evaporation
-    integer :: i, t, nl, f
+    integer :: i, j
 
-    nl = par%nlayers+2
-    
     ! evaporation using Penman
-    radiation = meteo%solar_radiation / 1e6 / par%dt * 3600 * 24 ! conversion from J/m2 to MJ/m2/day
-    m = vaporation_pressure_slope(meteo%air_temperature) ! [kPa/K]
-    delta = saturation_pressure(meteo%air_temperature) * (1 - meteo%relative_humidity) ! [kPa]
-    gamma = (meteo%air_specific_heat * meteo%atmospheric_pressure) / &
-         (.622 * meteo%latent_heat) ! [kPa/K]
-    evaporation = max(0.d0, (m * radiation + gamma * 6.43 * (1 + 0.536 * u) * delta) / &
-         (meteo%latent_heat * (m + gamma)))
-    evaporation = evaporation / 24 / 3600 / 1000 ! conversion from mm/day to m/s
+    if (par%evaporation) then
+       radiation = meteo%solar_radiation / 1e6 / par%dt * 3600 * 24 ! conversion from J/m2 to MJ/m2/day
+       m = vaporation_pressure_slope(meteo%air_temperature) ! [kPa/K]
+       delta = saturation_pressure(meteo%air_temperature) * (1 - meteo%relative_humidity) ! [kPa]
+       gamma = (meteo%air_specific_heat * meteo%atmospheric_pressure) / &
+            (.622 * meteo%latent_heat) ! [kPa/K]
+    end if
     
     ! infiltration using Darcy
-    do i = 1,par%nx
-       if (zs >= zb(i)) then
+    do i = 1,par%nc
+       if (zs(i) > zb(i)) then
           moist(:,i) = par%porosity
        else
           moist(:,i) = moist(:,i) * exp(-par%F * par%dt)
           if (par%evaporation) then
+             evaporation = max(0.d0, (m * radiation + gamma * 6.43 * (1 + 0.536 * uw(i)) * delta) / &
+                  (meteo%latent_heat * (m + gamma)))
+             evaporation = evaporation / 24 / 3600 / 1000 ! conversion from mm/day to m/s
+
              moist(:,i) = max(0.d0, moist(:,i) - evaporation * par%dt / par%layer_thickness)
           end if
        end if
@@ -345,20 +347,23 @@ contains
 
   end function saturation_pressure
     
-  function map_moisture(zm, m, z) result (mg)
+  function map_moisture(zm, m, zb) result (mg)
     
-    real*8, dimension(:) :: zm, m, z
-    real*8, dimension(size(z)) :: mg
+    real*8, dimension(:) :: zm, m
+    real*8, dimension(:) :: zb
+    real*8, dimension(:), allocatable :: mg
     integer :: i, n
 
+    allocate(mg(size(zb)))
+    
     n = size(m)
-    do i = 1,size(z)
-       if (z(i) < minval(zm)) then
+    do i = 1,size(zb)
+       if (zb(i) < minval(zm)) then
           mg(i) = m(1)
-       elseif (z(i) > maxval(zm)) then
+       elseif (zb(i) > maxval(zm)) then
           mg(i) = m(n)
        else
-          mg(i) = linear_interp(zm(2:n-1), m(2:n-1), z(i))
+          mg(i) = linear_interp(zm(2:n-1), m(2:n-1), zb(i))
        end if
     end do
 
