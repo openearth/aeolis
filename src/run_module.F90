@@ -45,8 +45,8 @@ contains
     s%uws = s%uw * cos(s%alfaz + s%udir)
     s%uwn = s%uw * sin(s%alfaz + s%udir)
 
-    if (par%ny > 0) then
-       s%uw = s%uws
+    if (par%ny == 0) then
+       s%uw = max(0.d0, s%uws) ! FIXME: offshore wind is instable
        s%uwn = 0.d0
     end if
 
@@ -59,9 +59,9 @@ contains
     end if
 
     ! interpolate time series
-    if (.not. is_set(var, 'moist')) call interpolate_moist(par%moist, par%t, sl%zb, sl%moist)
-    if (.not. is_set(var, 'meteo')) call interpolate_meteo(par%meteo, par%t, s%meteo)
-    if (.not. is_set(var, 'zs')) call interpolate_tide(par%zs, par%t, sl%zs)
+    if (.not. is_set(var, 'moist')) call interpolate_moist(par, sl%zb, sl%moist)
+    if (.not. is_set(var, 'meteo')) call interpolate_meteo(par, s%meteo)
+    if (.not. is_set(var, 'zs')) call interpolate_tide(par, sl%zs)
 
     ! update moisture contents
     call update_moisture(par, sl%zb, sl%zs, s%meteo, sl%uw, sl%moist)
@@ -152,7 +152,7 @@ contains
     end if
 
     ! update bed elevation
-    sl%zb = update_bed(par, sl%zb, -sl%supply, sl%rho)
+    call update_bed(par, sl%zb, sl%zs, -sl%supply, sl%rho)
     call sweep_toplayer(par)
 
     par%t = par%t + par%dt

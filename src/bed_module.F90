@@ -252,15 +252,14 @@ contains
 
   end subroutine generate_bedcomposition
 
-  function update_bed(par, zb, mass, rho) result (z_new)
+  subroutine update_bed(par, zb, zs, mass, rho)
 
     type(parameters), intent(in) :: par
-    real*8, dimension(:), intent(in) :: zb
+    real*8, dimension(:), intent(inout) :: zb, zs
     real*8, dimension(:,:), intent(in) :: mass
     real*8, dimension(:), intent(in) :: rho
-    real*8, dimension(:), allocatable :: z_new, dz
+    real*8, dimension(:), allocatable :: dz
 
-    allocate(z_new(par%nc))
     allocate(dz(par%nc))
 
     if ( updmorlyr(morlyr, mass, 0.d0 * mass, rho, par%dt, 1.d0, dz, messages) /= 0 ) then
@@ -268,12 +267,11 @@ contains
     end if
 
     if (par%bedupdate) then
-       z_new = zb + dz
-    else
-       z_new = zb
+       zb = zb + dz
+       zs = zs + dz
     end if
     
-  end function update_bed
+  end subroutine update_bed
 
   function get_layer_mass(par) result (mass)
 

@@ -66,18 +66,18 @@ contains
        var(i)%rank = 0
     else
        var(i)%rank = size(dims)
-       allocate(var(i)%dims(var(i)%rank)) ! MEMERR
+       allocate(var(i)%dims(var(i)%rank))
        var(i)%dims = dims
     end if
 
-    call alloc_variable_data(var(i)%val, dims, var(i)%rank) ! MEMERR
+    call alloc_variable_data(var(i)%val, dims, var(i)%rank)
     call alloc_variable_data(var(i)%sum, dims, var(i)%rank)
     call alloc_variable_data(var(i)%var, dims, var(i)%rank)
     call alloc_variable_data(var(i)%min, dims, var(i)%rank,  1d10)
     call alloc_variable_data(var(i)%max, dims, var(i)%rank, -1d10)
 
-    allocate(var(i)%avg) ! MEMERR
-
+    allocate(var(i)%avg)
+    
   end subroutine alloc_variable
 
   subroutine alloc_variable_data(var, dims, rank, val)
@@ -87,7 +87,7 @@ contains
     integer*4, intent(in) :: rank
     real*8, optional, intent(in) :: val
 
-    allocate(var) ! MEMERR
+    allocate(var)
 
     if (present(val)) then
        var%init = val

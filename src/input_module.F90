@@ -137,6 +137,7 @@ module input_module
      real*8    :: w = 0.d0                ! [m/s] fall velocity of sediment in water column
      real*8    :: bi = 0.d0               ! [-] bed interaction factor
      real*8    :: L = 0.d0                ! [-] length scale in sigmoid mapping
+     real*8    :: eps = 0.d0              ! [m] water depth at which cell is considered dry
 
      real*8, dimension(:), allocatable :: grain_size ! [m] median grain size for each fraction
      real*8, dimension(:), allocatable :: grain_dist ! [-] occurence of each fraction in bed
@@ -194,6 +195,9 @@ contains
        end do
     end if
 
+    ! http://www.patorjk.com/software/taag/
+    ! font: Colossal
+
     write(*,*) ' '
     write(*,*) '         d8888                   888      d8b  .d8888b.   ' 
     write(*,*) '        d88888                   888      Y8P d88P  Y88b  ' 
@@ -206,7 +210,7 @@ contains
     write(*,*) ' '
 
     if (len(trim(fpath)) .gt. 0) then
-       write(0, '(a, a)') ' Changed working directory to: ', trim(fpath)
+       write(*, '(a, a)') ' Changed working directory to: ', trim(fpath)
        write(*,*) ' '
     end if
 
@@ -273,6 +277,8 @@ contains
     par%rhop            = read_key_dbl(fname, 'rhop',            2650.d0)
     par%porosity        = read_key_dbl(fname, 'porosity',        0.4d0)
     par%A               = read_key_dbl(fname, 'A',               100.d0)
+
+    ! misc
     par%Hs              = read_key_dbl(fname, 'Hs',              1.d0)
     par%gamma           = read_key_dbl(fname, 'gamma',           0.5d0)
     par%facDOD          = read_key_dbl(fname, 'facDOD',          0.1d0)
@@ -281,6 +287,7 @@ contains
     par%w               = read_key_dbl(fname, 'w',               3.0d-2)
     par%bi              = read_key_dbl(fname, 'bi',              1.d0)
     par%L               = read_key_dbl(fname, 'L',               1.d0)
+    par%eps             = read_key_dbl(fname, 'eps',             0.005d0)
 
     if (allocated(par%grain_size)) then
        deallocate(par%grain_size)

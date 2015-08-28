@@ -83,26 +83,29 @@ contains
     
   end subroutine generate_moist
 
-  subroutine interpolate_moist(m, t, zb, moist)
+  subroutine interpolate_moist(par, zb, moist)
 
-    type(moisture), dimension(:,:), intent(in) :: m
+    type(parameters), intent(in) :: par
     real*8, dimension(:), intent(in) :: zb
-    real*8, intent(in) :: t
     real*8, dimension(:), allocatable :: m0
-    real*8, dimension(:,:), intent(out) :: moist
+    real*8, dimension(:,:), intent(inout) :: moist
     integer*4 :: j
 
-    allocate(m0(size(m,2)))
+    if (trim(par%moist_file) /= '') then
 
-    m0 = 0.d0
-    do j = 1,size(m,2)
-       m0(j) = linear_interp(m(:,j)%t, m(:,j)%moisture, t)
-    end do
+       allocate(m0(size(par%moist,2)))
 
-    moist = 0.d0
-    do j = 1,size(moist,1)
-       moist(j,:) = map_moisture(m(1,:)%z, m0, zb)
-    end do
+       m0 = 0.d0
+       do j = 1,size(par%moist,2)
+          m0(j) = linear_interp(par%moist(:,j)%t, par%moist(:,j)%moisture, par%t)
+       end do
+
+       moist = 0.d0
+       do j = 1,size(moist,1)
+          moist(j,:) = map_moisture(par%moist(1,:)%z, m0, zb)
+       end do
+
+    end if
 
   end subroutine interpolate_moist
 
@@ -158,15 +161,16 @@ contains
     
   end subroutine generate_tide
 
-  subroutine interpolate_tide(zs, t, field)
+  subroutine interpolate_tide(par, field)
 
-    type(tide), dimension(:), intent(in) :: zs
-    real*8, intent(in) :: t
+    type(parameters), intent(in) :: par
     real*8, dimension(:), intent(out) :: field
     real*8 :: level
 
-    level = linear_interp(zs%t, zs%level, t)
-    field(:) = level
+    if (trim(par%tide_file) /= '') then
+       level = linear_interp(par%zs%t, par%zs%level, par%t)
+       field(:) = level
+    end if
 
   end subroutine interpolate_tide
   
@@ -231,18 +235,25 @@ contains
 
   end subroutine generate_meteo
 
-  subroutine interpolate_meteo(m, t, meteo)
+  subroutine interpolate_meteo(par, meteo)
 
-    type(meteorology), dimension(:), intent(in) :: m
+    type(parameters), intent(in) :: par
     type(meteorology), intent(out) :: meteo
-    real*8, intent(in) :: t
 
-    meteo%solar_radiation = linear_interp(m%t, m%solar_radiation, t)
-    meteo%air_temperature = linear_interp(m%t, m%air_temperature, t)
-    meteo%relative_humidity = linear_interp(m%t, m%relative_humidity, t)
-    meteo%air_specific_heat = linear_interp(m%t, m%air_specific_heat, t)
-    meteo%atmospheric_pressure = linear_interp(m%t, m%atmospheric_pressure, t)
-    meteo%latent_heat = linear_interp(m%t, m%latent_heat, t)
+    if (trim(par%meteo_file) /= '') then
+       meteo%solar_radiation = \
+          linear_interp(par%meteo%t, par%meteo%solar_radiation, par%t)
+       meteo%air_temperature = \
+          linear_interp(par%meteo%t, par%meteo%air_temperature, par%t)
+       meteo%relative_humidity = \
+          linear_interp(par%meteo%t, par%meteo%relative_humidity, par%t)
+       meteo%air_specific_heat = \
+          linear_interp(par%meteo%t, par%meteo%air_specific_heat, par%t)
+       meteo%atmospheric_pressure = \
+          linear_interp(par%meteo%t, par%meteo%atmospheric_pressure, par%t)
+       meteo%latent_heat = \
+          linear_interp(par%meteo%t, par%meteo%latent_heat, par%t)
+    end if
 
   end subroutine interpolate_meteo
        
@@ -305,7 +316,7 @@ contains
     
     ! infiltration using Darcy
     do i = 1,par%nc
-       if (zs(i) > zb(i)) then
+       if (zs(i) - zb(i) >= par%eps) then
           moist(:,i) = par%porosity
        else
           moist(:,i) = moist(:,i) * exp(-par%F * par%dt)
