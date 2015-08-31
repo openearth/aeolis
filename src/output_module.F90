@@ -3,7 +3,6 @@ module output_module
   use constants_module
   use input_module
   use utils_module
-  use bed_module
   
   implicit none
 

@@ -83,6 +83,7 @@ contains
     call alloc_variable(var, 'uwn',    (/par%nx+1, par%ny+1/))
     call alloc_variable(var, 'udir',   (/par%nx+1, par%ny+1/))
     call alloc_variable(var, 'zs',     (/par%nx+1, par%ny+1/))
+    call alloc_variable(var, 'Hs',     (/par%nx+1, par%ny+1/))
 !    call alloc_variable(var, 'd10',    (/par%nlayers, par%nx+1, par%ny+1/))
 !    call alloc_variable(var, 'd50',    (/par%nlayers, par%nx+1, par%ny+1/))
 !    call alloc_variable(var, 'd90',    (/par%nlayers, par%nx+1, par%ny+1/))
@@ -103,6 +104,7 @@ contains
     call get_pointer(var, 'uwn',    (/par%nx+1, par%ny+1/), s%uwn)
     call get_pointer(var, 'udir',   (/par%nx+1, par%ny+1/), s%udir)
     call get_pointer(var, 'zs',     (/par%nx+1, par%ny+1/), s%zs)
+    call get_pointer(var, 'Hs',     (/par%nx+1, par%ny+1/), s%Hs)
 !    call get_pointer(var, 'd10',    (/par%nlayers, par%nx+1, par%ny+1/), s%d10)
 !    call get_pointer(var, 'd50',    (/par%nlayers, par%nx+1, par%ny+1/), s%d50)
 !    call get_pointer(var, 'd90',    (/par%nlayers, par%nx+1, par%ny+1/), s%d90)
@@ -122,12 +124,14 @@ contains
     call get_pointer(var, 'uwn',    (/par%nc/), sl%uwn)
     call get_pointer(var, 'udir',   (/par%nc/), sl%udir)
     call get_pointer(var, 'zs',     (/par%nc/), sl%zs)
+    call get_pointer(var, 'Hs',     (/par%nc/), sl%Hs)
 !    call get_pointer(var, 'd10',    (/par%nlayers, par%nc/), sl%d10)
 !    call get_pointer(var, 'd50',    (/par%nlayers, par%nc/), sl%d50)
 !    call get_pointer(var, 'd90',    (/par%nlayers, par%nc/), sl%d90)
 
     s%rho = par%rhom
     s%dist = par%grain_dist
+    s%Hs = par%Hs
 
     ! create spatial grid matrixes
     call gridprops(par, s)

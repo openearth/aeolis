@@ -50,7 +50,7 @@ module input_module
   type spaceparams
      real*8, dimension(:), pointer :: rho, dist
      real*8, dimension(:,:), pointer :: uw, udir, uws, uwn
-     real*8, dimension(:,:), pointer :: zb, zs
+     real*8, dimension(:,:), pointer :: zb, zs, Hs
      real*8, dimension(:,:), pointer :: xz, yz, xu, yu, xv, yv
      real*8, dimension(:,:,:), pointer :: uth, moist
      real*8, dimension(:,:,:), pointer :: Cu, Ct, supply, thlyr, p
@@ -67,7 +67,7 @@ module input_module
   type spaceparams_linear
      real*8, dimension(:), pointer :: rho, dist
      real*8, dimension(:), pointer :: uw, udir, uws, uwn
-     real*8, dimension(:), pointer :: zb, zs
+     real*8, dimension(:), pointer :: zb, zs, Hs
      real*8, dimension(:), pointer :: xz, yz, xu, yu, xv, yv
      real*8, dimension(:,:), pointer :: uth, moist
      real*8, dimension(:,:), pointer :: Cu, Ct, supply, thlyr, p

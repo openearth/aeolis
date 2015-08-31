@@ -446,10 +446,10 @@ contains
            
   end subroutine compute_threshold_bedslope
 
-  subroutine mix_toplayer(par, zb, zs)
+  subroutine mix_toplayer(par, zb, zs, Hs)
 
     type(parameters), intent(in) :: par
-    real*8, dimension(:), intent(in) :: zb, zs
+    real*8, dimension(:), intent(in) :: zb, zs, Hs
     integer :: i, k, l, nmix
     real*8 :: th
 
@@ -478,7 +478,7 @@ contains
           do k = 1,size(thlyr(:,i))
              nmix = nmix + 1
              th = th + thlyr(k,i)
-             if (th >= min(par%Hs, (zs(i) - zb(i)) * par%gamma) * par%facDOD) exit
+             if (th >= min(Hs(i), (zs(i) - zb(i)) * par%gamma) * par%facDOD) exit
           end do
 
           if (nmix == 0) continue

@@ -65,7 +65,7 @@ contains
 
     ! update moisture contents
     call update_moisture(par, sl%zb, sl%zs, s%meteo, sl%uw, sl%moist)
-    call mix_toplayer(par, sl%zb, sl%zs)
+    call mix_toplayer(par, sl%zb, sl%zs, sl%Hs)
        
     ! update threshold
     sl%uth = par%u_th
