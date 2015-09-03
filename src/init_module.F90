@@ -134,13 +134,13 @@ contains
     s%Hs = par%Hs
 
     ! create spatial grid matrixes
-    call gridprops(par, s)
+    call gridprops(par, s, sl)
 
     write(*,*) 'Starting simulation...'
 
   end subroutine init
 
-  subroutine gridprops(par, s)
+  subroutine gridprops(par, s, sl)
 
     ! THIS FUNCTION IS BASED ON THE XBEACH GRIDPROPS FUNCTION
     ! https://svn.oss.deltares.nl/repos/xbeach/trunk/src/xbeachlibrary/spaceparams.F90
@@ -149,6 +149,7 @@ contains
 
     type(parameters), intent(in) :: par
     type(spaceparams), intent(inout) :: s
+    type(spaceparams_linear), intent(inout) :: sl
 
     integer                           :: i, j
     real*8,dimension(:,:),allocatable :: xc      ! x-coordinate c-points
@@ -158,24 +159,43 @@ contains
     real*8                            :: dsdnz   ! surface of cell centered around z-point
     real*8                            :: x1,y1,x2,y2,x3,y3,x4,y4
 
-    allocate(s%xu(par%nx+1, par%ny+1))
-    allocate(s%yu(par%nx+1, par%ny+1))
-    allocate(s%xv(par%nx+1, par%ny+1))
-    allocate(s%yv(par%nx+1, par%ny+1))
-    allocate(s%dsz(par%nx+1, par%ny+1))
-    allocate(s%dnz(par%nx+1, par%ny+1))
-    allocate(s%dsdnzi(par%nx+1, par%ny+1))
-    allocate(s%alfaz(par%nx+1, par%ny+1))
-    allocate(s%dsu(par%nx+1, par%ny+1))
-    allocate(s%dnu(par%nx+1, par%ny+1))
-    allocate(s%dsdnui(par%nx+1, par%ny+1))
-    allocate(s%alfau(par%nx+1, par%ny+1))
-    allocate(s%dsv(par%nx+1, par%ny+1))
-    allocate(s%dnv(par%nx+1, par%ny+1))
-    allocate(s%dsdnvi(par%nx+1, par%ny+1))
-    allocate(s%alfav(par%nx+1, par%ny+1))
-    allocate(s%dsc(par%nx+1, par%ny+1))
-    allocate(s%dnc(par%nx+1, par%ny+1))
+    allocate(sl%xu(par%nc))
+    allocate(sl%yu(par%nc))
+    allocate(sl%xv(par%nc))
+    allocate(sl%yv(par%nc))
+    allocate(sl%dsz(par%nc))
+    allocate(sl%dnz(par%nc))
+    allocate(sl%dsdnzi(par%nc))
+    allocate(sl%alfaz(par%nc))
+    allocate(sl%dsu(par%nc))
+    allocate(sl%dnu(par%nc))
+    allocate(sl%dsdnui(par%nc))
+    allocate(sl%alfau(par%nc))
+    allocate(sl%dsv(par%nc))
+    allocate(sl%dnv(par%nc))
+    allocate(sl%dsdnvi(par%nc))
+    allocate(sl%alfav(par%nc))
+    allocate(sl%dsc(par%nc))
+    allocate(sl%dnc(par%nc))
+    
+    s%xu(1:par%nx+1, 1:par%ny+1) => sl%xu
+    s%yu(1:par%nx+1, 1:par%ny+1) => sl%yu
+    s%xv(1:par%nx+1, 1:par%ny+1) => sl%xv
+    s%yv(1:par%nx+1, 1:par%ny+1) => sl%yv
+    s%dsz(1:par%nx+1, 1:par%ny+1) => sl%dsz
+    s%dnz(1:par%nx+1, 1:par%ny+1) => sl%dnz
+    s%dsdnzi(1:par%nx+1, 1:par%ny+1) => sl%dsdnzi
+    s%alfaz(1:par%nx+1, 1:par%ny+1) => sl%alfaz
+    s%dsu(1:par%nx+1, 1:par%ny+1) => sl%dsu
+    s%dnu(1:par%nx+1, 1:par%ny+1) => sl%dnu
+    s%dsdnui(1:par%nx+1, 1:par%ny+1) => sl%dsdnui
+    s%alfau(1:par%nx+1, 1:par%ny+1) => sl%alfau
+    s%dsv(1:par%nx+1, 1:par%ny+1) => sl%dsv
+    s%dnv(1:par%nx+1, 1:par%ny+1) => sl%dnv
+    s%dsdnvi(1:par%nx+1, 1:par%ny+1) => sl%dsdnvi
+    s%alfav(1:par%nx+1, 1:par%ny+1) => sl%alfav
+    s%dsc(1:par%nx+1, 1:par%ny+1) => sl%dsc
+    s%dnc(1:par%nx+1, 1:par%ny+1) => sl%dnc
 
     allocate(xc(par%nx+1, par%ny+1))
     allocate(yc(par%nx+1, par%ny+1))

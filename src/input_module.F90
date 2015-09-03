@@ -73,7 +73,12 @@ module input_module
      real*8, dimension(:,:), pointer :: Cu, Ct, supply, thlyr, p
      real*8, dimension(:,:), pointer :: d10, d50, d90
      real*8, dimension(:,:,:), pointer :: mass
-  end type spaceparams_linear
+
+     real*8, dimension(:), pointer :: dsz, dnz, dsdnzi, alfaz
+     real*8, dimension(:), pointer :: dsu, dnu, dsdnui, alfau
+     real*8, dimension(:), pointer :: dsv, dnv, dsdnvi, alfav
+     real*8, dimension(:), pointer :: dsc, dnc
+ end type spaceparams_linear
 
   type parameters
      logical   :: mixtoplayer   = .true.

@@ -6,6 +6,7 @@ module bmi_module
   use moist_module
   use run_module
   use utils_module
+  use bed_module
 
   implicit none
 
@@ -13,6 +14,7 @@ module bmi_module
   type(spaceparams) :: s
   type(spaceparams_linear) :: sl
   type(variables), dimension(:), allocatable :: var
+  logical, save :: clear_output = .false.
 
   interface get_c_pointer
      module procedure get_c_pointer_rank0
@@ -61,6 +63,11 @@ contains
 
     if (dt > 0.d0) then
        par%dt = dt
+    end if
+
+    if (clear_output) then
+       call output_clear(var)
+       clear_output = .false.
     end if
 
     call step(par, s, sl, var)
@@ -240,6 +247,7 @@ contains
     else
        allocate(shp(rank))
        shp = get_shape(var, name)
+       clear_output = .true.
 
        select case(rank)
        case(1)
@@ -285,6 +293,9 @@ contains
     integer*4, dimension(:), allocatable :: shp
     integer*4 :: rank
 
+    real(c_double), pointer :: x_2d_double_ptr(:,:)
+    real*8, dimension(par%nx+1,par%ny+1) :: zbx
+
     var_name = char_array_to_string(c_var_name)
 
     rank = get_rank(var, var_name)
@@ -293,8 +304,14 @@ contains
     else
        allocate(shp(rank))
        shp = get_shape(var, var_name)
-       call set_c_pointer(var, var_name, xptr, rank, shp)
-    end if
+       if (var_name == 'zbx') then
+          call c_f_pointer(xptr, x_2d_double_ptr, shp)
+          zbx = x_2d_double_ptr
+          call update_bedlevel(par, sl, zbx)
+       else
+          call set_c_pointer(var, var_name, xptr, rank, shp)
+       endif
+    endif
 
   end subroutine set_var
   

@@ -273,6 +273,56 @@ contains
     
   end subroutine update_bed
 
+  subroutine update_bedlevel(par, sl, zb)
+
+    type(parameters), intent(in) :: par
+    type(spaceparams_linear), intent(in) :: sl
+    real*8, dimension(:,:), intent(in) :: zb
+    
+    real*8, dimension(par%nc) :: dz
+    real*8, dimension(par%nfractions,par%nc) :: supply, total_supply
+    real*8, dimension(par%nfractions,par%nlayers,par%nc) :: mass
+    real*8, dimension(par%nfractions) :: dist, ero
+    integer*4 :: i
+
+    ! adapt bed composition to single fraction erosion
+    dz = reshape(zb, (/par%nc/)) - sl%zb
+    mass = get_layer_mass(par)
+    total_supply = 0.d0
+    do while (any(dz < 0.d0))
+       supply = 0.d0
+       do i = 1,par%nc
+          if (dz(i) < 0.d0) then
+             ! compute distribution in top layer
+             dist = mass(:,1,i) / sum(mass(:,1,i))
+             ! erode cell according to distribution
+             supply(:,i) = min(mass(:,1,i), dz(i) * sl%rho * dist)
+             ! subtract supply from bed level change
+             dz(i) = dz(i) - sum(supply(:,i) / sl%rho)
+          end if
+       enddo
+       ! update bed composition
+       call update_bed(par, sl%zb, sl%zs, supply, sl%rho)
+       total_supply = total_supply + supply
+    enddo
+    ! compute total erosion per fraction
+    dist = sum(total_supply, dim=2)
+    ! compute distribution of eroded sediment
+    if (sum(dist) == 0.d0) then
+       dist = 1.d0
+    end if
+    dist = dist / sum(dist)
+    supply = 0.d0
+    do i = 1,par%nc
+       if (dz(i) > 0.d0) then
+          ! deposit sediment according to distribution
+          supply(:,i) = dz(i) * sl%rho * dist ! FIXME: only take eroded sediment
+       endif
+    enddo
+    ! update bed composition
+    call update_bed(par, sl%zb, sl%zs, supply, sl%rho)
+  end subroutine update_bedlevel
+
   function get_layer_mass(par) result (mass)
 
     integer :: istat
