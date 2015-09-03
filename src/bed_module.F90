@@ -276,7 +276,7 @@ contains
   subroutine update_bedlevel(par, sl, zb)
 
     type(parameters), intent(in) :: par
-    type(spaceparams_linear), intent(in) :: sl
+    type(spaceparams_linear), intent(inout) :: sl
     real*8, dimension(:,:), intent(in) :: zb
     
     real*8, dimension(par%nc) :: dz

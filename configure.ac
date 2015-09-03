@@ -3,6 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT(AeoLiS, 0.1, b.m.hoonhout@tudelft.nl)
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
 
 # Checks for programs.
