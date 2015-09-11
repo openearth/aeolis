@@ -38,7 +38,7 @@ contains
        ierr = 0
        do while (ierr == 0)
           read(fid, *, iostat=ierr) tmp(:)
-          wind(i)%duration = tmp(1)
+          wind(i)%t = tmp(1)
           wind(i)%u_mean = tmp(2)
           wind(i)%u_std = tmp(3)
           wind(i)%gust_mean = tmp(4)
@@ -46,31 +46,32 @@ contains
           wind(i)%dir_mean = tmp(6) / 180.d0 * pi
           wind(i)%dir_std = tmp(7) / 180.d0 * pi
 
-          if (sum(wind(1:i)%duration) > par%tstop) exit
+          if (wind(i)%t > par%tstop) exit
        
           i = i + 1
        end do
        close(fid)
 
        ! checks
-       if (sum(wind%duration) < par%tstop) then
+       if (wind(i)%t < par%tstop) then
           write(*,*) "ERROR: wind definition file too short"
           stop 1
        end if
 
        ! determine time axis
-       wind(i)%duration = wind(i)%duration - (sum(wind%duration) - par%tstop)
-       wind(2:n)%t = cumsum(wind(1:n-1)%duration)
+       n = i
+       wind(1:n-1)%duration = wind(2:n)%t - wind(1:n-1)%t
+       wind(n)%duration = par%tstop - wind(n)%t
 
        ! simulate wind gusts
        if (par%gusts) then
           call simulate_gusts(wind, gusty_wind)
        else
-          allocate(gusty_wind(size(wind)))
-          gusty_wind%t = wind%t
-          gusty_wind%duration = wind%duration
-          gusty_wind%dir = wind%dir_mean
-          gusty_wind%u = wind%u_mean
+          allocate(gusty_wind(n))
+          gusty_wind%t = wind(1:n)%t
+          gusty_wind%duration = wind(1:n)%duration
+          gusty_wind%dir = wind(1:n)%dir_mean
+          gusty_wind%u = wind(1:n)%u_mean
        end if
 
     else
