@@ -61,7 +61,10 @@ contains
 
     real(c_double), value, intent(in) :: dt
 
-    if (dt > 0.d0) then
+    if (dt < -1.d0) then
+       par%t = par%t - dt
+       clear_output = .true.
+    elseif (dt > 0.d0) then
        par%dt = dt
     end if
 
@@ -70,8 +73,11 @@ contains
        clear_output = .false.
     end if
 
-    call step(par, s, sl, var)
-    call output_update(var)
+    if (dt >= -1.d0) then
+       call step(par, s, sl, var)
+       call output_update(var)
+    endif
+    
     call set_var_reset(var)
     
   end function update
