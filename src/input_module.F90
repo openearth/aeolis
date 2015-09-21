@@ -404,7 +404,7 @@ contains
        value = default
     end if
 
-    value_arr = split(value)
+    call split(value, value_arr)
 
     write(*, '(a12,a,a)') key, ' = ', trim(value_arr(1))
     
