@@ -14,6 +14,12 @@
 *.egg
 *.png
 *.egg-info
+*.obj
+*.tlog
+*.suo
+*.u2d
+*.vfproj.*
 aeolis*.txt
 .dirstamp
 _build/
+bin
