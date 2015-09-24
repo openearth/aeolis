@@ -4,8 +4,8 @@
 		<Platform Name="Win32"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="bin/$(ConfigurationName)" IntermediateDirectory="bin/$(ConfigurationName)/.libs" ConfigurationType="typeDynamicLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="src/sand_mud_bed/include/" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemWindows" LinkDLL="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="src/sand_mud_bed/include/" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemWindows" LinkDLL="true" AdditionalDependencies="$(SolutionDir)bin\$(ConfigurationName)\.core\*.obj"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -14,8 +14,8 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="bin/$(ConfigurationName)" IntermediateDirectory="bin/$(ConfigurationName)/.libs" ConfigurationType="typeDynamicLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="src/sand_mud_bed/include/" RuntimeLibrary="rtMultiThreadedDLL"/>
-				<Tool Name="VFLinkerTool" SuppressStartupBanner="true" SubSystem="subSystemWindows" LinkDLL="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="src/sand_mud_bed/include/"/>
+				<Tool Name="VFLinkerTool" SuppressStartupBanner="true" SubSystem="subSystemWindows" LinkDLL="true" AdditionalDependencies="$(SolutionDir)bin\$(ConfigurationName)\.core\*.obj"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -27,22 +27,5 @@
 		<Filter Name="Header Files" Filter="fi;fd"/>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<Filter Name="sand_mud_bed">
-		<File RelativePath=".\src\sand_mud_bed\modules\bedcomposition_module.f90"/>
-		<File RelativePath=".\src\sand_mud_bed\modules\message_module.f90"/>
-		<File RelativePath=".\src\sand_mud_bed\modules\precision.f90"/>
-		<File RelativePath=".\src\sand_mud_bed\modules\precision_basics.f90"/>
-		<File RelativePath=".\src\sand_mud_bed\modules\string_module.f90"/></Filter>
-		<File RelativePath=".\src\bed_module.F90"/>
-		<File RelativePath=".\src\bmi_module.F90"/>
-		<File RelativePath=".\src\constants_module.F90"/>
-		<File RelativePath=".\src\init_module.F90"/>
-		<File RelativePath=".\src\input_module.F90"/>
-		<File RelativePath=".\src\iso_c_utils.F90"/>
-		<File RelativePath=".\src\logging.F90"/>
-		<File RelativePath=".\src\moist_module.F90"/>
-		<File RelativePath=".\src\output_module.F90"/>
-		<File RelativePath=".\src\run_module.F90"/>
-		<File RelativePath=".\src\utils_module.F90"/>
-		<File RelativePath=".\src\wind_module.F90"/></Filter></Files>
+		<File RelativePath=".\src\bmi_module.F90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
