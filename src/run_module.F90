@@ -96,10 +96,8 @@ contains
        ! compute advection
        if (trim(par%scheme) .eq. 'euler_forward') then
 
-          write(*,*) s%Ct
           call euler(par, s, s%Ct, Ct)
           s%Ct = Ct
-          write(*,*) s%Ct
        
        else
 
