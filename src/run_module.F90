@@ -20,8 +20,9 @@ contains
     type(spaceparams_linear), intent(inout) :: sl
     type(variables), dimension(:), intent(inout) :: var
     integer*4 :: i, j, k, n
-    real*8 :: err, alpha
+    real*8 :: err, alpha, dtref
     real*8, dimension(:,:,:), allocatable :: Ct, Cte, Ctp1, Ctp2, Fp1, Fp2
+    logical :: skip = .false.
 
     allocate(Ct(par%nfractions, par%nx+1, par%ny+1))
     Ct = 0.d0
@@ -53,108 +54,120 @@ contains
     ! courant check
     if (trim(par%scheme) .eq. 'euler_forward') then
        if (par%CFL > 0.d0) then
-          par%dt = par%CFL / (maxval(abs(s%uws) / s%dsz) + &
-                              maxval(abs(s%uwn) / s%dnz))
+          dtref = maxval(abs(s%uws) / s%dsz) + &
+               maxval(abs(s%uwn) / s%dnz)
+          if (dtref > 0.d0) then
+             par%dt = par%CFL / dtref
+          else
+             par%dt = 1.d0
+             skip = .true.
+          end if
        end if
     end if
 
-    ! interpolate time series
-    if (.not. is_set(var, 'moist')) call interpolate_moist(par, sl%zb, sl%moist)
-    if (.not. is_set(var, 'meteo')) call interpolate_meteo(par, s%meteo)
-    if (.not. is_set(var, 'zs')) call interpolate_tide(par, sl%zs)
-
-    ! update moisture contents
-    call update_moisture(par, sl%zb, sl%zs, s%meteo, sl%uw, sl%moist)
-    call mix_toplayer(par, sl%zb, sl%zs, sl%Hs)
+    if (.not. skip) then
        
-    ! update threshold
-    sl%uth = par%u_th
-    call compute_threshold_grainsize(par, sl%uth)
-    call compute_threshold_bedslope(par, s)
-    call compute_threshold_moisture(par, sl%moist(1,:), sl%uth)
-
-    ! get available mass
-    sl%mass = get_layer_mass(par)
-    sl%thlyr = get_layer_thickness(par)
-
-    ! compute transport capacity by wind, including thresholds
-    alpha = (0.174 / log10(par%z0/par%k))**3
-    do k = 1,par%nfractions
-       s%Cu(k,:,:) = max(0.d0, alpha * par%Cb * par%rhoa / par%g * &
-            (abs(s%uw) - s%uth(k,:,:))**3 / abs(s%uw))
-    end do
-
-    ! compute advection
-    if (trim(par%scheme) .eq. 'euler_forward') then
-
-       call euler(par, s, s%Ct, Ct)
-       s%Ct = Ct
+       ! interpolate time series
+       if (.not. is_set(var, 'moist')) call interpolate_moist(par, sl%zb, sl%moist)
+       if (.not. is_set(var, 'meteo')) call interpolate_meteo(par, s%meteo)
+       if (.not. is_set(var, 'zs')) call interpolate_tide(par, sl%zs)
        
-    else
+       ! update moisture contents
+       call update_moisture(par, sl%zb, sl%zs, s%meteo, sl%uw, sl%moist)
+       call mix_toplayer(par, sl%zb, sl%zs, sl%Hs)
+       
+       ! update threshold
+       sl%uth = par%u_th
+       call compute_threshold_grainsize(par, sl%uth)
+       call compute_threshold_bedslope(par, s)
+       call compute_threshold_moisture(par, sl%moist(1,:), sl%uth)
+       
+       ! get available mass
+       sl%mass = get_layer_mass(par)
+       sl%thlyr = get_layer_thickness(par)
 
-       ! initial values
-       call euler(par, s, s%Ct, Cte)
-       Ct = Cte
-       Ctp1 = s%Ct
-       Fp1 = Ctp1 - Ct
+       ! compute transport capacity by wind, including thresholds
+       alpha = (0.174 / log10(par%z0/par%k))**3
+       do k = 1,par%nfractions
+          s%Cu(k,:,:) = max(0.d0, alpha * par%Cb * par%rhoa / par%g * &
+               (abs(s%uw) - s%uth(k,:,:))**3 / abs(s%uw))
+       end do
+       
+       ! compute advection
+       if (trim(par%scheme) .eq. 'euler_forward') then
 
-       do n = 1,par%max_iter
+          write(*,*) s%Ct
+          call euler(par, s, s%Ct, Ct)
+          s%Ct = Ct
+          write(*,*) s%Ct
+       
+       else
 
-          Ctp2 = Ctp1
-          Ctp1 = Ct
-
-          call euler(par, s, Ctp1, Ct)
-
-          Fp2 = Fp1
+          ! initial values
+          call euler(par, s, s%Ct, Cte)
+          Ct = Cte
+          Ctp1 = s%Ct
           Fp1 = Ctp1 - Ct
 
-          ! secant approximation
-          where (Fp1 - Fp2 .eq. 0.d0)
-             Ct = Ctp1
-          elsewhere
-             Ct = Ctp1 - Fp1 * (Ctp1 - Ctp2) / (Fp1 - Fp2)
+          do n = 1,par%max_iter
+             
+             Ctp2 = Ctp1
+             Ctp1 = Ct
+             
+             call euler(par, s, Ctp1, Ct)
+             
+             Fp2 = Fp1
+             Fp1 = Ctp1 - Ct
+
+             ! secant approximation
+             where (Fp1 - Fp2 .eq. 0.d0)
+                Ct = Ctp1
+             elsewhere
+                Ct = Ctp1 - Fp1 * (Ctp1 - Ctp2) / (Fp1 - Fp2)
+             end where
+             Ct = max(0.d0, Ct)
+
+             ! exit iteration if change is negligible
+             err = sum(abs(Ct - Ctp1)) !/ sum(Ct)
+             if (err .le. par%max_error) exit
+
+          end do
+
+          if (err .gt. par%max_error) then
+             write(0, '(a,i6,a,f10.4,a,e10.2,a)') &
+                  "WARNING: iteration not converged (i: ", par%nt, "; error: ", err, ")"
+          end if
+
+          if (trim(par%scheme) .eq. 'euler_backward') then
+             s%Ct = Ct
+          elseif (trim(par%scheme) .eq. 'crank_nicolson') then
+             s%Ct = 0.5d0 * (Ct + Cte)
+          end if
+
+       end if
+
+       ! add sediment deposit
+       do i = 1,par%nfractions
+          where (sl%zb < sl%zs)
+             sl%supply(i,:) = sl%supply(i,:) - par%Cw * &
+                  min(par%w * par%dt, sl%zs - sl%zb) * &
+                  par%grain_dist(i) / max(1e-10, sum(par%grain_dist))
           end where
-          Ct = max(0.d0, Ct)
-
-          ! exit iteration if change is negligible
-          err = sum(abs(Ct - Ctp1)) !/ sum(Ct)
-          if (err .le. par%max_error) exit
-
        end do
+       s%supply(:,1,:) = 0.d0
 
-       if (err .gt. par%max_error) then
-          write(0, '(a,i6,a,f10.4,a,e10.2,a)') &
-               "WARNING: iteration not converged (i: ", par%nt, "; error: ", err, ")"
+       ! handle boundaries
+       if (par%ny > 0) then
+          s%Ct(:,:,1) = s%Ct(:,:,par%ny+1)
+          s%supply(:,:,1) = s%supply(:,:,par%ny+1)
        end if
 
-       if (trim(par%scheme) .eq. 'euler_backward') then
-          s%Ct = Ct
-       elseif (trim(par%scheme) .eq. 'crank_nicolson') then
-          s%Ct = 0.5d0 * (Ct + Cte)
-       end if
+       ! update bed elevation
+       call update_bed(par, sl%zb, sl%zs, -sl%supply, sl%rho)
+       call sweep_toplayer(par)
 
     end if
-
-    ! add sediment deposit
-    do i = 1,par%nfractions
-       where (sl%zb < sl%zs)
-          sl%supply(i,:) = sl%supply(i,:) - par%Cw * &
-               min(par%w * par%dt, sl%zs - sl%zb) * &
-               par%grain_dist(i) / max(1e-10, sum(par%grain_dist))
-       end where
-    end do
-    s%supply(:,1,:) = 0.d0
-
-    ! handle boundaries
-    if (par%ny > 0) then
-       s%Ct(:,:,1) = s%Ct(:,:,par%ny+1)
-       s%supply(:,:,1) = s%supply(:,:,par%ny+1)
-    end if
-
-    ! update bed elevation
-    call update_bed(par, sl%zb, sl%zs, -sl%supply, sl%rho)
-    call sweep_toplayer(par)
-
+ 
     par%t = par%t + par%dt
     par%nt = par%nt + 1
     
