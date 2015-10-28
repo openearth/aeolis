@@ -25,6 +25,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from bmi.wrapper import BMIWrapper
+from multiprocessing import Process
 
 class AeoLiS:
     '''AeoLiS model class'''
@@ -482,10 +483,23 @@ class AeoLiS:
         self.iout += 1
 
 
-    def run(self, callback=None, overwrite=True):
+    def run(self, callback=None, overwrite=True, subprocess=True):
 
         if os.path.exists(self.outputfile) and not overwrite:
             return
+
+        if subprocess:
+
+            p = Process(target=self._run,
+                        args=(callback,))
+            p.start()
+            p.join()
+
+        else:
+            self._run(callback)
+
+
+    def _run(self, callback):
 
         print ' '
         print '         d8888                   888      d8b  .d8888b.   ' 
@@ -496,6 +510,9 @@ class AeoLiS:
         print '    d88P   888 88888888 888  888 888      888       "888  ' 
         print '   d8888888888 Y8b.     Y88..88P 888      888 Y88b  d88P  ' 
         print '  d88P     888  "Y8888   "Y88P"  88888888 888  "Y8888P"   '
+        print ' '
+        
+        print 'Process ID #%d' % os.getpid()
         print ' '
 
         self.write_params()
