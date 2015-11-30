@@ -38,7 +38,7 @@ contains
        ierr = 0
        do while (ierr == 0)
           read(fid, *, iostat=ierr) tmp(:)
-          wind(i)%t = tmp(1)
+          wind(i)%t = min(par%tstop+1.d0, tmp(1))
           wind(i)%u_mean = tmp(2)
           wind(i)%u_std = tmp(3)
           wind(i)%gust_mean = tmp(4)
@@ -52,14 +52,12 @@ contains
        end do
        close(fid)
 
-       ! checks
        if (wind(i)%t < par%tstop) then
           write(*,*) "ERROR: wind definition file too short"
           stop 1
        end if
-
+       
        ! determine time axis
-       n = i
        wind(1:n-1)%duration = wind(2:n)%t - wind(1:n-1)%t
        wind(n)%duration = par%tstop - wind(n)%t
 
@@ -94,7 +92,11 @@ contains
     real*8, intent(in) :: t
     real*8, dimension(:), intent(out) :: uw, udir
     integer*4 :: i
+    real*8 :: tm
 
+    ! repeat time series if necessary
+!    tm = mod(t, sum(wind%duration))
+    
     if (par%gusts) then
        uw = linear_interp(wind%t, wind%u, t)
        udir = linear_interp(wind%t, wind%dir, t)
@@ -112,6 +114,7 @@ contains
     type(windspeed), dimension(:), allocatable, intent(out) :: gusty_wind
     real*8, dimension(:), allocatable :: l, u, d
     integer*4 :: i, n, m
+    real*8 :: p
 
     m = nint(2 * sum(wind%duration / wind%gust_mean))
 
