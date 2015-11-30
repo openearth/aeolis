@@ -113,19 +113,20 @@ contains
 
     type(parameters), intent(inout) :: par
     type(tide), dimension(:), allocatable, intent(out) :: zs
-    real*8, dimension(:), allocatable :: t, tmp
+    real*8, dimension(:), allocatable :: t
     integer*4 :: fid, ierr, n, i, nt
+    real*8 :: tmp1, tmp2
 
     if (trim(par%tide_file) /= '') then
 
        fid = 99
 
        ! count lines
-       n = -1
+       n = 0
        ierr = 0
        open(fid, file=trim(par%tide_file))
        do while (ierr == 0)
-          read(fid, *, iostat=ierr)
+          read(fid, *, iostat=ierr) tmp1, tmp2
           n = n + 1
        end do
        rewind(fid)
@@ -241,17 +242,17 @@ contains
     type(meteorology), intent(out) :: meteo
 
     if (trim(par%meteo_file) /= '') then
-       meteo%solar_radiation = \
+       meteo%solar_radiation = &
           linear_interp(par%meteo%t, par%meteo%solar_radiation, par%t)
-       meteo%air_temperature = \
+       meteo%air_temperature = &
           linear_interp(par%meteo%t, par%meteo%air_temperature, par%t)
-       meteo%relative_humidity = \
+       meteo%relative_humidity = &
           linear_interp(par%meteo%t, par%meteo%relative_humidity, par%t)
-       meteo%air_specific_heat = \
+       meteo%air_specific_heat = &
           linear_interp(par%meteo%t, par%meteo%air_specific_heat, par%t)
-       meteo%atmospheric_pressure = \
+       meteo%atmospheric_pressure = &
           linear_interp(par%meteo%t, par%meteo%atmospheric_pressure, par%t)
-       meteo%latent_heat = \
+       meteo%latent_heat = &
           linear_interp(par%meteo%t, par%meteo%latent_heat, par%t)
     end if
 

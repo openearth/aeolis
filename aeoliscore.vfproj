@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectType="typeStaticLibrary" ProjectCreator="Intel Fortran" Keyword="Static Library" Version="11.0" ProjectIdGuid="{B64F5F81-F7DD-46D9-829C-E21E4DA2EA5E}">
+	<Platforms>
+		<Platform Name="Win32"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32" OutputDirectory="bin/$(ConfigurationName)" IntermediateDirectory="bin/$(ConfigurationName)/.core" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="src/sand_mud_bed/include/" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLibrarianTool"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration>
+		<Configuration Name="Release|Win32" OutputDirectory="bin/$(ConfigurationName)" IntermediateDirectory="bin/$(ConfigurationName)/.core" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="src/sand_mud_bed/include/"/>
+				<Tool Name="VFLibrarianTool"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<Filter Name="sand_mud_bed">
+		<File RelativePath="..\aeolis\src\sand_mud_bed\modules\bedcomposition_module.f90"/>
+		<File RelativePath="..\aeolis\src\sand_mud_bed\modules\message_module.f90"/>
+		<File RelativePath="..\aeolis\src\sand_mud_bed\modules\precision.f90"/>
+		<File RelativePath="..\aeolis\src\sand_mud_bed\modules\precision_basics.f90"/>
+		<File RelativePath="..\aeolis\src\sand_mud_bed\modules\string_module.f90"/></Filter>
+		<File RelativePath="..\aeolis\src\bed_module.F90"/>
+		<File RelativePath="..\aeolis\src\constants_module.F90"/>
+		<File RelativePath="..\aeolis\src\init_module.F90"/>
+		<File RelativePath="..\aeolis\src\input_module.F90"/>
+		<File RelativePath="..\aeolis\src\iso_c_utils.F90"/>
+		<File RelativePath="..\aeolis\src\logging.F90"/>
+		<File RelativePath="..\aeolis\src\moist_module.F90"/>
+		<File RelativePath="..\aeolis\src\output_module.F90"/>
+		<File RelativePath="..\aeolis\src\run_module.F90"/>
+		<File RelativePath="..\aeolis\src\utils_module.F90"/>
+		<File RelativePath="..\aeolis\src\wind_module.F90"/></Filter></Files>
+	<Globals/></VisualStudioProject>

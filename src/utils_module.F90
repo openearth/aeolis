@@ -49,12 +49,12 @@ contains
 
   end subroutine swap
 
-  function split(str, sep) result (arr)
+  subroutine split(str, arr, sep)
 
-    character(*) :: str
-    character(*), optional :: sep
+    character(*), intent(in) :: str
+    character(*), intent(in), optional :: sep
     character(1) :: sep0
-    character(10), dimension(:), allocatable :: arr
+    character(10), intent(inout), dimension(:), allocatable :: arr
     integer*4 :: i, n, pos, pos0
 
     if (present(sep)) then
@@ -90,7 +90,7 @@ contains
        pos0 = pos0 + pos
     end do
 
-  end function split
+  end subroutine split
 
   function isin(arr, x) result (found)
 
@@ -136,7 +136,7 @@ contains
     character(10), dimension(:), allocatable :: var_name_parts
     character(slen), intent(out) :: name, type
 
-    var_name_parts = split(var_name, '.')
+    call split(var_name, var_name_parts, '.')
     if (size(var_name_parts) == 1) then
        name = trim(var_name_parts(1))
        type = ''
