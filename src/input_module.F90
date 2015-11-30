@@ -87,6 +87,7 @@ module input_module
      logical   :: th_bedslope   = .true.
      logical   :: th_moisture   = .true.
      logical   :: th_humidity   = .true.
+     logical   :: th_roughness  = .true.
      logical   :: bedupdate     = .true.
      logical   :: evaporation   = .true.
      logical   :: gusts         = .true.
@@ -236,6 +237,7 @@ contains
     par%th_bedslope   = read_key_logical(fname, 'th_bedslope', .false.)
     par%th_moisture   = read_key_logical(fname, 'th_moisture', .true.)
     par%th_humidity   = read_key_logical(fname, 'th_humidity', .true.)
+    par%th_roughness  = read_key_logical(fname, 'th_roughness', .false.)
     par%bedupdate     = read_key_logical(fname, 'bedupdate', .true.)
     par%evaporation   = read_key_logical(fname, 'evaporation', .true.)
     par%gusts         = read_key_logical(fname, 'gusts', .true.)

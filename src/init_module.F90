@@ -133,6 +133,8 @@ contains
     s%dist = par%grain_dist
     s%Hs = par%Hs
 
+    sl%mass = get_layer_mass(par)
+
     ! create spatial grid matrixes
     call gridprops(par, s, sl)
 

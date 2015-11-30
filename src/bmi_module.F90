@@ -26,7 +26,7 @@ module bmi_module
 
   interface set_c_pointer
      module procedure set_c_pointer_rank0
-     module procedure set_c_pointer_rank1
+     module procedure set_c_pointer_rankx
   end interface set_c_pointer
 
 contains
@@ -297,10 +297,14 @@ contains
 
     character(len=strlen(c_var_name)) :: var_name
     integer*4, dimension(:), allocatable :: shp
-    integer*4 :: rank
+    integer*4 :: rank, i, j
+    integer, parameter :: fid = 23
 
     real(c_double), pointer :: x_2d_double_ptr(:,:)
+    real(c_double), pointer :: x_4d_double_ptr(:,:,:,:)
+
     real*8, dimension(par%nx+1,par%ny+1) :: zbx
+    real*8, dimension(par%nfractions,par%nlayers,par%nx+1,par%ny+1) :: mass
 
     var_name = char_array_to_string(c_var_name)
 
@@ -314,6 +318,10 @@ contains
           call c_f_pointer(xptr, x_2d_double_ptr, shp)
           zbx = x_2d_double_ptr
           call update_bedlevel(par, sl, zbx)
+       elseif (var_name == 'mass') then
+          call c_f_pointer(xptr, x_4d_double_ptr, shp)
+          mass = x_4d_double_ptr
+          call set_layer_mass(par, sl, mass)
        else
           call set_c_pointer(var, var_name, xptr, rank, shp)
        endif
@@ -493,7 +501,7 @@ contains
 
   end subroutine set_c_pointer_rank0
   
-  subroutine set_c_pointer_rank1(var, name, val, rank, shp)
+  subroutine set_c_pointer_rankx(var, name, val, rank, shp)
 
     type(variables), dimension(:), intent(inout) :: var
     character(*), intent(in) :: name
@@ -505,6 +513,7 @@ contains
     real(c_double), pointer :: x_1d_double_ptr(:)
     real(c_double), pointer :: x_2d_double_ptr(:,:)
     real(c_double), pointer :: x_3d_double_ptr(:,:,:)
+    real(c_double), pointer :: x_4d_double_ptr(:,:,:,:)
     
     do i = 1,size(var)
        if (trim(var(i)%name) == trim(name)) then
@@ -520,12 +529,15 @@ contains
           case(3)
              call c_f_pointer(val, x_3d_double_ptr, shp)
              var(i)%val%rank3 = x_3d_double_ptr
+          case(4)
+             call c_f_pointer(val, x_4d_double_ptr, shp)
+             var(i)%val%rank4 = x_4d_double_ptr
           end select
           var(i)%isset = .true.
           exit
        end if
     end do
     
-  end subroutine set_c_pointer_rank1
+  end subroutine set_c_pointer_rankx
 
 end module bmi_module

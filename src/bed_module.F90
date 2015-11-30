@@ -168,7 +168,7 @@ contains
     iunderlyr   = 2 ! graded sediments
     neulyr      = 1 !par%nlayers ! all layers are fixed
     nlalyr      = par%nlayers ! except one
-    theulyr     = 10 !par%layer_thickness
+    theulyr     = 1000 !par%layer_thickness
     thlalyr     = par%layer_thickness
     updbaselyr  = 1 ! base layer is independent
                                
@@ -323,6 +323,28 @@ contains
     call update_bed(par, sl%zb, sl%zs, supply, sl%rho)
   end subroutine update_bedlevel
 
+  subroutine set_layer_mass(par, sl, mass)
+
+    integer :: i,j,istat
+    integer, parameter :: fid=21
+    type(parameters) :: par
+    type(spaceparams_linear), intent(inout) :: sl
+    real*8, dimension(:,:,:), pointer :: msed
+    real*8, dimension(:,:,:,:), intent(in) :: mass
+
+    istat = bedcomp_getpointer_realfp(morlyr, 'layer_mass', msed)
+    if (istat/=0) call adderror(messages, message)
+
+    do i = 1,par%nlayers
+       do j = 1,par%nfractions
+          msed(j,i,:) = reshape(mass(j,i,:,:), (/par%nc/))
+       end do
+    end do
+
+    sl%mass = get_layer_mass(par)
+
+  end subroutine set_layer_mass
+
   function get_layer_mass(par) result (mass)
 
     integer :: istat
@@ -430,6 +452,28 @@ contains
     end do
 
   end function get_layer_volumefraction
+
+  subroutine compute_threshold_roughness(par, sl)
+
+    type(parameters), intent(in) :: par
+    type(spaceparams_linear), intent(inout) :: sl
+    real*8 :: m, s, b
+    real*8, dimension(par%nc) :: l
+    integer :: i
+
+    if (.not. par%th_roughness) return
+    
+    ! Raupauch, 1993
+
+    m = 1.d0
+    s = 3.d0
+    b = 45.d0
+    l = sl%mass(par%nfractions,1,:) / sum(sl%mass(:,1,:), dim=1)
+    do i=1,par%nfractions
+       sl%uth(i,:) = sl%uth(i,:) * sqrt((1-m*s*l)*(1+m*b*l))
+    end do
+
+  end subroutine compute_threshold_roughness
 
   subroutine compute_threshold_grainsize(par, u_th)
 

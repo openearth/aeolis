@@ -15,6 +15,7 @@ contains
 
   subroutine step(par, s, sl, var)
     
+    integer, parameter :: fid=22
     type(parameters), intent(inout) :: par
     type(spaceparams), intent(inout) :: s
     type(spaceparams_linear), intent(inout) :: sl
@@ -81,6 +82,7 @@ contains
        call compute_threshold_grainsize(par, sl%uth)
        call compute_threshold_bedslope(par, s)
        call compute_threshold_moisture(par, sl%moist(1,:), sl%uth)
+       call compute_threshold_roughness(par, sl)
        
        ! get available mass
        sl%mass = get_layer_mass(par)
