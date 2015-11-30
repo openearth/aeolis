@@ -307,8 +307,10 @@ contains
     par%grain_size = read_key_dblvec(fname, 'grain_size', par%nfractions, 0.d0003)
     par%grain_dist = read_key_dblvec(fname, 'grain_dist', par%nfractions, 1.d0)
 
-    par%outputvars = read_key_strvec(fname, 'outputvars', 'z')
-    par%outputtypes = read_key_strvec(fname, 'outputtypes', '')
+    ! this should be a subroutine with the intel compiler, because
+    ! the arrays are not allocated yet    
+    call read_key_strvec(fname, 'outputvars', par%outputvars, 'z')
+    call read_key_strvec(fname, 'outputtypes', par%outputtypes, '')
 
     write(*,*) '**********************************************************'
     write(*,*) ' '
@@ -389,14 +391,14 @@ contains
 
   end function read_key_str
 
-  function read_key_strvec(fname, key, default) result (value_arr)
+  subroutine read_key_strvec(fname, key, value_arr, default)
     
     integer*4 :: ierr
-    character(len=*) :: fname, key
+    character(len=*), intent(in) :: fname, key
     character(slen) :: value
     integer*4 :: n, i
-    character(*), optional :: default
-    character(10), dimension(:), allocatable :: value_arr
+    character(*), intent(in), optional :: default
+    character(10), dimension(:), allocatable, intent(inout) :: value_arr
 
     value = read_key(fname, key)
 
@@ -412,7 +414,7 @@ contains
        write(*, '(a15,a)') ' ', trim(value_arr(i))
     end do
         
-  end function read_key_strvec
+  end subroutine read_key_strvec
   
   function read_key_dbl(fname, key, default) result (value_dbl)
 

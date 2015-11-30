@@ -54,7 +54,7 @@ contains
     character(*), intent(in) :: str
     character(*), intent(in), optional :: sep
     character(1) :: sep0
-    character(10), intent(out), dimension(:), allocatable :: arr
+    character(10), intent(inout), dimension(:), allocatable :: arr
     integer*4 :: i, n, pos, pos0
 
     if (present(sep)) then
