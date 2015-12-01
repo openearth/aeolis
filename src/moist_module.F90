@@ -122,7 +122,7 @@ contains
        fid = 99
 
        ! count lines
-       n = 0
+       n = -1
        ierr = 0
        open(fid, file=trim(par%tide_file))
        do while (ierr == 0)

@@ -72,6 +72,7 @@ contains
        if (.not. is_set(var, 'moist')) call interpolate_moist(par, sl%zb, sl%moist)
        if (.not. is_set(var, 'meteo')) call interpolate_meteo(par, s%meteo)
        if (.not. is_set(var, 'zs')) call interpolate_tide(par, sl%zs)
+       sl%zs = max(sl%zs, sl%zb)
        
        ! update moisture contents
        call update_moisture(par, sl%zb, sl%zs, s%meteo, sl%uw, sl%moist)
