@@ -65,13 +65,13 @@ contains
        if (par%gusts) then
           call simulate_gusts(wind, gusty_wind)
        else
-          allocate(gusty_wind(n))
-          gusty_wind%t = wind(1:n)%t
-          gusty_wind%duration = wind(1:n)%duration
-          gusty_wind%dir = wind(1:n)%dir_mean
-          gusty_wind%u = wind(1:n)%u_mean
+          allocate(gusty_wind(i))
+          gusty_wind%t = wind(1:i)%t
+          gusty_wind%duration = wind(1:i)%duration
+          gusty_wind%dir = wind(1:i)%dir_mean
+          gusty_wind%u = wind(1:i)%u_mean
        end if
-
+          
     else
 
        allocate(gusty_wind(2))
